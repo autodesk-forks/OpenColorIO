@@ -3,10 +3,13 @@
 
 #ifndef INCLUDED_OCIO_FILEFORMATS_CDL_CDLREADERHELPER_H
 #define INCLUDED_OCIO_FILEFORMATS_CDL_CDLREADERHELPER_H
+#include "transforms/CDLTransform.h"
+
+#if OCIO_LUT_SUPPORT
+
 
 #include "fileformats/xmlutils/XMLReaderHelper.h"
 #include "Op.h"
-#include "transforms/CDLTransform.h"
 
 namespace OCIO_NAMESPACE
 {
@@ -213,5 +216,6 @@ public:
 };
 
 } // namespace OCIO_NAMESPACE
+#endif //OCIO_LUT_SUPPORT
 
 #endif

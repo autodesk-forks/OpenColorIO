@@ -315,7 +315,6 @@ target_include_directories(OpenColorIO
 
 target_link_libraries(OpenColorIO
     PRIVATE
-        expat::expat
         Imath::Imath
         pystring::pystring
         "$<BUILD_INTERFACE:sampleicc::sampleicc>"
@@ -324,6 +323,10 @@ target_link_libraries(OpenColorIO
         "$<BUILD_INTERFACE:xxHash>"
         ${YAML_CPP_LIBRARIES}
 )
+
+if(OCIO_LUT_SUPPORT)
+    target_link_libraries(OpenColorIO PRIVATE expat::expat)
+endif()
 
 if(OCIO_ARCHIVE_SUPPORT)
     target_link_libraries(OpenColorIO PRIVATE MINIZIP::minizip-ng)

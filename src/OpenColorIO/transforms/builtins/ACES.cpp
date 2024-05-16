@@ -73,6 +73,7 @@ static constexpr double nonuniform_LUT[lutSize * 2]
 
 void GenerateOps(OpRcPtrVec & ops)
 {
+#if OCIO_LUT_SUPPORT
     // Note that in CTL, the matrices are stored transposed.
     static constexpr double CDD_TO_CID[4 * 4]
     {
@@ -131,7 +132,11 @@ void GenerateOps(OpRcPtrVec & ops)
     };
 
     // Convert Relative Exposure values to ACES values.
-    CreateMatrixOp(ops, &EXP_TO_ACES[0], TRANSFORM_DIR_FORWARD);            
+    CreateMatrixOp(ops, &EXP_TO_ACES[0], TRANSFORM_DIR_FORWARD);          
+#else
+#pragma message("Needs LUT-free implementation")
+#endif //OCIO_LUT_SUPPORT
+
 }
 
 }  // namespace ADX_to_ACES
@@ -427,6 +432,7 @@ void Generate_nit_normalization_ops(OpRcPtrVec & ops, double nit_level)
 
 void Generate_roll_white_d60_ops(OpRcPtrVec & ops)
 {
+#if OCIO_LUT_SUPPORT
     auto GenerateLutValues = [](double in) -> float
     {
         const double new_wht = 0.918;
@@ -457,10 +463,14 @@ void Generate_roll_white_d60_ops(OpRcPtrVec & ops)
     };
 
     CreateHalfLut(ops, GenerateLutValues);
+#else
+#   pragma message("Needs lut-free implementation")
+#endif //OCIO_LUT_SUPPORT
 }
 
 void Generate_roll_white_d65_ops(OpRcPtrVec & ops)
 {
+#if OCIO_LUT_SUPPORT
     auto GenerateLutValues = [](double in) -> float
     {
         const double new_wht = 0.908;
@@ -491,6 +501,9 @@ void Generate_roll_white_d65_ops(OpRcPtrVec & ops)
     };
 
     CreateHalfLut(ops, GenerateLutValues);
+#else
+#   pragma message("Needs lut-free implementation")
+#endif //OCIO_LUT_SUPPORT
 }
 
 }  // namespace ACES_OUTPUT
@@ -569,6 +582,8 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             ACEScct_to_ACES2065_1_Functor);
     }
     {
+#if OCIO_LUT_SUPPORT
+
         auto ACEScc_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
         {
             auto GenerateLutValues = [](double input) -> float
@@ -617,6 +632,9 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
         registry.addBuiltin("ACEScc_to_ACES2065-1", 
                             "Convert ACEScc to ACES2065-1",
                             ACEScc_to_ACES2065_1_Functor);
+#else
+#   pragma message("Needs lut-free implementation")
+#endif //OCIO_LUT_SUPPORT
     }
     {
         auto ACEScg_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)

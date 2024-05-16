@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 
+#include <OpenColorIO/OpenColorIO.h>
+
+#if OCIO_LUT_SUPPORT
+
 #include <sstream>
 #include <string.h>
-
-#include <OpenColorIO/OpenColorIO.h>
 
 #include "BitDepthUtils.h"
 #include "HashUtils.h"
@@ -1123,3 +1125,5 @@ bool operator==(const Lut1DOpData & lhs, const Lut1DOpData & rhs)
 }
 
 } // namespace OCIO_NAMESPACE
+
+#endif //#if OCIO_LUT_SUPPORT

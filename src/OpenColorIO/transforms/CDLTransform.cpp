@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
+#include <OpenColorIO/OpenColorIO.h>
+#if OCIO_LUT_SUPPORT
 
 #include <fstream>
 #include <sstream>
 #include <string.h>
 
-#include <OpenColorIO/OpenColorIO.h>
 
 #include "fileformats/cdl/CDLParser.h"
 #include "Logging.h"
@@ -387,3 +388,4 @@ std::ostream & operator<< (std::ostream & os, const CDLTransform & t)
 
 } // namespace OCIO_NAMESPACE
 
+#endif //OCIO_LUT_SUPPORT

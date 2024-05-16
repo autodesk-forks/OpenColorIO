@@ -326,7 +326,7 @@ bool containsBlockedTransform(const ConstTransformRcPtr & transform)
             }
         }
     }
-
+#if OCIO_LUT_SUPPORT
     // Prevent FileTransforms from being used, except for spi1d and spimtx since these
     // may be used with OCIO v1 configs to implement the type of color spaces the heuristics
     // are designed to look for.  (E.g. The sRGB Texture space in the legacy ACES configs.)
@@ -342,6 +342,7 @@ bool containsBlockedTransform(const ConstTransformRcPtr & transform)
             return true;
         }
     }
+#endif //OCIO_LUT_SUPPORT
 
     // Prevent transforms that may be hiding a FileTransform.
     else if (transform->getTransformType() == TRANSFORM_TYPE_COLORSPACE

@@ -4,10 +4,11 @@
 
 #ifndef INCLUDED_OCIO_CDL_H
 #define INCLUDED_OCIO_CDL_H
+#include <OpenColorIO/OpenColorIO.h>
+#if OCIO_LUT_SUPPORT
 
 #include <vector>
 
-#include <OpenColorIO/OpenColorIO.h>
 
 #include "Op.h"
 #include "ops/cdl/CDLOpData.h"
@@ -35,5 +36,6 @@ void CreateCDLOp(OpRcPtrVec & ops,
 void CreateCDLTransform(GroupTransformRcPtr & group, ConstOpRcPtr & op);
 
 } // namespace OCIO_NAMESPACE
+#endif //OCIO_LUT_SUPPORT
 
 #endif

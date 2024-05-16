@@ -7,6 +7,7 @@
 
 
 #include <OpenColorIO/OpenColorIO.h>
+#if OCIO_LUT_SUPPORT
 
 
 namespace OCIO_NAMESPACE
@@ -27,5 +28,6 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept;
 } // namespace CAMERA
 
 } // namespace OCIO_NAMESPACE
+#endif //OCIO_LUT_SUPPORT
 
 #endif // INCLUDED_OCIO_CANON_CAMERAS_H

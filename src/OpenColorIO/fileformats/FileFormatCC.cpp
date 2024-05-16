@@ -2,6 +2,8 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include <OpenColorIO/OpenColorIO.h>
+#if OCIO_LUT_SUPPORT
+
 
 #include "fileformats/cdl/CDLParser.h"
 #include "fileformats/cdl/CDLWriter.h"
@@ -166,3 +168,4 @@ FileFormat * CreateFileFormatCC()
 }
 
 } // namespace OCIO_NAMESPACE
+#endif //OCIO_LUT_SUPPORT

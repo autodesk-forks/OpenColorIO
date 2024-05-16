@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 
+#include <OpenColorIO/OpenColorIO.h>
+#if OCIO_LUT_SUPPORT
+
+
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -8,7 +12,6 @@
 
 #include <pystring.h>
 
-#include <OpenColorIO/OpenColorIO.h>
 
 #include "expat.h"
 #include "fileformats/ctf/CTFTransform.h"
@@ -1578,3 +1581,4 @@ FileFormat * CreateFileFormatCLF()
 
 
 } // namespace OCIO_NAMESPACE
+#endif //OCIO_LUT_SUPPORT

@@ -3,6 +3,9 @@
 
 #include "Lut1DOpCPU_SSE2.h"
 
+#if OCIO_LUT_SUPPORT
+
+
 #if OCIO_USE_SSE2
 
 #include <string.h>
@@ -206,3 +209,4 @@ Lut1DOpCPUApplyFunc * SSE2GetLut1DApplyFunc(BitDepth inBD, BitDepth outBD)
 } // OCIO_NAMESPACE
 
 #endif // OCIO_USE_SSE2
+#endif //#if OCIO_LUT_SUPPORT

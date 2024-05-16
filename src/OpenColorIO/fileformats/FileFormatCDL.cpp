@@ -25,10 +25,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <OpenColorIO/OpenColorIO.h>
+#if OCIO_LUT_SUPPORT
 
 #include <map>
 
-#include <OpenColorIO/OpenColorIO.h>
 
 #include "fileformats/cdl/CDLParser.h"
 #include "fileformats/cdl/CDLWriter.h"
@@ -290,3 +291,4 @@ FileFormat * CreateFileFormatCDL()
 
 
 } // namespace OCIO_NAMESPACE
+#endif //OCIO_LUT_SUPPORT

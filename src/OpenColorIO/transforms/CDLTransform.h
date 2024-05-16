@@ -5,10 +5,13 @@
 #ifndef INCLUDED_OCIO_CDLTRANSFORM_H
 #define INCLUDED_OCIO_CDLTRANSFORM_H
 
+#include <OpenColorIO/OpenColorIO.h>
+
+#if OCIO_LUT_SUPPORT
+
 #include <map>
 #include <vector>
 
-#include <OpenColorIO/OpenColorIO.h>
 
 #include "ops/cdl/CDLOpData.h"
 
@@ -83,5 +86,8 @@ private:
 };
 
 } // namespace OCIO_NAMESPACE
+
+#endif //OCIO_LUT_SUPPORT
+
 
 #endif

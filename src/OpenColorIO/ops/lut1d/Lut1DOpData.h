@@ -6,6 +6,9 @@
 
 #include <OpenColorIO/OpenColorIO.h>
 
+#if OCIO_LUT_SUPPORT
+
+
 #include "Op.h"
 #include "ops/OpArray.h"
 #include "PrivateTypes.h"
@@ -275,5 +278,7 @@ bool operator==(const Lut1DOpData & lhs, const Lut1DOpData & rhs);
 Lut1DOpDataRcPtr MakeFastLut1DFromInverse(ConstLut1DOpDataRcPtr & lut);
 
 } // namespace OCIO_NAMESPACE
+
+#endif //OCIO_LUT_SUPPORT
 
 #endif

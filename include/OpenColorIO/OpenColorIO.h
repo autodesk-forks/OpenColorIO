@@ -80,6 +80,10 @@ public:
     Exception() = delete;
     /// Constructor that takes a string as the exception message.
     explicit Exception(const char *);
+    explicit Exception(const std::string&);
+    explicit Exception(const std::ostringstream&);
+    explicit Exception(const std::stringstream&);
+
     /// Constructor that takes an existing exception.
     Exception(const Exception &);
     Exception & operator= (const Exception &) = delete;
@@ -1482,6 +1486,7 @@ public:
     void setConfigIOProxy(ConfigIOProxyRcPtr ciop);
     ConfigIOProxyRcPtr getConfigIOProxy() const;
 
+#if OCIO_ARCHIVE_SUPPORT
     /**
      * \brief Verify if the config is archivable.
      *
@@ -2045,7 +2050,7 @@ public:
      * Specify the transform for the appropriate direction.
      * Setting the transform to null will clear it.
      */
-    void setTransform(const ConstTransformRcPtr & transform, ColorSpaceDirection dir);
+    void setTransform(const ConstTransformRcPtr& transform, ColorSpaceDirection dir);
 
     ColorSpace(const ColorSpace &) = delete;
     ColorSpace& operator= (const ColorSpace &) = delete;
@@ -2765,7 +2770,7 @@ private:
 };
 
 
-
+#if OCIO_LUT_SUPPORT
 /**
  * In certain situations it is necessary to serialize transforms into a variety
  * of application specific LUT formats. Note that not all file formats that may
@@ -2897,6 +2902,7 @@ private:
     Impl * getImpl() { return m_impl; }
     const Impl * getImpl() const { return m_impl; }
 };
+#endif //OCIO_LUT_SUPPORT
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3210,6 +3216,7 @@ public:
     /// End to collect the shader data.
     virtual void end();
 
+#if OCIO_LUT_SUPPORT
     /// Some graphic cards could have 1D & 2D textures with size limitations.
     virtual void setTextureMaxWidth(unsigned maxWidth) = 0;
     virtual unsigned getTextureMaxWidth() const noexcept = 0;
@@ -3217,6 +3224,7 @@ public:
     /// Allow 1D GPU resource type, otherwise always using 2D resources for 1D LUTs.
     virtual void setAllowTexture1D(bool allowed) = 0;
     virtual bool getAllowTexture1D() const = 0;
+#endif //OCIO_LUT_SUPPORT
 
     /**
      * To avoid global texture sampler and uniform name clashes always append an increasing index
@@ -3268,6 +3276,7 @@ public:
      */
     DynamicPropertyRcPtr getDynamicProperty(DynamicPropertyType type) const;
 
+#if OCIO_LUT_SUPPORT
     enum TextureType
     {
         TEXTURE_RED_CHANNEL, ///< Only need a red channel texture
@@ -3310,6 +3319,7 @@ public:
                               unsigned edgelen,
                               Interpolation interpolation,
                               const float * values) = 0;
+#endif //OCIO_LUT_SUPPORT
 
     // Methods to specialize parts of a OCIO shader program
     virtual void addToDeclareShaderCode(const char * shaderCode);
@@ -3537,6 +3547,7 @@ public:
     /// Returns name of uniform and data as parameter.
     virtual const char * getUniform(unsigned index, UniformData & data) const = 0;
 
+#if OCIO_LUT_SUPPORT
     // 1D lut related methods
     virtual unsigned getNumTextures() const noexcept = 0;
     virtual void getTexture(unsigned index,
@@ -3557,6 +3568,7 @@ public:
                               unsigned & edgelen,
                               Interpolation & interpolation) const = 0;
     virtual void get3DTextureValues(unsigned index, const float *& values) const = 0;
+#endif //OCIO_LUT_SUPPORT
 
     /// Get the complete OCIO shader program.
     const char * getShaderText() const noexcept;

@@ -17,6 +17,9 @@
         - Add support for 'Sampling' tag
 
 */
+#include <OpenColorIO/OpenColorIO.h>
+#if OCIO_LUT_SUPPORT
+
 
 #include <algorithm>
 #include <cmath>
@@ -27,7 +30,6 @@
 #include <string>
 #include <vector>
 
-#include <OpenColorIO/OpenColorIO.h>
 
 #include "fileformats/FileFormatUtils.h"
 #include "MathUtils.h"
@@ -886,3 +888,4 @@ FileFormat * CreateFileFormatHDL()
 }
 
 } // namespace OCIO_NAMESPACE
+#endif //OCIO_LUT_SUPPORT

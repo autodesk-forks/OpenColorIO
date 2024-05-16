@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
+#include <OpenColorIO/OpenColorIO.h>
+#if OCIO_LUT_SUPPORT
 
 #include <cstdio>
 #include <cstring>
 #include <sstream>
 
-#include <OpenColorIO/OpenColorIO.h>
 
 #include "ops/matrix/MatrixOp.h"
 #include "ParseUtils.h"
@@ -168,3 +169,4 @@ FileFormat * CreateFileFormatSpiMtx()
 
 } // namespace OCIO_NAMESPACE
 
+#endif //OCIO_LUT_SUPPORT

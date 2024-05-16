@@ -23,6 +23,8 @@
 #include "ops/range/RangeOpData.h"
 #include "ops/reference/ReferenceOpData.h"
 
+#if OCIO_LUT_SUPPORT
+
 namespace OCIO_NAMESPACE
 {
 
@@ -311,8 +313,8 @@ public:
     enum Type
     {
         CDLType = 0,
-        Lut1DType,
-        Lut3DType,
+        Lut1DType, //TODO Nano: remove?
+        Lut3DType,//TODO Nano: remove?
         MatrixType,
         RangeType,
         // CTF types.
@@ -324,8 +326,8 @@ public:
         GradingPrimaryType,
         GradingRGBCurveType,
         GradingToneType,
-        InvLut1DType,
-        InvLut3DType,
+        InvLut1DType,//TODO Nano: remove?
+        InvLut3DType,//TODO Nano: remove?
         LogType,
         ReferenceType,
 
@@ -1214,5 +1216,6 @@ public:
 };
 
 } // namespace OCIO_NAMESPACE
+#endif //OCIO_LUT_SUPPORT
 
 #endif

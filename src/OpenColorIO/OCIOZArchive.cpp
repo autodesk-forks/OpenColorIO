@@ -149,6 +149,7 @@ struct MinizipNgMemStreamGuard
  */
 void addSupportedFiles(void * archiver, const char * path, const char * configWorkingDirectory)
 {
+#if OCIO_LUT_SUPPORT
     DIR *dir = mz_os_open_dir(path);
     if (dir != NULL)
     {
@@ -200,6 +201,8 @@ void addSupportedFiles(void * archiver, const char * path, const char * configWo
         }
         mz_os_close_dir(dir);
     }
+#endif //OCIO_LUT_SUPPORT
+
 }
 //////////////////////////////////////////////////////////////////////////////////////
 
