@@ -40,7 +40,7 @@ function(add_ocio_test NAME SOURCES PRIVATE_INCLUDES)
     )
 
     if(OCIO_LUT_SUPPORT)
-        target_link_libraries(OpenColorIO PRIVATE expat::expat)
+        target_link_libraries(${TEST_BINARY} PRIVATE expat::expat)
     endif()
 
     if(OCIO_ARCHIVE_SUPPORT)

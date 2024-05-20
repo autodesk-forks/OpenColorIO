@@ -226,7 +226,6 @@ private:
 //
 extern OCIOEXPORT std::ostream & operator<<(std::ostream &, const BuiltinTransform &) noexcept;
 
-#if OCIO_LUT_SUPPORT
 /**
  * \brief 
  *     An implementation of the ASC Color Decision List (CDL), based on the ASC v1.2
@@ -245,7 +244,7 @@ class OCIOEXPORT CDLTransform : public Transform
 {
 public:
     static CDLTransformRcPtr Create();
-
+#if OCIO_LUT_SUPPORT
     /**
      * \brief Load the CDL from the src .cdl, .cc, or .ccc file.
      *
@@ -266,6 +265,7 @@ public:
      *    resolution is performed.
      */
     static GroupTransformRcPtr CreateGroupFromFile(const char * src);
+#endif //OCIO_LUT_SUPPORT
 
     TransformType getTransformType() const noexcept override { return TRANSFORM_TYPE_CDL; }
 
@@ -328,7 +328,6 @@ protected:
 };
 
 extern OCIOEXPORT std::ostream & operator<<(std::ostream &, const CDLTransform &);
-#endif //OCIO_LUT_SUPPORT
 
 
 class OCIOEXPORT ColorSpaceTransform : public Transform

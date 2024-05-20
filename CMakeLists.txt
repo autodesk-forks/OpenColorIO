@@ -149,7 +149,7 @@ option(OCIO_BUILD_DOCS "Specify whether to build documentation" ${OCIO_BUILD_FRO
 
 option(OCIO_BUILD_PYTHON "Specify whether to build python bindings" ON)
 
-option(OCIO_LUT_SUPPORT "Specify whether to build with LUT and file-transform support. Requies Expat dependency" OFF)
+option(OCIO_LUT_SUPPORT "Specify whether to build with LUT and file-transform support. Requies Expat dependency" ON)
 option(OCIO_USE_HALF_LOOKUP_TABLE "Determines if the Imath library should use a 64k LUT for half conversions" ON)
 option(OCIO_ARCHIVE_SUPPORT "Specify whether to build with OCIOZ archive support. Requires ZLIB and minizip-ng dependencies" ON)
 option(OCIO_HAS_BUILTIN_YAML_CONFIGS "If OFF, built-in yaml-based configs will be removed from the library" ON)
