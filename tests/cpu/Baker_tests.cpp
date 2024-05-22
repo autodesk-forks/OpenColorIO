@@ -3,6 +3,8 @@
 
 
 #include "Baker.cpp"
+#if OCIO_LUT_SUPPORT
+
 
 #include "testutils/UnitTest.h"
 #include "ParseUtils.h"
@@ -578,3 +580,4 @@ OCIO_ADD_TEST(Baker, baking_validation)
     OCIO_CHECK_THROW_WHAT(bake->bake(os), OCIO::Exception,
         "Could not find target colorspace 'Log2NT'.");
 }
+#endif //OCIO_LUT_SUPPORT

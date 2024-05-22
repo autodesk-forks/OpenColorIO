@@ -3,6 +3,8 @@
 
 
 #include "fileformats/FileFormatIridasLook.cpp"
+#if OCIO_LUT_SUPPORT
+
 
 #include "testutils/UnitTest.h"
 
@@ -966,3 +968,4 @@ OCIO_ADD_TEST(FileFormatIridasLook, fail_on_mask)
 
 }
 
+#endif //OCIO_LUT_SUPPORT

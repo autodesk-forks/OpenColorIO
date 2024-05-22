@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 
+#include "transforms/CDLTransform.cpp"
+#if OCIO_LUT_SUPPORT
 
 #include <cstdio>
 
 #include "ops/exponent/ExponentOp.h"
 #include "ops/matrix/MatrixOpData.h"
-#include "transforms/CDLTransform.cpp"
 
 #include "testutils/UnitTest.h"
 #include "UnitTestLogUtils.h"
@@ -620,3 +621,5 @@ OCIO_ADD_TEST(CDLTransform, apply_optimize_simplify)
     OCIO_CHECK_CLOSE(pixNoSimplify[1], pixSimplify[1], error);
     OCIO_CHECK_CLOSE(pixNoSimplify[2], pixSimplify[2], error);
 }
+#endif //OCIO_LUT_SUPPORT
+

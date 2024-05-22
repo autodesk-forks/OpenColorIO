@@ -2,7 +2,6 @@
 // Copyright Contributors to the OpenColorIO Project.
 #include <OpenColorIO/OpenColorIO.h>
 
-#if OCIO_LUT_SUPPORT
 
 #include <cstring>
 #include <sstream>
@@ -268,4 +267,3 @@ void BuildCDLOp(OpRcPtrVec & ops,
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT

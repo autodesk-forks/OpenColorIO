@@ -3,6 +3,8 @@
 
 
 #include "ops/lut1d/Lut1DOpCPU.cpp"
+#if OCIO_LUT_SUPPORT
+
 
 #include "testutils/UnitTest.h"
 #include "UnitTestUtils.h"
@@ -2638,3 +2640,4 @@ OCIO_ADD_TEST(Lut1DRenderer, lut_1d_inv_half_domain_hue_adjust)
     }
 }
 
+#endif //OCIO_LUT_SUPPORT

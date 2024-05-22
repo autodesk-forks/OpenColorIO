@@ -529,6 +529,7 @@ OCIO_ADD_TEST(Config, required_roles_for_version_2_2)
     }
 }
 
+#if OCIO_LUT_SUPPORT
 OCIO_ADD_TEST(Config, serialize_group_transform)
 {
     // The unit test validates that a group transform is correctly serialized.
@@ -634,6 +635,7 @@ OCIO_ADD_TEST(Config, serialize_group_transform)
         OCIO_CHECK_EQUAL(osvec[i], PROFILE_OUTvec[i]);
     }
 }
+#endif //OCIO_LUT_SUPPORT
 
 OCIO_ADD_TEST(Config, serialize_searchpath)
 {
@@ -5138,6 +5140,7 @@ OCIO_ADD_TEST(Config, file_transform_serialization)
     OCIO_CHECK_EQUAL(oss.str(), str);
 }
 
+#if OCIO_LUT_SUPPORT
 OCIO_ADD_TEST(Config, file_transform_serialization_v1)
 {
     OCIO::ConfigRcPtr cfg;
@@ -5186,6 +5189,7 @@ colorspaces:
     from_reference: !<FileTransform> {src: other, interpolation: tetrahedral}
 )" );
 }
+#endif //OCIO_LUT_SUPPORT
 
 OCIO_ADD_TEST(Config, add_color_space)
 {
@@ -8253,13 +8257,12 @@ colorspaces:
     }
 
 
+#if OCIO_LUT_SUPPORT
     // Step 4 - When present the virtual display instantiation works for MacOS and Windows but
     // throws for headless machines and Linux.
 
     static const std::string ICCProfileFilepath
         = std::string(OCIO::GetTestFilesDir()) + "/icc-test-1.icc";
-
-
 #if !defined(OCIO_HEADLESS_ENABLED) && ( defined(__APPLE__) || defined(_WIN32) )
 
     OCIO_CHECK_ASSERT(OCIO::SystemMonitors::Get()->isSupported());
@@ -8390,8 +8393,12 @@ colorspaces:
 
 #endif
 
+#endif //OCIO_LUT_SUPPORT
+
+
 }
 
+#if OCIO_LUT_SUPPORT
 OCIO_ADD_TEST(Config, virtual_display_with_active_displays)
 {
     // Test the virtual display instantiation when active displays & views are defined.
@@ -8477,6 +8484,7 @@ colorspaces:
 #endif
 
 }
+#endif //OCIO_LUT_SUPPORT
 
 OCIO_ADD_TEST(Config, virtual_display_v2_only)
 {

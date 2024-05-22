@@ -992,6 +992,7 @@ public:
     /// Clear the virtual display.
     void clearVirtualDisplay() noexcept;
 
+#if OCIO_LUT_SUPPORT
     /**
      * \brief Instantiate a new display from a virtual display, using the monitor name.
      * 
@@ -1030,6 +1031,7 @@ public:
      * Returns the index of the display.
      */
     int instantiateDisplayFromICCProfile(const char * ICCProfileFilepath);
+#endif //OCIO_LUT_SUPPORT
 
     /**
      * \brief

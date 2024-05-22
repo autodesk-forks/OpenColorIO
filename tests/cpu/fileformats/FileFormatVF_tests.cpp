@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 
+#include "fileformats/FileFormatVF.cpp"
+#if OCIO_LUT_SUPPORT
 
 #include <fstream>
-
-#include "fileformats/FileFormatVF.cpp"
 
 #include "testutils/UnitTest.h"
 #include "UnitTestUtils.h"
@@ -152,3 +152,4 @@ OCIO_ADD_TEST(FileFormatVF, load_ops)
     OCIO_CHECK_EQUAL(lutArray[23], 2.0f);
 }
 
+#endif //OCIO_LUT_SUPPORT

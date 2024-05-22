@@ -3,6 +3,8 @@
 
 
 #include "transforms/Lut3DTransform.cpp"
+#if OCIO_LUT_SUPPORT
+
 
 #include "testutils/UnitTest.h"
 
@@ -119,3 +121,4 @@ OCIO_ADD_TEST(Lut3DTransform, create_with_parameters)
     OCIO_CHECK_EQUAL(b, 1.0f);
 }
 
+#endif //OCIO_LUT_SUPPORT

@@ -3,6 +3,8 @@
 
 
 #include "ops/lut1d/Lut1DOpData.cpp"
+#if OCIO_LUT_SUPPORT
+
 
 #include "testutils/UnitTest.h"
 #include "UnitTestUtils.h"
@@ -1018,3 +1020,4 @@ OCIO_ADD_TEST(Lut1DOpData, compose_inverse_luts)
     OCIO_CHECK_EQUAL(compLutInvFwd->getArray()[14336 * 3], 0.5f);
 }
 
+#endif //OCIO_LUT_SUPPORT

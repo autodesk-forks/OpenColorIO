@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 #include <OpenColorIO/OpenColorIO.h>
-#if OCIO_LUT_SUPPORT
 
 #include <fstream>
 #include <sstream>
 #include <string.h>
-
 
 #include "fileformats/cdl/CDLParser.h"
 #include "Logging.h"
@@ -84,6 +82,7 @@ CDLTransformRcPtr GetCDL(GroupTransformRcPtr & group, const std::string & cdlId)
     throw Exception(os.str().c_str());
 }
 
+#if OCIO_LUT_SUPPORT
 CDLTransformRcPtr CDLTransform::CreateFromFile(const char * src, const char * cdlId_)
 {
     if (!src || !*src)
@@ -117,6 +116,7 @@ GroupTransformRcPtr CDLTransform::CreateGroupFromFile(const char * src)
 
     return cachedFile->getCDLGroup();
 }
+#endif //OCIO_LUT_SUPPORT
 
 void CDLTransformImpl::deleter(CDLTransform * t)
 {
@@ -388,4 +388,3 @@ std::ostream & operator<< (std::ostream & os, const CDLTransform & t)
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT

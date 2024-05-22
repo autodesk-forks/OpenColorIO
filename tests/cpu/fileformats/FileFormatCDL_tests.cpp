@@ -29,6 +29,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "fileformats/FileFormatCDL.cpp"
 
+// TODO Nano: add non-file tests for CDL. /coz
+#if OCIO_LUT_SUPPORT
+
 #include "testutils/UnitTest.h"
 #include "UnitTestLogUtils.h"
 #include "UnitTestUtils.h"
@@ -399,3 +402,4 @@ OCIO_ADD_TEST(FileFormatCDL, write)
     OCIO_CHECK_THROW_WHAT(group->write(cfg, OCIO::FILEFORMAT_COLOR_DECISION_LIST, oss),
                           OCIO::Exception, "only CDL can be written");
 }
+#endif //OCIO_LUT_SUPPORT

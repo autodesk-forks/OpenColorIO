@@ -4,6 +4,10 @@
 
 #include "ops/noop/NoOps.cpp"
 
+// TODO Nano: some tests may not be needing the LUT, those can be enabled. /coz
+#if OCIO_LUT_SUPPORT
+
+
 #include "ops/lut1d/Lut1DOp.h"
 #include "ops/matrix/MatrixOp.h"
 #include "testutils/UnitTest.h"
@@ -344,3 +348,4 @@ OCIO_ADD_TEST(NoOps, look_op)
     OCIO_CHECK_EQUAL(clonedOp->supportedByLegacyShader(), true);
 }
 
+#endif //OCIO_LUT_SUPPORT

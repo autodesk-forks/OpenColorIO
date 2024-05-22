@@ -466,6 +466,7 @@ OCIO_ADD_TEST(CPUProcessor, with_one_matrix)
     }
 }
 
+#if OCIO_LUT_SUPPORT
 OCIO_ADD_TEST(CPUProcessor, with_one_1d_lut)
 {
     // The unit test validates that pixel formats are correctly
@@ -727,6 +728,7 @@ OCIO_ADD_TEST(CPUProcessor, with_one_1d_lut)
     }
 
 }
+#endif //OCIO_LUT_SUPPORT
 
 OCIO_ADD_TEST(CPUProcessor, with_several_ops)
 {

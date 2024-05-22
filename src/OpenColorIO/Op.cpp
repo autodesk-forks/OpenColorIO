@@ -488,11 +488,9 @@ void CreateOpVecFromOpData(OpRcPtrVec & ops,
     {
     case OpData::CDLType:
     {
-#if OCIO_LUT_SUPPORT
         auto cdlSrc = std::dynamic_pointer_cast<const CDLOpData>(opData);
         auto cdl = std::make_shared<CDLOpData>(*cdlSrc);
         CreateCDLOp(ops, cdl, dir);
-#endif //OCIO_LUT_SUPPORT
         break;
     }
 

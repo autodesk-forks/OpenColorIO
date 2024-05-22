@@ -43,6 +43,7 @@ OCIO_ADD_TEST(GpuShader, generic_shader)
         OCIO_CHECK_NE(std::string(shaderDesc->getCacheID()), id);
     }
 
+#if OCIO_LUT_SUPPORT
     {
         const unsigned width  = 3;
         const unsigned height = 2;
@@ -170,6 +171,7 @@ OCIO_ADD_TEST(GpuShader, generic_shader)
                                                   &values[0]),
                          OCIO::Exception);
     }
+#endif OCIO_LUT_SUPPORT
 
     {
         OCIO_CHECK_NO_THROW(shaderDesc->addToDeclareShaderCode("vec2 coords;\n"));

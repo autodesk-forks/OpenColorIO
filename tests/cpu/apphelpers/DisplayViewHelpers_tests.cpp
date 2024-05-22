@@ -22,7 +22,7 @@ static const std::string ocioTestFilesDir(STR(OCIO_UNIT_TEST_FILES_DIR));
 
 // The configuration file used by the unit tests.
 #include "configs.data"
-
+#if OCIO_LUT_SUPPORT
 
 OCIO_ADD_TEST(DisplayViewHelpers, basic)
 {
@@ -196,6 +196,7 @@ OCIO_ADD_TEST(DisplayViewHelpers, basic)
         OCIO_CHECK_EQUAL(log->getBase(), 2.);
     }
 
+#if OCIO_LUT_SUPPORT
     // 'reference' to the display color space (i.e. view_3).
     {
         // The 'view_3' color space is a group transform containing:
@@ -242,6 +243,7 @@ OCIO_ADD_TEST(DisplayViewHelpers, basic)
         OCIO_CHECK_CLOSE(g, 66.0f/1023.0f, 1e-8f);
         OCIO_CHECK_EQUAL(b, 0.);
     }
+#endif //OCIO_LUT_SUPPORT
 
     // The E/C op.
     {
@@ -269,7 +271,7 @@ OCIO_ADD_TEST(DisplayViewHelpers, basic)
     //
     // Step 7 - Some faulty scenarios.
     //
-
+#if OCIO_LUT_SUPPORT
     {
         // Color space already exists.
         OCIO_CHECK_THROW_WHAT(
@@ -309,6 +311,7 @@ OCIO_ADD_TEST(DisplayViewHelpers, basic)
             OCIO::Exception,
             "Connection color space name 'lut_unknown' does not exist.");
     }
+#endif //OCIO_LUT_SUPPORT
 
     //
     // Step 8 - Remove the display/view.
@@ -321,6 +324,7 @@ OCIO_ADD_TEST(DisplayViewHelpers, basic)
     OCIO_CHECK_ASSERT(!config->getColorSpace("view_5"));
     OCIO_CHECK_NO_THROW(val = config->getView("DISP_1", 2));
 }
+#endif //OCIO_LUT_SUPPORT
 
 OCIO_ADD_TEST(DisplayViewHelpers, display_view_without_look)
 {
@@ -424,6 +428,8 @@ private:
 
 }
 
+// TODO Nano: can enable some tests that doesn't require file
+#if OCIO_LUT_SUPPORT
 OCIO_ADD_TEST(DisplayViewHelpers, active_display_view)
 {
     std::istringstream is(category_test_config);
@@ -556,6 +562,7 @@ OCIO_ADD_TEST(DisplayViewHelpers, active_display_view)
             "Forbidden to add an active view as 'OCIO_ACTIVE_VIEWS' controls the active list.");
     }
 }
+#endif OCIO_LUT_SUPPORT
 
 OCIO_ADD_TEST(DisplayViewHelpers, remove_display_view)
 {

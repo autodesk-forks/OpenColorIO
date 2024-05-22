@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 
+#include "transforms/CDLTransform.h"
+#if OCIO_LUT_SUPPORT
+
 #include <sstream>
 
 #include "BitDepthUtils.h"
@@ -26,9 +29,6 @@
 #include "ops/reference/ReferenceOpData.h"
 #include "ParseUtils.h"
 #include "Platform.h"
-#include "transforms/CDLTransform.h"
-
-#if OCIO_LUT_SUPPORT
 
 namespace OCIO_NAMESPACE
 {

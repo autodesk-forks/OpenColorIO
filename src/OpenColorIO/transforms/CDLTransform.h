@@ -7,11 +7,8 @@
 
 #include <OpenColorIO/OpenColorIO.h>
 
-#if OCIO_LUT_SUPPORT
-
 #include <map>
 #include <vector>
-
 
 #include "ops/cdl/CDLOpData.h"
 
@@ -87,7 +84,6 @@ private:
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT
 
 
 #endif
