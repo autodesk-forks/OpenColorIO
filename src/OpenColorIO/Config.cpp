@@ -5483,7 +5483,6 @@ ConfigIOProxyRcPtr Config::getConfigIOProxy() const
 {
     return getImpl()->m_context->getConfigIOProxy();
 }
-#if OCIO_ARCHIVE_SUPPORT
 bool Config::isArchivable() const
 {
     ConstContextRcPtr context = getCurrentContext();
@@ -5558,6 +5557,7 @@ bool Config::isArchivable() const
 
     return true;
 }
+#if OCIO_ARCHIVE_SUPPORT
 
 void Config::archive(std::ostream & ostream) const
 {
