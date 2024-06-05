@@ -1482,7 +1482,6 @@ public:
     void setConfigIOProxy(ConfigIOProxyRcPtr ciop);
     ConfigIOProxyRcPtr getConfigIOProxy() const;
 
-#if OCIO_ARCHIVE_SUPPORT
     /**
      * \brief Verify if the config is archivable.
      *
@@ -1508,6 +1507,7 @@ public:
      */
     bool isArchivable() const;
 
+#if OCIO_ARCHIVE_SUPPORT
     /**
      * \brief Archive the config and its LUTs into the specified output stream.
      * 
