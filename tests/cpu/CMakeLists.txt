@@ -155,6 +155,7 @@ set(SOURCES
     ops/gamma/GammaOpGPU.cpp
     ops/gradingprimary/GradingPrimaryOpGPU.cpp
     ops/gradingrgbcurve/GradingRGBCurveOpGPU.cpp
+    ops/gradingrgbcurve/HueCurveOpGPU.cpp
     ops/gradingtone/GradingToneOpGPU.cpp
     ops/log/LogOpGPU.cpp
     ops/lut1d/Lut1DOpCPU_SSE2.cpp
@@ -258,7 +259,10 @@ set(TESTS
     ops/gradingprimary/GradingPrimaryOp_tests.cpp
     ops/gradingrgbcurve/GradingBSplineCurve_tests.cpp
     ops/gradingrgbcurve/GradingRGBCurve_tests.cpp
+    ops/gradingrgbcurve/HueCurve_tests.cpp
     ops/gradingrgbcurve/GradingRGBCurveOpCPU_tests.cpp
+    ops/gradingrgbcurve/HueCurveOp_tests.cpp
+    ops/gradingrgbcurve/HueCurveOpData_tests.cpp
     ops/gradingrgbcurve/GradingRGBCurveOpData_tests.cpp
     ops/gradingrgbcurve/GradingRGBCurveOp_tests.cpp
     ops/gradingtone/GradingTone_tests.cpp
@@ -307,6 +311,7 @@ set(TESTS
     transforms/FixedFunctionTransform_tests.cpp
     transforms/GradingPrimaryTransform_tests.cpp
     transforms/GradingRGBCurveTransform_tests.cpp
+    transforms/HueCurveTransform_tests.cpp
     transforms/GradingToneTransform_tests.cpp
     transforms/GroupTransform_tests.cpp
     transforms/LogAffineTransform_tests.cpp
