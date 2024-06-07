@@ -170,7 +170,7 @@ void GetFileReferences(std::set<std::string> & files, const ConstTransformRcPtr 
         files.insert(fileTransform->getSrc());
     }
 }
-#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 // Return the list of all color spaces referenced by the transform (including all sub-transforms in
 // a group). All legal context variables are expanded, so if any are remaining, the caller may want

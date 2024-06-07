@@ -177,4 +177,4 @@ Lut1DOpCPUApplyFunc * AVX2GetLut1DApplyFunc(BitDepth inBD, BitDepth outBD)
 } // OCIO_NAMESPACE
 
 #endif // OCIO_USE_AVX2
-#endif //#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

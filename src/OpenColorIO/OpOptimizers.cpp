@@ -588,7 +588,7 @@ void OptimizeSeparablePrefix(OpRcPtrVec & ops, BitDepth in)
     FinalizeOps(lutOps);
 
     ops.insert(ops.begin(), lutOps.begin(), lutOps.end());
-#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 } // namespace
 

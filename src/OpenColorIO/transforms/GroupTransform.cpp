@@ -158,7 +158,7 @@ void GroupTransformImpl::write(const ConstConfigRcPtr& config,
 	const char* formatName,
 	std::ostream& os) const
 {
-	throw Exception("LUT support is OFF.");
+	throw Exception("LUT and File-Transform support is turned OFF.");
 }
 
 int GroupTransform::GetNumWriteFormats() noexcept

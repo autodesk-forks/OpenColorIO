@@ -562,7 +562,7 @@ OCIO_ADD_TEST(DisplayViewHelpers, active_display_view)
             "Forbidden to add an active view as 'OCIO_ACTIVE_VIEWS' controls the active list.");
     }
 }
-#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(DisplayViewHelpers, remove_display_view)
 {

@@ -183,7 +183,7 @@ bool CollectContextVariables(const Config & config,
     {
         if (CollectContextVariables(config, context, *tr, usedContextVars)) return true;
     }
-#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(ConstGroupTransformRcPtr tr = DynamicPtrCast<const GroupTransform>(transform))
     {
         if (CollectContextVariables(config, context, *tr, usedContextVars)) return true;

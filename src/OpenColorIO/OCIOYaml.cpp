@@ -3112,7 +3112,7 @@ void save(YAML::Emitter& out, ConstTransformRcPtr t, unsigned int majorVersion)
     else if(ConstFileTransformRcPtr File_tran = \
         DynamicPtrCast<const FileTransform>(t))
         save(out, File_tran, majorVersion);
-#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if (ConstExposureContrastTransformRcPtr File_tran = \
         DynamicPtrCast<const ExposureContrastTransform>(t))
         save(out, File_tran);

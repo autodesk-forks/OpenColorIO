@@ -228,4 +228,4 @@ std::ostream & operator<< (std::ostream & os, const Lut1DTransform & t)
 
 } // namespace OCIO_NAMESPACE
 
-#endif //#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

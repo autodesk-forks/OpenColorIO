@@ -350,7 +350,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
 #else
 #   pragma message("Needs lut-free implementation")
-#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 }

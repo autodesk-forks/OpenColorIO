@@ -209,4 +209,4 @@ Lut1DOpCPUApplyFunc * SSE2GetLut1DApplyFunc(BitDepth inBD, BitDepth outBD)
 } // OCIO_NAMESPACE
 
 #endif // OCIO_USE_SSE2
-#endif //#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
