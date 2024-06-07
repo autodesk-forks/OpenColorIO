@@ -114,9 +114,9 @@ class OCIOEXPORT GradingRGBCurve;
 typedef OCIO_SHARED_PTR<const GradingRGBCurve> ConstGradingRGBCurveRcPtr;
 typedef OCIO_SHARED_PTR<GradingRGBCurve> GradingRGBCurveRcPtr;
 
-class OCIOEXPORT HueCurve;
-typedef OCIO_SHARED_PTR<const HueCurve> ConstHueCurveRcPtr;
-typedef OCIO_SHARED_PTR<HueCurve> HueCurveRcPtr;
+class OCIOEXPORT GradingHueCurve;
+typedef OCIO_SHARED_PTR<const GradingHueCurve> ConstGradingHueCurveRcPtr;
+typedef OCIO_SHARED_PTR<GradingHueCurve> GradingHueCurveRcPtr;
 
 class OCIOEXPORT ConfigIOProxy;
 typedef OCIO_SHARED_PTR<const ConfigIOProxy> ConstConfigIOProxyRcPtr;
@@ -370,6 +370,7 @@ enum TransformType
     TRANSFORM_TYPE_EXPOSURE_CONTRAST,
     TRANSFORM_TYPE_FILE,
     TRANSFORM_TYPE_FIXED_FUNCTION,
+    TRANSFORM_TYPE_GRADING_HUE_CURVE,
     TRANSFORM_TYPE_GRADING_PRIMARY,
     TRANSFORM_TYPE_GRADING_RGB_CURVE,
     TRANSFORM_TYPE_GRADING_TONE,
@@ -382,7 +383,6 @@ enum TransformType
     TRANSFORM_TYPE_LUT3D,
     TRANSFORM_TYPE_MATRIX,
     TRANSFORM_TYPE_RANGE,
-    TRANSFORM_TYPE_HUE_CURVE
 };
 
 /**
@@ -583,7 +583,7 @@ enum RGBCurveType
     RGB_NUM_CURVES
 };
 
-/// Types for HueCurve.
+/// Types for GradingHueCurve.
 enum HueCurveType
 {
     HUE_HUE = 0,
