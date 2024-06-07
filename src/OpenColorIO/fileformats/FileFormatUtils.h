@@ -7,7 +7,7 @@
 
 #include <OpenColorIO/OpenColorIO.h>
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "ops/lut1d/Lut1DOpData.h"
 #include "ops/lut3d/Lut3DOpData.h"
@@ -27,6 +27,6 @@ void LogWarningInterpolationNotUsed(Interpolation interp, const FileTransform & 
 
 
 } // OCIO_NAMESPACE
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif // INCLUDED_OCIO_FILEFORMAT_UTILS_H

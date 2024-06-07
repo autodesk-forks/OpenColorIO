@@ -6,7 +6,7 @@
 #define INCLUDED_OCIO_FILEFORMATS_CTF_CTFTRANSFORM_H
 
 #include <OpenColorIO/OpenColorIO.h>
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <vector>
 
@@ -290,6 +290,6 @@ void GetElementsValues(const FormatMetadataImpl::Elements & elements,
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif

@@ -3,7 +3,7 @@
 
 
 #include "fileformats/FileFormatSpi3D.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -305,4 +305,4 @@ OCIO_ADD_TEST(FileFormatSpi3D, bake_3d)
         OCIO_CHECK_EQUAL(osvec[i], resvec[i]);
     }
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

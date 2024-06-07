@@ -3,7 +3,7 @@
 
 
 #include "fileformats/FileFormatCCC.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -422,4 +422,4 @@ OCIO_ADD_TEST(FileFormatCCC, write)
     OCIO_CHECK_EQUAL(oss.str(), RESULT);
 }
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

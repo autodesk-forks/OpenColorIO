@@ -33,7 +33,7 @@ static constexpr double c1 = c3 - c2 + 1.;
 
 void GeneratePQToLinearOps(OpRcPtrVec & ops)
 {
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     auto GenerateLutValues = [](double input) -> float
     {
         const double N = std::max(0., input);
@@ -49,12 +49,12 @@ void GeneratePQToLinearOps(OpRcPtrVec & ops)
     CreateLut(ops, 4096, GenerateLutValues);
 #else
 #   pragma message("Needs lut-free implementation")
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void GenerateLinearToPQOps(OpRcPtrVec & ops)
 {
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     auto GenerateLutValues = [](double input) -> float
     {
         // Input is in nits/100, convert to [0,1], where 1 is 10000 nits.
@@ -70,7 +70,7 @@ void GenerateLinearToPQOps(OpRcPtrVec & ops)
     CreateHalfLut(ops, GenerateLutValues);
 #else
 #   pragma message("Needs lut-free implementation")
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 } // ST_2084
@@ -295,7 +295,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             CIE_XYZ_D65_to_ST2084_P3_D65_Functor);
     }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
         auto CIE_XYZ_D65_to_REC2100_HLG_1000nit_Functor = [](OpRcPtrVec & ops)
         {
@@ -350,7 +350,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
 #else
 #   pragma message("Needs lut-free implementation")
-#endif OCIO_LUT_SUPPORT
+#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 }

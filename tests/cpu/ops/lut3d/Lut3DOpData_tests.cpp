@@ -3,7 +3,7 @@
 
 
 #include "ops/lut3d/Lut3DOpData.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -360,4 +360,4 @@ OCIO_ADD_TEST(Lut3DOpData, compose_inverse_luts)
     }
 
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

@@ -375,7 +375,7 @@ void RemoveActiveDisplayView(ConfigRcPtr & config, const char * displayName, con
     }
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 void AddDisplayView(ConfigRcPtr & config,
                     const char * displayName,
                     const char * viewName,
@@ -500,7 +500,7 @@ void AddDisplayView(ConfigRcPtr & config,
                    colorSpace, file,
                    connectionColorSpaceName);
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 void RemoveDisplayView(ConfigRcPtr & config, const char * displayName, const char * viewName)
 {

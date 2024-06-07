@@ -309,7 +309,7 @@ extern OCIOEXPORT ConstProcessorRcPtr GetProcessor(const ConstConfigRcPtr & conf
 extern OCIOEXPORT ConstProcessorRcPtr GetIdentityProcessor(const ConstConfigRcPtr & config);
 
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 /**
  * Add a new (display, view) pair and the new color space to a configuration instance.
@@ -325,7 +325,7 @@ extern OCIOEXPORT void AddDisplayView(ConfigRcPtr & config,
                                       const char * categories,      // Could be empty or null
                                       const char * transformFilePath,
                                       const char * connectionColorSpaceName);
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 /**
  * Remove a (display, view) pair including the associated color space (only if not used).

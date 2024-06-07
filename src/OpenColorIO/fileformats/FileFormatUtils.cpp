@@ -3,7 +3,7 @@
 
 #include "fileformats/FileFormatUtils.h"
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "Logging.h"
 
@@ -66,4 +66,4 @@ void LogWarningInterpolationNotUsed(Interpolation interp, const FileTransform & 
     LogWarning(oss.str());
 }
 } // OCIO_NAMESPACE
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

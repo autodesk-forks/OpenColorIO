@@ -3,7 +3,7 @@
 
 #include <OpenColorIO/OpenColorIO.h>
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <sstream>
 
@@ -503,4 +503,4 @@ bool operator==(const Lut3DOpData & lhs, const Lut3DOpData & rhs)
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

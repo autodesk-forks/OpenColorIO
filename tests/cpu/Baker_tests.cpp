@@ -3,7 +3,7 @@
 
 
 #include "Baker.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -580,4 +580,4 @@ OCIO_ADD_TEST(Baker, baking_validation)
     OCIO_CHECK_THROW_WHAT(bake->bake(os), OCIO::Exception,
         "Could not find target colorspace 'Log2NT'.");
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

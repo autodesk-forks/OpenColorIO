@@ -2,7 +2,7 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include "transforms/CDLTransform.h"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <sstream>
 
@@ -1872,7 +1872,7 @@ void LogWriter::writeContent() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 class Lut1DWriter : public OpWriter
 {
 public:
@@ -2107,7 +2107,7 @@ void Lut3DWriter::writeContent() const
 
     m_formatter.writeEndTag(TAG_ARRAY);
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2775,4 +2775,4 @@ void TransformWriter::writeOps(const CTFVersion & version) const
 }
 
 } // namespace OCIO_NAMESPACE
-#endif OCIO_LUT_SUPPORT
+#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT

@@ -70,12 +70,12 @@ bool CollectContextVariables(const Config & config,
                              const Context & context,
                              const DisplayViewTransform & tr,
                              ContextRcPtr & usedContextVars);
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 bool CollectContextVariables(const Config & config, 
                              const Context & context,
                              const FileTransform & tr,
                              ContextRcPtr & usedContextVars);
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 bool CollectContextVariables(const Config & config, 
                              const Context & context,

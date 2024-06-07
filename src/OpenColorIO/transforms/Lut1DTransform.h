@@ -7,7 +7,7 @@
 
 #include <OpenColorIO/OpenColorIO.h>
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "ops/lut1d/Lut1DOpData.h"
 
@@ -69,7 +69,7 @@ private:
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif  // INCLUDED_OCIO_LUT1DTRANSFORM_H
 

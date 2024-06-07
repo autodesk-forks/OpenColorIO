@@ -992,7 +992,7 @@ public:
     /// Clear the virtual display.
     void clearVirtualDisplay() noexcept;
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     /**
      * \brief Instantiate a new display from a virtual display, using the monitor name.
      * 
@@ -1031,7 +1031,7 @@ public:
      * Returns the index of the display.
      */
     int instantiateDisplayFromICCProfile(const char * ICCProfileFilepath);
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     /**
      * \brief
@@ -2771,7 +2771,7 @@ private:
 };
 
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 /**
  * In certain situations it is necessary to serialize transforms into a variety
  * of application specific LUT formats. Note that not all file formats that may
@@ -2903,7 +2903,7 @@ private:
     Impl * getImpl() { return m_impl; }
     const Impl * getImpl() const { return m_impl; }
 };
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3217,7 +3217,7 @@ public:
     /// End to collect the shader data.
     virtual void end();
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     /// Some graphic cards could have 1D & 2D textures with size limitations.
     virtual void setTextureMaxWidth(unsigned maxWidth) = 0;
     virtual unsigned getTextureMaxWidth() const noexcept = 0;
@@ -3225,7 +3225,7 @@ public:
     /// Allow 1D GPU resource type, otherwise always using 2D resources for 1D LUTs.
     virtual void setAllowTexture1D(bool allowed) = 0;
     virtual bool getAllowTexture1D() const = 0;
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     /**
      * To avoid global texture sampler and uniform name clashes always append an increasing index
@@ -3277,7 +3277,7 @@ public:
      */
     DynamicPropertyRcPtr getDynamicProperty(DynamicPropertyType type) const;
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     enum TextureType
     {
         TEXTURE_RED_CHANNEL, ///< Only need a red channel texture
@@ -3320,7 +3320,7 @@ public:
                               unsigned edgelen,
                               Interpolation interpolation,
                               const float * values) = 0;
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Methods to specialize parts of a OCIO shader program
     virtual void addToDeclareShaderCode(const char * shaderCode);
@@ -3548,7 +3548,7 @@ public:
     /// Returns name of uniform and data as parameter.
     virtual const char * getUniform(unsigned index, UniformData & data) const = 0;
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     // 1D lut related methods
     virtual unsigned getNumTextures() const noexcept = 0;
     virtual void getTexture(unsigned index,
@@ -3569,7 +3569,7 @@ public:
                               unsigned & edgelen,
                               Interpolation & interpolation) const = 0;
     virtual void get3DTextureValues(unsigned index, const float *& values) const = 0;
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     /// Get the complete OCIO shader program.
     const char * getShaderText() const noexcept;

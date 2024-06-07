@@ -50,7 +50,7 @@ OCIO_ADD_TEST(GroupTransform, basic)
     metadata.addChildElement("child1", "content1");
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 namespace
 {
 std::string GetFormatName(const std::string & extension)
@@ -115,4 +115,4 @@ OCIO_ADD_TEST(GroupTransform, write_with_noops)
         OCIO_CHECK_NO_THROW(group->write(config, OCIO::FILEFORMAT_CLF, oss));
     }
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

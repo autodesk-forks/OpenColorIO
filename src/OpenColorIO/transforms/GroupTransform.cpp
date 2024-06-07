@@ -111,7 +111,7 @@ void GroupTransformImpl::prependTransform(TransformRcPtr transform) noexcept
     m_vec.insert(m_vec.begin(), transform);
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 void GroupTransformImpl::write(const ConstConfigRcPtr & config,
                                const char * formatName,
                                std::ostream & os) const
@@ -175,7 +175,7 @@ const char* GroupTransform::GetFormatExtensionByIndex(int index) noexcept
 {
 	return nullptr;
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 std::ostream & operator<< (std::ostream & os, const GroupTransform & groupTransform)
 {

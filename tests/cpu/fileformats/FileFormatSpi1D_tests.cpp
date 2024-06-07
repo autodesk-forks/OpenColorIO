@@ -3,7 +3,7 @@
 
 
 #include "fileformats/FileFormatSpi1D.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -495,4 +495,4 @@ OCIO_ADD_TEST(FileFormatSpi1D, bake_1d_shaper)
         }
     }
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

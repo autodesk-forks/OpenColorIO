@@ -6,7 +6,7 @@
 
 #include <OpenColorIO/OpenColorIO.h>
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "Op.h"
 #include "ops/lut3d/Lut3DOpData.h"
@@ -17,6 +17,6 @@ namespace OCIO_NAMESPACE
 ConstOpCPURcPtr GetLut3DRenderer(ConstLut3DOpDataRcPtr & lut);
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif

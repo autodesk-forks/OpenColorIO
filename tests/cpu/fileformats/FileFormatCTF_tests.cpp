@@ -3,7 +3,7 @@
 
 #include "fileformats/FileFormatCTF.cpp"
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "BitDepthUtils.h"
 #include "ops/fixedfunction/FixedFunctionOp.h"
@@ -8435,4 +8435,4 @@ OCIO_ADD_TEST(FileFormatCTF, lut_interpolation_option)
     OCIO_REQUIRE_ASSERT(lut3D);
     OCIO_CHECK_EQUAL(lut3D->getInterpolation(), OCIO::INTERP_TETRAHEDRAL);
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

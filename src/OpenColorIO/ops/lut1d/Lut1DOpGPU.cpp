@@ -3,7 +3,7 @@
 
 #include <OpenColorIO/OpenColorIO.h>
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <algorithm>
 #include <iterator>
@@ -391,4 +391,4 @@ void GetLut1DGPUShaderProgram(GpuShaderCreatorRcPtr & shaderCreator,
 
 } // namespace OCIO_NAMESPACE
 
-#endif //#if OCIO_LUT_SUPPORT
+#endif //#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT

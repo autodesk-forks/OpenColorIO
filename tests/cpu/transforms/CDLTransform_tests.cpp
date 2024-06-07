@@ -37,7 +37,7 @@ OCIO_ADD_TEST(CDLTransform, equality)
     OCIO_CHECK_ASSERT(!cdl1->equals(*cdl2));
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 OCIO_ADD_TEST(CDLTransform, create_from_cc_file)
 {
     const std::string filePath(OCIO::GetTestFilesDir() + "/cdl_test1.cc");
@@ -226,7 +226,7 @@ struct FileGuard
 
 } //anon.
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 OCIO_ADD_TEST(CDLTransform, escape_xml)
 {
     const std::string inputXML(
@@ -318,7 +318,7 @@ static const std::string kContentsB = {
 
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 // OCIO_ADD_TEST(CDLTransform, clear_caches)
 // {

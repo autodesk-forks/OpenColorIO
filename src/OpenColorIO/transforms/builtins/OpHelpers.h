@@ -13,7 +13,7 @@
 namespace OCIO_NAMESPACE
 {
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 // Linearly interpolate a single input value through a non-uniformly spaced LUT.
 // The lutValues are ordered as: [in0, out0, in1, out1, in2, out2, ...].
@@ -39,7 +39,7 @@ void CreateLut(OpRcPtrVec & ops,
 void CreateHalfLut(OpRcPtrVec & ops,
                    std::function<float(double)> lutValueGenerator);
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 } // namespace OCIO_NAMESPACE

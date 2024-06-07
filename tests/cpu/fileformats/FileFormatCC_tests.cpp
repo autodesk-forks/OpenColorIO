@@ -3,7 +3,7 @@
 
 
 #include "fileformats/FileFormatCC.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -187,4 +187,4 @@ OCIO_ADD_TEST(FileFormatCC, test_cc2_load_save)
 )" };
     OCIO_CHECK_EQUAL(outputTransform.str(), expected);
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

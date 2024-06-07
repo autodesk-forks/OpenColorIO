@@ -3,7 +3,7 @@
 
 
 #include "fileformats/FileFormatPandora.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -195,4 +195,4 @@ OCIO_ADD_TEST(FileFormatPandora, load_op)
     OCIO_CHECK_CLOSE(lutArray[23], 1.2f, error);
 }
 
-#endif OCIO_LUT_SUPPORT
+#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT

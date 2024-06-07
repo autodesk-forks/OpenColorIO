@@ -3,7 +3,7 @@
 
 
 #include "fileformats/FileFormatTruelight.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -272,4 +272,4 @@ OCIO_ADD_TEST(FileFormatTruelight, lut_3d)
     }
 }
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

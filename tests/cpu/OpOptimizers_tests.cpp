@@ -441,7 +441,7 @@ OCIO_ADD_TEST(OpOptimizers, optimizable)
     OCIO_CHECK_ASSERT(!mat->isDiagonal());
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 OCIO_ADD_TEST(OpOptimizers, optimization)
 {
     // This is a transform consisting of a Lut1d, Matrix, Matrix, Lut1d.
@@ -742,7 +742,7 @@ OCIO_ADD_TEST(OpOptimizers, lut1d_half_domain_keep_prior_range)
     // Now check that the optimized transform renders the same as the original.
     CompareRender(ops, optOps, __LINE__, 1e-6f);
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(OpOptimizers, range_composition)
 {
@@ -912,7 +912,7 @@ OCIO_ADD_TEST(OpOptimizers, range_composition)
     }
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(OpOptimizers, invlut_pair_identities)
 {
@@ -1090,7 +1090,7 @@ OCIO_ADD_TEST(OpOptimizers, gamma_comp_identity)
     OCIO_CHECK_EQUAL(optOps[1]->getInfo(), "<GammaOp>");
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 OCIO_ADD_TEST(OpOptimizers, log_identities)
 {
     // Log fwd and rev transforms should become a range.
@@ -1166,7 +1166,7 @@ OCIO_ADD_TEST(OpOptimizers, range_lut)
     // Now check that the optimized transform renders the same as the original.
     CompareRender(ops, optOps, __LINE__, 1e-6f);
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(OpOptimizers, dynamic_ops)
 {
@@ -1231,7 +1231,7 @@ OCIO_ADD_TEST(OpOptimizers, dynamic_ops)
     }
 }
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 OCIO_ADD_TEST(OpOptimizers, gamma_prefix)
 {
     OCIO::OpRcPtrVec originalOps;
@@ -1464,7 +1464,7 @@ OCIO_ADD_TEST(OpOptimizers, opt_prefix_test1)
     OCIO_CHECK_ASSERT(!lut0->isIdentity());
     OCIO_CHECK_EQUAL(lut0->getArray().getLength(), 65536u);
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(OpOptimizers, replace_ops)
 {

@@ -39,7 +39,7 @@ function(add_ocio_test NAME SOURCES PRIVATE_INCLUDES)
             xxHash
     )
 
-    if(OCIO_LUT_SUPPORT)
+    if(OCIO_LUT_AND_FILETRANSFORM_SUPPORT)
         target_link_libraries(${TEST_BINARY} PRIVATE expat::expat)
     endif()
 

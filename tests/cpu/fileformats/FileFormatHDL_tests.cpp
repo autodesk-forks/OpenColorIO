@@ -3,7 +3,7 @@
 
 
 #include "fileformats/FileFormatHDL.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -859,4 +859,4 @@ OCIO_ADD_TEST(FileFormatHDL, look_test)
         OCIO_CHECK_EQUAL(StringUtils::Trim(osvec[i]), StringUtils::Trim(resvec[i]));
     }
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

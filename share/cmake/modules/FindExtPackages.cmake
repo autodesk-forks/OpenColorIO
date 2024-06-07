@@ -85,7 +85,7 @@ ocio_handle_dependency(  Imath REQUIRED ALLOW_INSTALL
 message(STATUS "")
 message(STATUS "Checking for optional dependencies...")
 
-if(OCIO_LUT_SUPPORT)
+if(OCIO_LUT_AND_FILETRANSFORM_SUPPORT)
     # expat
     # https://github.com/libexpat/libexpat
     ocio_handle_dependency(  expat REQUIRED ALLOW_INSTALL

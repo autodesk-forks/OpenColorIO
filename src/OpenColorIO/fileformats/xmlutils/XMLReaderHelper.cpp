@@ -3,7 +3,7 @@
 
 #include "fileformats/xmlutils/XMLReaderHelper.h"
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <sstream>
 
@@ -285,4 +285,4 @@ void XmlReaderSaturationElt::setRawData(const char* str, size_t len, unsigned in
 }
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

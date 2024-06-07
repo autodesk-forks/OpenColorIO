@@ -3,7 +3,7 @@
 
 #include "fileformats/cdl/CDLReaderHelper.h"
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "fileformats/xmlutils/XMLReaderUtils.h"
 
@@ -89,4 +89,4 @@ void CDLReaderColorCorrectionElt::appendMetadata(const std::string & name, const
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

@@ -324,7 +324,7 @@ target_link_libraries(OpenColorIO
         ${YAML_CPP_LIBRARIES}
 )
 
-if(OCIO_LUT_SUPPORT)
+if(OCIO_LUT_AND_FILETRANSFORM_SUPPORT)
     target_link_libraries(OpenColorIO PRIVATE expat::expat)
 endif()
 

@@ -3,7 +3,7 @@
 
 #include "fileformats/xmlutils/XMLReaderUtils.h"
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <algorithm>
 
@@ -117,4 +117,4 @@ void FindSubString(const char * str, size_t length,
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

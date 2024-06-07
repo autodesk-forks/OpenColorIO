@@ -3,7 +3,7 @@
 
 #include "transforms/CDLTransform.h"
 
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <sstream>
 
@@ -1019,4 +1019,4 @@ bool CDLParser::isCCC() const
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

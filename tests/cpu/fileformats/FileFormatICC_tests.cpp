@@ -3,7 +3,7 @@
 
 
 #include "fileformats/FileFormatICC.cpp"
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 #include "testutils/UnitTest.h"
@@ -648,4 +648,4 @@ OCIO_ADD_TEST(FileFormatICC, endian)
     OCIO_CHECK_EQUAL(test[0], 0x66);
 
 }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT

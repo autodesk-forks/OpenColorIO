@@ -5,7 +5,7 @@
 #define INCLUDED_OCIO_LUT3DOPDATA_H
 
 #include <OpenColorIO/OpenColorIO.h>
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <vector>
 
@@ -147,6 +147,6 @@ bool operator==(const Lut3DOpData & lhs, const Lut3DOpData & rhs);
 Lut3DOpDataRcPtr MakeFastLut3DFromInverse(ConstLut3DOpDataRcPtr & lut);
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif

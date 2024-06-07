@@ -244,7 +244,7 @@ int RemoveInverseOps(OpRcPtrVec & opVec, OptimizationFlags oFlags)
             // mean inserting a Range to emulate the clamping done by the original ops.
 
             OpRcPtr replacedBy;
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             if (type1 == OpData::Lut1DType)
             {
                 // Lut1D gets special handling so that both halfs of the pair are available.
@@ -271,7 +271,7 @@ int RemoveInverseOps(OpRcPtrVec & opVec, OptimizationFlags oFlags)
                 replacedBy = ops[0];
             }
             else
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             {
                 replacedBy = op1->getIdentityReplacement();
             }
@@ -366,7 +366,7 @@ int ReplaceInverseLuts(OpRcPtrVec & opVec)
         ConstOpRcPtr op = opVec[i];
         auto opData = op->data();
         const auto type = opData->getType();
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
         if (type == OpData::Lut1DType)
         {
             auto lutData = OCIO_DYNAMIC_POINTER_CAST<const Lut1DOpData>(opData);
@@ -393,7 +393,7 @@ int ReplaceInverseLuts(OpRcPtrVec & opVec)
                 ++count;
             }
         }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     }
     return count;
@@ -486,7 +486,7 @@ unsigned FindSeparablePrefix(const OpRcPtrVec & ops)
     // If the only op is a 1D LUT, there is actually nothing to optimize
     // so set the length to 0.  (This also avoids an infinite loop.)
     // (If it is an inverse 1D LUT, proceed since we want to replace it with a 1D LUT.)
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     if (prefixLen == 1)
     {
         ConstOpRcPtr constOp0 = ops[0];
@@ -500,7 +500,7 @@ unsigned FindSeparablePrefix(const OpRcPtrVec & ops)
             }
         }
     }
-#endif //OCIO_LUT_SUPPORT
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Some ops are so fast that it may not make sense to replace just one of those.
     // E.g., if it's just a single matrix, it may not be faster to replace it with a LUT.
@@ -547,7 +547,7 @@ unsigned FindSeparablePrefix(const OpRcPtrVec & ops)
 // the op list with a single 1D LUT that is built to do a look-up for the input bit-depth.
 void OptimizeSeparablePrefix(OpRcPtrVec & ops, BitDepth in)
 {
-#if OCIO_LUT_SUPPORT
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     if (ops.empty())
     {
         return;
@@ -588,7 +588,7 @@ void OptimizeSeparablePrefix(OpRcPtrVec & ops, BitDepth in)
     FinalizeOps(lutOps);
 
     ops.insert(ops.begin(), lutOps.begin(), lutOps.end());
-#endif OCIO_LUT_SUPPORT
+#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 } // namespace
 
