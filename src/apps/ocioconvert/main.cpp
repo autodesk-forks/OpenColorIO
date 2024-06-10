@@ -65,7 +65,9 @@ int main(int argc, const char **argv)
                "   or: ocioconvert [options] --invertview inputimage displayname viewname outputimage outputcolorspace\n\n",
                "%*", parse_end_args, "",
                "<SEPARATOR>", "Options:",
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
                "--lut",         &useLut,            "Convert using a LUT rather than a config file",
+#endif
                "--view",        &useDisplayView,    "Convert to a (display,view) pair rather than to "
                                                     "an output color space",
                "--invertview",  &useInvertView,     "Convert from a (display,view) pair rather than "
@@ -320,12 +322,17 @@ int main(int argc, const char **argv)
         {
             if (useLut)
             {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
                 // Create the OCIO processor for the specified transform.
                 OCIO::FileTransformRcPtr t = OCIO::FileTransform::Create();
                 t->setSrc(lutFile);
                 t->setInterpolation(OCIO::INTERP_BEST);
     
                 processor = config->getProcessor(t);
+#else 
+				std::cout << "ERROR OCIO LUT support is turned off." << std::endl;
+				exit(1);
+#endif 
             }
             else if (useDisplayView)
             {

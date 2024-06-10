@@ -96,6 +96,7 @@ void AllocateTexture3D(unsigned index, unsigned & texId,
                     edgelen, edgelen, edgelen, 0, GL_RGB, GL_FLOAT, values);
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 void AllocateTexture(unsigned index, unsigned & texId,
                        unsigned width, unsigned height,
                        GpuShaderDesc::TextureType channel,
@@ -144,7 +145,7 @@ void AllocateTexture(unsigned index, unsigned & texId,
         break;
     }
 }
-
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 GLuint CompileShaderText(GLenum shaderType, const char * text)
 {
     CheckStatus();
@@ -303,6 +304,8 @@ OpenGLBuilder::~OpenGLBuilder()
 
 void OpenGLBuilder::allocateAllTextures(unsigned startIndex)
 {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
     deleteAllTextures();
 
     // This is the first available index for the textures.
@@ -389,10 +392,13 @@ void OpenGLBuilder::allocateAllTextures(unsigned startIndex)
         m_textureIds.push_back(TextureId(texId, textureName, samplerName, type));
         currIndex++;
     }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 }
 
 void OpenGLBuilder::deleteAllTextures()
 {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     const size_t max = m_textureIds.size();
     for (size_t idx=0; idx<max; ++idx)
     {
@@ -401,10 +407,12 @@ void OpenGLBuilder::deleteAllTextures()
     }
 
     m_textureIds.clear();
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void OpenGLBuilder::useAllTextures()
 {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     const size_t max = m_textureIds.size();
     for (size_t idx=0; idx<max; ++idx)
     {
@@ -416,6 +424,7 @@ void OpenGLBuilder::useAllTextures()
                                  data.m_samplerName.c_str()),
                                  GLint(m_startIndex + idx) );
     }
+#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void OpenGLBuilder::linkAllUniforms()

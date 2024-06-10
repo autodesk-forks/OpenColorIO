@@ -9217,6 +9217,7 @@ OCIO_ADD_TEST(Config, look_fallback)
     }
 }
 
+#if OCIO_ARCHIVE_SUPPORT
 OCIO_ADD_TEST(Config, create_from_archive)
 {
     {
@@ -9366,6 +9367,8 @@ OCIO_ADD_TEST(Config, create_from_archive)
 #endif
     }
 }
+#endif // OCIO_ARCHIVE_SUPPORT
+
 
 OCIO_ADD_TEST(Config, create_from_config_io_proxy)
 {
