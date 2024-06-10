@@ -392,19 +392,7 @@ if(WIN32)
     endif()
 endif()
 
-set(CUSTOM_COMPILE_FLAGS ${PLATFORM_LINK_OPTIONS})
 set(CUSTOM_LINK_FLAGS ${PLATFORM_LINK_OPTIONS})
-
-if(MSVC)
-    set(CUSTOM_COMPILE_FLAGS "${CUSTOM_COMPILE_FLAGS};/MP")     # parallel build
-    set(CUSTOM_COMPILE_FLAGS "${CUSTOM_COMPILE_FLAGS};/GL")     # Whole program optimization
-    
-    set(CUSTOM_LINK_FLAGS "${CUSTOM_LINK_FLAGS};/LTCG")         # Link-time code generation
-    set(CUSTOM_LINK_FLAGS "${CUSTOM_LINK_FLAGS};/OPT:REF")     # Link time comdat optimization
-    set(CUSTOM_LINK_FLAGS "${CUSTOM_LINK_FLAGS};/OPT:ICF")     # Link time comdat optimization
-endif()
-
-
 
 
 if(UNIX AND NOT APPLE)
@@ -453,7 +441,7 @@ endif()
 
 set_target_properties(OpenColorIO PROPERTIES
     OUTPUT_NAME   ${PROJECT_NAME}${OCIO_LIBNAME_SUFFIX}
-    COMPILE_OPTIONS "${CUSTOM_COMPILE_FLAGS}"
+    COMPILE_OPTIONS "${PLATFORM_COMPILE_OPTIONS}"
     LINK_OPTIONS "${CUSTOM_LINK_FLAGS}"
     PUBLIC_HEADER "${INSTALL_HEADERS}"
 )
