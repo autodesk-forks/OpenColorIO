@@ -80,9 +80,6 @@ public:
     Exception() = delete;
     /// Constructor that takes a string as the exception message.
     explicit Exception(const char *);
-    explicit Exception(const std::string&);
-    explicit Exception(const std::ostringstream&);
-    explicit Exception(const std::stringstream&);
 
     /// Constructor that takes an existing exception.
     Exception(const Exception &);

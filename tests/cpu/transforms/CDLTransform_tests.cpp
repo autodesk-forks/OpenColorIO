@@ -203,7 +203,7 @@ OCIO_ADD_TEST(CDLTransform, create_from_cdl_file)
         OCIO_REQUIRE_EQUAL(group->getNumTransforms(), 5);
     }
 }
-#endif 
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 namespace
 {
@@ -262,7 +262,7 @@ OCIO_ADD_TEST(CDLTransform, escape_xml)
         OCIO_CHECK_EQUAL("These: < & \" ' > are escape chars", descStr);
     }
 }
-#endif
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 namespace
 {
@@ -402,7 +402,7 @@ OCIO_ADD_TEST(CDLTransform, faulty_file_content)
     }
 }
 
-#endif
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(CDLTransform, buildops)
 {
