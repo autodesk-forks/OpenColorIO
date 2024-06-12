@@ -378,6 +378,7 @@ float4 Display(
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // This test need FileTransform
 OCIO_ADD_TEST(GpuShader, MetalSupport3)
 {
     // The unit test validates a single 1D LUT.
@@ -862,6 +863,7 @@ float4 OCIOMain(
         OCIO_CHECK_EQUAL(expected, text);
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(GpuShader, MetalSupport7)
 {

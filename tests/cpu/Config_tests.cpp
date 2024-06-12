@@ -111,6 +111,7 @@ OCIO_ADD_TEST(Config, create_raw_config)
                           "Color space 'not_found' could not be found");
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // This test needs FileTransform
 OCIO_ADD_TEST(Config, simple_config)
 {
 
@@ -184,6 +185,7 @@ OCIO_ADD_TEST(Config, simple_config)
     OCIO_CHECK_NO_THROW(config = OCIO::Config::CreateFromStream(is));
     OCIO_CHECK_NO_THROW(config->validate());
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, colorspace_duplicate)
 {
@@ -1291,6 +1293,7 @@ OCIO_ADD_TEST(Config, context_variable_unresolved)
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // This test needs FileTransform
 OCIO_ADD_TEST(Config, context_variable_with_sanity_check)
 {
     // Add some extra tests for the environment section. If declared, the context is then
@@ -1441,6 +1444,7 @@ OCIO_ADD_TEST(Config, context_variable_with_sanity_check)
         OCIO_CHECK_NO_THROW(cfg->validate());
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, colorspacename_with_reserved_token)
 {
@@ -1454,6 +1458,7 @@ OCIO_ADD_TEST(Config, colorspacename_with_reserved_token)
                           "variable reserved token i.e. % or $.");
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // This test needs FileTransform
 OCIO_ADD_TEST(Config, context_variable_with_colorspacename)
 {
     // Test some faulty context variable use cases.
@@ -1614,6 +1619,7 @@ OCIO_ADD_TEST(Config, context_variable_with_colorspacename)
         OCIO_CHECK_NO_THROW(cfg->getProcessor(ctx, "cs1", "cs2"));
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, context_variable_with_role)
 {
@@ -1711,6 +1717,7 @@ OCIO_ADD_TEST(Config, context_variable_with_display_view)
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // These test need FileTransform
 OCIO_ADD_TEST(Config, context_variable_with_search_path_v1)
 {
     // Test a search_path containing a context variable for a v1 config file.
@@ -1912,6 +1919,7 @@ OCIO_ADD_TEST(Config, context_variable_with_search_path_v2)
 #endif
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, role_without_colorspace)
 {
@@ -5115,6 +5123,7 @@ OCIO_ADD_TEST(Config, cdl_serialization)
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // These tests need FileTransform
 OCIO_ADD_TEST(Config, file_transform_serialization)
 {
     // Config v2.
@@ -5140,7 +5149,6 @@ OCIO_ADD_TEST(Config, file_transform_serialization)
     OCIO_CHECK_EQUAL(oss.str(), str);
 }
 
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 OCIO_ADD_TEST(Config, file_transform_serialization_v1)
 {
     OCIO::ConfigRcPtr cfg;
@@ -7313,6 +7321,7 @@ colorspaces:
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // This test need FileTransform
 OCIO_ADD_TEST(Config, config_context_cacheids)
 {
     // Validate the cacheID computation from Config & Context classes when OCIO Context
@@ -7445,6 +7454,8 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
         OCIO_CHECK_EQUAL(configCacheID,  cfg->getCacheID());
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 
 OCIO_ADD_TEST(Config, processor_cache_with_context_variables)
 {
@@ -7535,6 +7546,7 @@ colorspaces:
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // This test need FileTransform
 OCIO_ADD_TEST(Config, context_variables_typical_use_cases)
 {
     // Case 1 - No context variables used in the config.
@@ -8081,6 +8093,7 @@ OCIO_ADD_TEST(Config, context_variables_typical_use_cases)
         OCIO_CHECK_NE(p2.get(), p3.get());
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, virtual_display)
 {
@@ -8396,7 +8409,6 @@ colorspaces:
 
 }
 
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 OCIO_ADD_TEST(Config, virtual_display_with_active_displays)
 {
     // Test the virtual display instantiation when active displays & views are defined.
@@ -8459,7 +8471,7 @@ colorspaces:
     // Only the 'view' view is active.
     OCIO_CHECK_EQUAL(1, config->getNumViews("sRGB"));
 
-#if !defined(OCIO_HEADLESS_ENABLED) && ( defined(__APPLE__) || defined(_WIN32) )
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT && !defined(OCIO_HEADLESS_ENABLED) && ( defined(__APPLE__) || defined(_WIN32) )
 
     OCIO_CHECK_ASSERT(OCIO::SystemMonitors::Get()->isSupported());
 
@@ -8482,7 +8494,6 @@ colorspaces:
 #endif
 
 }
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, virtual_display_v2_only)
 {
@@ -9150,6 +9161,7 @@ colorspaces:
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // This test need FileTransform
 OCIO_ADD_TEST(Config, look_fallback)
 {
     // Test that the look fallback syntax works for look with missing file.
@@ -9214,6 +9226,7 @@ OCIO_ADD_TEST(Config, look_fallback)
         OCIO_CHECK_ASSERT(proc->isNoOp());
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #if OCIO_ARCHIVE_SUPPORT
 OCIO_ADD_TEST(Config, create_from_archive)

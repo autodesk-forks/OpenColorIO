@@ -556,7 +556,6 @@ inline void save(YAML::Emitter & out, const ConstBuiltinTransformRcPtr & t)
     out << YAML::EndMap;
 }
 
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 // CDLTransform
 
 inline void load(const YAML::Node& node, CDLTransformRcPtr& t)
@@ -688,7 +687,6 @@ inline void save(YAML::Emitter& out, ConstCDLTransformRcPtr t, unsigned int majo
     EmitBaseTransformKeyValues(out, t);
     out << YAML::EndMap;
 }
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 // ColorSpaceTransform
 
@@ -2951,14 +2949,12 @@ void load(const YAML::Node& node, TransformRcPtr& t)
         load(node, temp);
         t = temp;
     }
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(type == "CDLTransform")
     {
         CDLTransformRcPtr temp;
         load(node, temp);
         t = temp;
     }
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(type == "ColorSpaceTransform")
     {
         ColorSpaceTransformRcPtr temp;
@@ -3091,11 +3087,9 @@ void save(YAML::Emitter& out, ConstTransformRcPtr t, unsigned int majorVersion)
     else if (ConstBuiltinTransformRcPtr builtin_tran = \
         DynamicPtrCast<const BuiltinTransform>(t))
         save(out, builtin_tran);
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(ConstCDLTransformRcPtr CDL_tran = \
         DynamicPtrCast<const CDLTransform>(t))
         save(out, CDL_tran, majorVersion);
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(ConstColorSpaceTransformRcPtr ColorSpace_tran = \
         DynamicPtrCast<const ColorSpaceTransform>(t))
         save(out, ColorSpace_tran);
