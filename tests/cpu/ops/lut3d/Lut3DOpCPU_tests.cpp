@@ -2,8 +2,8 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include "ops/lut3d/Lut3DOpCPU.cpp"
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <limits>
 

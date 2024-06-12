@@ -35,7 +35,7 @@ static void  CreateArray(const float * buf,
     res.resize(size);
     std::memcpy(&res[0], buf, size * sizeof(float));
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 }
 
@@ -104,7 +104,7 @@ public:
     };
 
     typedef std::vector<Texture> Textures;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     struct Uniform
     {
@@ -302,7 +302,7 @@ public:
         const Texture & t = m_textures3D[index];
         values = &t.m_values[0];
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     unsigned getNumUniforms() const
     {
@@ -383,7 +383,7 @@ public:
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     Textures m_textures;
     Textures m_textures3D;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     Uniforms m_uniforms;
 
 private:
@@ -547,7 +547,7 @@ void GenericGpuShaderDesc::get3DTextureValues(unsigned index, const float *& val
 {
     getImplGeneric()->get3DTextureValues(index, values);
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 void GenericGpuShaderDesc::Deleter(GenericGpuShaderDesc* c)

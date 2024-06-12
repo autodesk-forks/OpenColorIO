@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 
-
 #include "ops/lut1d/Lut1DOpCPU.cpp"
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "testutils/UnitTest.h"
 #include "UnitTestUtils.h"
@@ -2640,4 +2639,4 @@ OCIO_ADD_TEST(Lut1DRenderer, lut_1d_inv_half_domain_hue_adjust)
     }
 }
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

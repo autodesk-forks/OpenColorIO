@@ -2,8 +2,8 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include "ops/lut1d/Lut1DOp.cpp"
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <cstring>
 
@@ -509,4 +509,4 @@ OCIO_ADD_TEST(Lut1DTransform, build_op)
     OCIO_CHECK_EQUAL(lutdata->getArray()[5], b);
 }
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

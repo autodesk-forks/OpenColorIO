@@ -26,6 +26,7 @@ namespace OCIO_NAMESPACE
 {
 
 const std::string & GetTestFilesDir();
+
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 // Special test function that copies the implementation of FileTransform
@@ -42,7 +43,8 @@ FileTransformRcPtr CreateFileTransform(const std::string & fileName);
 
 // Create processor for a given file.
 ConstProcessorRcPtr GetFileTransformProcessor(const std::string & fileName);
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 class CachedFile;
 

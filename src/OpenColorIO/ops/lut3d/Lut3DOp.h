@@ -60,6 +60,7 @@ void CreateLut3DOp(OpRcPtrVec & ops,
 void CreateLut3DTransform(GroupTransformRcPtr & group, ConstOpRcPtr & op);
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif

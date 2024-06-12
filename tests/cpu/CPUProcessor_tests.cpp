@@ -728,7 +728,7 @@ OCIO_ADD_TEST(CPUProcessor, with_one_1d_lut)
     }
 
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(CPUProcessor, with_several_ops)
 {

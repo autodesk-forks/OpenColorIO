@@ -89,7 +89,7 @@ void BuildFileTransformOps(OpRcPtrVec & ops,
                            const ConstContextRcPtr & context,
                            const FileTransform & transform,
                            TransformDirection dir);
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 void BuildFixedFunctionOp(OpRcPtrVec & ops,
                           const FixedFunctionTransform & transform,
@@ -151,7 +151,7 @@ void BuildLut1DOp(OpRcPtrVec & ops,
 void BuildLut3DOp(OpRcPtrVec & ops,
                   const Lut3DTransform & transform,
                   TransformDirection dir);
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 void BuildMatrixOp(OpRcPtrVec & ops,
                    const MatrixTransform & transform,

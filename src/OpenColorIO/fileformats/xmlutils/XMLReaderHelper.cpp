@@ -285,4 +285,4 @@ void XmlReaderSaturationElt::setRawData(const char* str, size_t len, unsigned in
 }
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

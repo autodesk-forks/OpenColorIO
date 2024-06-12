@@ -5,6 +5,7 @@
 #define INCLUDED_OCIO_LUT1DOP_CPU_H
 
 #include <OpenColorIO/OpenColorIO.h>
+
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "ops/lut1d/Lut1DOpData.h"
@@ -16,5 +17,5 @@ ConstOpCPURcPtr GetLut1DRenderer(ConstLut1DOpDataRcPtr & lut, BitDepth in, BitDe
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 #endif

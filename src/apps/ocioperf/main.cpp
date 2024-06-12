@@ -293,8 +293,8 @@ int main(int argc, const char **argv)
                 }
             }
         }
-		else
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+        else
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
         // Checking for an input colorspace or input (display, view) pair.
         if (!inColorSpace.empty() || (!display.empty() && !view.empty()))
         {

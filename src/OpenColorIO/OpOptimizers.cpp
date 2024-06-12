@@ -271,7 +271,7 @@ int RemoveInverseOps(OpRcPtrVec & opVec, OptimizationFlags oFlags)
                 replacedBy = ops[0];
             }
             else
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             {
                 replacedBy = op1->getIdentityReplacement();
             }
@@ -393,7 +393,7 @@ int ReplaceInverseLuts(OpRcPtrVec & opVec)
                 ++count;
             }
         }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     }
     return count;
@@ -500,7 +500,7 @@ unsigned FindSeparablePrefix(const OpRcPtrVec & ops)
             }
         }
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Some ops are so fast that it may not make sense to replace just one of those.
     // E.g., if it's just a single matrix, it may not be faster to replace it with a LUT.

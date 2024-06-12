@@ -391,7 +391,6 @@ public:
     void setIsPowerInit(bool status) { m_isPowerInit = status; }
 
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
     virtual const CDLOpDataRcPtr & getCDL() const = 0;
     void appendMetadata(const std::string & /* name */, const std::string & value) override
     {
@@ -399,7 +398,7 @@ public:
         FormatMetadataImpl item(METADATA_SOP_DESCRIPTION, value);
         getCDL()->getFormatMetadata().getChildrenElements().push_back(item);
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 private:
     XmlReaderSOPNodeBaseElt() = delete;
@@ -461,8 +460,7 @@ public:
         FormatMetadataImpl item(METADATA_SAT_DESCRIPTION, value);
         getCDL()->getFormatMetadata().getChildrenElements().push_back(item);
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 private:
     XmlReaderSatNodeBaseElt() = delete;

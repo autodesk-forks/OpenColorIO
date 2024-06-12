@@ -635,7 +635,7 @@ OCIO_ADD_TEST(Config, serialize_group_transform)
         OCIO_CHECK_EQUAL(osvec[i], PROFILE_OUTvec[i]);
     }
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, serialize_searchpath)
 {
@@ -5189,7 +5189,7 @@ colorspaces:
     from_reference: !<FileTransform> {src: other, interpolation: tetrahedral}
 )" );
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, add_color_space)
 {
@@ -5775,8 +5775,7 @@ OCIO_ADD_TEST(Config, is_inactive)
         OCIO_CHECK_EQUAL(config->isInactiveColorSpace("Rec.1886 Rec.2020 - Display"), true);
     }
 }
-#endif //OCIO_HAS_BUILTIN_YAML_CONFIGS
-
+#endif // OCIO_HAS_BUILTIN_YAML_CONFIGS
 
 OCIO_ADD_TEST(Config, inactive_color_space_precedence)
 {
@@ -8393,8 +8392,7 @@ colorspaces:
 
 #endif
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 }
 
@@ -8484,7 +8482,7 @@ colorspaces:
 #endif
 
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(Config, virtual_display_v2_only)
 {
@@ -9368,7 +9366,6 @@ OCIO_ADD_TEST(Config, create_from_archive)
     }
 }
 #endif // OCIO_ARCHIVE_SUPPORT
-
 
 OCIO_ADD_TEST(Config, create_from_config_io_proxy)
 {

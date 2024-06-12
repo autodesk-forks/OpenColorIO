@@ -117,4 +117,4 @@ void FindSubString(const char * str, size_t length,
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

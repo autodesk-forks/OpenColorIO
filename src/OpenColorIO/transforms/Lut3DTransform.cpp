@@ -221,4 +221,4 @@ std::ostream & operator<< (std::ostream & os, const Lut3DTransform & t)
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

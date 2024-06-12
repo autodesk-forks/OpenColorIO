@@ -320,4 +320,4 @@ void applyTetrahedralSSE2(const float *lut3d, int dim, const float *src, float *
 } // OCIO_NAMESPACE
 
 #endif // OCIO_USE_SSE2
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

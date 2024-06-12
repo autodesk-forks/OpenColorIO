@@ -113,7 +113,7 @@ OCIO_ADD_TEST(Reference, load_cycle_rel_resolve_failing)
     OCIO_CHECK_THROW_WHAT(GetTransformFileProcessor(fileName), OCIO::Exception,
                           "is creating a recursion");
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 namespace
 {
@@ -242,7 +242,7 @@ OCIO_ADD_TEST(Reference, load_nested_resolve_internal)
     auto matrixData = OCIO::DynamicPtrCast<const OCIO::MatrixOpData>(op->data());
     OCIO_REQUIRE_ASSERT(matrixData);
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 // TODO: Once searchPath for Windows is fixed, add test where files are in different directories
 // and several path are being searched.

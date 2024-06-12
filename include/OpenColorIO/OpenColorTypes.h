@@ -183,7 +183,7 @@ typedef OCIO_SHARED_PTR<ExposureContrastTransform> ExposureContrastTransformRcPt
 class OCIOEXPORT FileTransform;
 typedef OCIO_SHARED_PTR<const FileTransform> ConstFileTransformRcPtr;
 typedef OCIO_SHARED_PTR<FileTransform> FileTransformRcPtr;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 class OCIOEXPORT FixedFunctionTransform;
 typedef OCIO_SHARED_PTR<const FixedFunctionTransform> ConstFixedFunctionTransformRcPtr;
@@ -229,7 +229,7 @@ typedef OCIO_SHARED_PTR<Lut1DTransform> Lut1DTransformRcPtr;
 class OCIOEXPORT Lut3DTransform;
 typedef OCIO_SHARED_PTR<const Lut3DTransform> ConstLut3DTransformRcPtr;
 typedef OCIO_SHARED_PTR<Lut3DTransform> Lut3DTransformRcPtr;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 class OCIOEXPORT MatrixTransform;
 typedef OCIO_SHARED_PTR<const MatrixTransform> ConstMatrixTransformRcPtr;

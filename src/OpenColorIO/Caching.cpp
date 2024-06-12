@@ -26,7 +26,7 @@ void ClearAllCaches()
     ClearPathCaches();
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     ClearFileTransformCaches();
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 }
 } // namespace OCIO_NAMESPACE

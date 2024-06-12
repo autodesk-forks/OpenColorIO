@@ -2,8 +2,8 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include <OpenColorIO/OpenColorIO.h>
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <sstream>
 #include <fstream>
@@ -912,4 +912,5 @@ std::string GetProfileDescriptionFromICCProfile(const char * ICCProfileFilepath)
 }
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

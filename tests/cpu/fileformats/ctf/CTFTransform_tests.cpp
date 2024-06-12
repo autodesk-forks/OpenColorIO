@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 
-
 #include "fileformats/ctf/CTFTransform.cpp"
+
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "ops/matrix/MatrixOpData.h"
@@ -210,4 +210,4 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
         OCIO_CHECK_EQUAL(ct.getDescriptions()[1], "Two");
     }
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

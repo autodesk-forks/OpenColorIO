@@ -146,6 +146,7 @@ void AllocateTexture(unsigned index, unsigned & texId,
     }
 }
 #endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 GLuint CompileShaderText(GLenum shaderType, const char * text)
 {
     CheckStatus();
@@ -393,7 +394,6 @@ void OpenGLBuilder::allocateAllTextures(unsigned startIndex)
         currIndex++;
     }
 #endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
 }
 
 void OpenGLBuilder::deleteAllTextures()
@@ -424,7 +424,7 @@ void OpenGLBuilder::useAllTextures()
                                  data.m_samplerName.c_str()),
                                  GLint(m_startIndex + idx) );
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void OpenGLBuilder::linkAllUniforms()

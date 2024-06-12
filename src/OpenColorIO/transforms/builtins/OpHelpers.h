@@ -39,7 +39,7 @@ void CreateLut(OpRcPtrVec & ops,
 void CreateHalfLut(OpRcPtrVec & ops,
                    std::function<float(double)> lutValueGenerator);
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 } // namespace OCIO_NAMESPACE

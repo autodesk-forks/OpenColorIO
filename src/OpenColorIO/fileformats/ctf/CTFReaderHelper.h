@@ -5,6 +5,9 @@
 #define INCLUDED_OCIO_FILEFORMATS_CTF_CTFREADERHELPER_H
 
 #include "fileformats/xmlutils/XMLReaderHelper.h"
+
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 #include "fileformats/ctf/CTFTransform.h"
 #include "fileformats/ctf/IndexMapping.h"
 #include "fileformats/FormatMetadata.h"
@@ -22,8 +25,6 @@
 #include "ops/lut3d/Lut3DOpData.h"
 #include "ops/range/RangeOpData.h"
 #include "ops/reference/ReferenceOpData.h"
-
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 namespace OCIO_NAMESPACE
 {
@@ -313,8 +314,8 @@ public:
     enum Type
     {
         CDLType = 0,
-        Lut1DType, //TODO Nano: remove?
-        Lut3DType,//TODO Nano: remove?
+        Lut1DType,
+        Lut3DType,
         MatrixType,
         RangeType,
         // CTF types.
@@ -326,8 +327,8 @@ public:
         GradingPrimaryType,
         GradingRGBCurveType,
         GradingToneType,
-        InvLut1DType,//TODO Nano: remove?
-        InvLut3DType,//TODO Nano: remove?
+        InvLut1DType,
+        InvLut3DType,
         LogType,
         ReferenceType,
 
@@ -1216,6 +1217,7 @@ public:
 };
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif

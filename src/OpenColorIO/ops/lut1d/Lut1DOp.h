@@ -9,7 +9,6 @@
 
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
-
 #include <vector>
 #include "ops/lut1d/Lut1DOpData.h"
 
@@ -31,6 +30,6 @@ void CreateLut1DTransform(GroupTransformRcPtr & group, ConstOpRcPtr & op);
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif

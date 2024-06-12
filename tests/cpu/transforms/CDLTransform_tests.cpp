@@ -319,7 +319,6 @@ static const std::string kContentsB = {
 }
 
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
 OCIO_ADD_TEST(CDLTransform, clear_caches)
 {
     FileGuard guard(__LINE__);
@@ -401,7 +400,6 @@ OCIO_ADD_TEST(CDLTransform, faulty_file_content)
                               OCIO::Exception, "Not a CDL file format");
     }
 }
-
 #endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(CDLTransform, buildops)

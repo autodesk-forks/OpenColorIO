@@ -146,7 +146,7 @@ void CreateCPUEngine(const OpRcPtrVec & ops,
                 inBitDepthOp = GetLut1DRenderer(lut, in, BIT_DEPTH_F32);
             }
             else 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             if(in==BIT_DEPTH_F32)
             {
                 inBitDepthOp = op->getCPUOp(fastLogExpPow);
@@ -171,7 +171,7 @@ void CreateCPUEngine(const OpRcPtrVec & ops,
                 outBitDepthOp = GetLut1DRenderer(lut, BIT_DEPTH_F32, out);
             }
             else 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             if(out==BIT_DEPTH_F32)
             {
                 outBitDepthOp = op->getCPUOp(fastLogExpPow);

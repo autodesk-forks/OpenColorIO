@@ -342,7 +342,7 @@ bool containsBlockedTransform(const ConstTransformRcPtr & transform)
             return true;
         }
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Prevent transforms that may be hiding a FileTransform.
     else if (transform->getTransformType() == TRANSFORM_TYPE_COLORSPACE

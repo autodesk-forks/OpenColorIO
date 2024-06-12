@@ -576,10 +576,10 @@ void CreateOpVecFromOpData(OpRcPtrVec & ops,
     }
 #else
     case OpData::Lut1DType:
-	case OpData::Lut3DType:
+    case OpData::Lut3DType:
         throw Exception("LUT support is not enabled in this build");
         break;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     case OpData::MatrixType:
     {

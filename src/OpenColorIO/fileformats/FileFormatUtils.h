@@ -27,6 +27,7 @@ void LogWarningInterpolationNotUsed(Interpolation interp, const FileTransform & 
 
 
 } // OCIO_NAMESPACE
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif // INCLUDED_OCIO_FILEFORMAT_UTILS_H

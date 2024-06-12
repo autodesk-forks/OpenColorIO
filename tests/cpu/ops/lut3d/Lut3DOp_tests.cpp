@@ -2,8 +2,8 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include "ops/lut3d/Lut3DOp.cpp"
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <cstring>
 #include <cstdlib>
@@ -671,4 +671,5 @@ OCIO_ADD_TEST(Lut3DTransform, build_op)
 // TODO: Port syncolor test: renderer\test\CPURenderer_cases.cpp_inc - CPURendererLUT3D_Green
 // TODO: Port syncolor test: renderer\test\CPURenderer_cases.cpp_inc - CPURendererLUT3D_Red
 // TODO: Port syncolor test: renderer\test\CPURenderer_cases.cpp_inc - CPURendererLUT3D_Example
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

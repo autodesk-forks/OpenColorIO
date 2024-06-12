@@ -116,7 +116,7 @@ GroupTransformRcPtr CDLTransform::CreateGroupFromFile(const char * src)
 
     return cachedFile->getCDLGroup();
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 void CDLTransformImpl::deleter(CDLTransform * t)
 {

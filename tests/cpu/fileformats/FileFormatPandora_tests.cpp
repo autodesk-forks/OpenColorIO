@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
 
-
 #include "fileformats/FileFormatPandora.cpp"
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include "testutils/UnitTest.h"
 #include "UnitTestUtils.h"

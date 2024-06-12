@@ -322,7 +322,7 @@ OCIO_ADD_TEST(Builtins, interpolate)
     ValidateValues(OCIO::Interpolate1D(lutSize, &lutValues[0],  0.99), 2.98, __LINE__);
     ValidateValues(OCIO::Interpolate1D(lutSize, &lutValues[0],  2.  ), 3.  , __LINE__);
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 namespace
 {

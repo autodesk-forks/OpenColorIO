@@ -155,10 +155,10 @@ const char * GroupTransform::GetFormatExtensionByIndex(int index) noexcept
 }
 #else
 void GroupTransformImpl::write(const ConstConfigRcPtr& config,
-	const char* formatName,
-	std::ostream& os) const
+    const char* formatName,
+    std::ostream& os) const
 {
-	throw Exception("LUT and File-Transform support is turned OFF.");
+    throw Exception("LUT and File-Transform support is turned OFF.");
 }
 
 int GroupTransform::GetNumWriteFormats() noexcept
@@ -168,14 +168,14 @@ int GroupTransform::GetNumWriteFormats() noexcept
 
 const char* GroupTransform::GetFormatNameByIndex(int index) noexcept
 {
-	return nullptr;
+    return nullptr;
 }
 
 const char* GroupTransform::GetFormatExtensionByIndex(int index) noexcept
 {
-	return nullptr;
+    return nullptr;
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 std::ostream & operator<< (std::ostream & os, const GroupTransform & groupTransform)
 {

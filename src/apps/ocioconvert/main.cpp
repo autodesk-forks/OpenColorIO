@@ -330,8 +330,8 @@ int main(int argc, const char **argv)
     
                 processor = config->getProcessor(t);
 #else 
-				std::cout << "ERROR OCIO LUT support is turned off." << std::endl;
-				exit(1);
+                std::cout << "ERROR OCIO LUT support is turned off." << std::endl;
+                exit(1);
 #endif 
             }
             else if (useDisplayView)

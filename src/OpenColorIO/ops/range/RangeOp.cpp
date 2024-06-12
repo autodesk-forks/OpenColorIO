@@ -130,7 +130,7 @@ bool RangeOp::canCombineWith(ConstOpRcPtr & op2) const
                 return true;
             }
         }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     }
 
     if (type2 == OpData::RangeType)

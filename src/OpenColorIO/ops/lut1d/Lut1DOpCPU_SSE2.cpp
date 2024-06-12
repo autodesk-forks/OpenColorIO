@@ -4,8 +4,6 @@
 #include "Lut1DOpCPU_SSE2.h"
 
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
-
 #if OCIO_USE_SSE2
 
 #include <string.h>

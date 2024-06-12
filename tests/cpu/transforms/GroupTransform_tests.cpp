@@ -115,4 +115,4 @@ OCIO_ADD_TEST(GroupTransform, write_with_noops)
         OCIO_CHECK_NO_THROW(group->write(config, OCIO::FILEFORMAT_CLF, oss));
     }
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

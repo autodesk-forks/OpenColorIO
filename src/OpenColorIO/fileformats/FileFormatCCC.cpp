@@ -258,4 +258,4 @@ FileFormat * CreateFileFormatCCC()
     return new LocalFileFormat();
 }
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

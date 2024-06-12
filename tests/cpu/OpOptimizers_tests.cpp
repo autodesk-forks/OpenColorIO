@@ -742,7 +742,7 @@ OCIO_ADD_TEST(OpOptimizers, lut1d_half_domain_keep_prior_range)
     // Now check that the optimized transform renders the same as the original.
     CompareRender(ops, optOps, __LINE__, 1e-6f);
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(OpOptimizers, range_composition)
 {
@@ -913,7 +913,6 @@ OCIO_ADD_TEST(OpOptimizers, range_composition)
 }
 
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
 OCIO_ADD_TEST(OpOptimizers, invlut_pair_identities)
 {
     // The file contains an InverseLUT1D and LUT1D, both with the same array, followed by
@@ -1031,7 +1030,8 @@ OCIO_ADD_TEST(OpOptimizers, gamma_comp)
     // TODO: Gamma is clamping alpha, and Range does not.
     CompareRender(ops, optOps, __LINE__, 1e-4f, true);
 }
-#endif
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 OCIO_ADD_TEST(OpOptimizers, gamma_comp_identity)
 {
     OCIO::OpRcPtrVec ops;
@@ -1166,7 +1166,7 @@ OCIO_ADD_TEST(OpOptimizers, range_lut)
     // Now check that the optimized transform renders the same as the original.
     CompareRender(ops, optOps, __LINE__, 1e-6f);
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(OpOptimizers, dynamic_ops)
 {
@@ -1464,7 +1464,7 @@ OCIO_ADD_TEST(OpOptimizers, opt_prefix_test1)
     OCIO_CHECK_ASSERT(!lut0->isIdentity());
     OCIO_CHECK_EQUAL(lut0->getArray().getLength(), 65536u);
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(OpOptimizers, replace_ops)
 {

@@ -2,8 +2,8 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include "fileformats/xmlutils/XMLReaderUtils.cpp"
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <cstring>
 
@@ -501,4 +501,4 @@ OCIO_ADD_TEST(XMLReaderHelper, find_sub_string)
     }
 }
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

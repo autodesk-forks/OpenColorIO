@@ -473,7 +473,7 @@ ConstGPUProcessorRcPtr Processor::Impl::getOptimizedLegacyGPUProcessor(Optimizat
     return getGPUProcessor(gpuOps, oFlags);
 #else
     throw Exception("LUT support is turned off.");
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 ConstGPUProcessorRcPtr Processor::Impl::getGPUProcessor(const OpRcPtrVec & gpuOps,

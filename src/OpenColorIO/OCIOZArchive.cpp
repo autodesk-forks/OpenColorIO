@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
+
 #include <OpenColorIO/OpenColorIO.h>
+
 #if OCIO_ARCHIVE_SUPPORT
 
 #include <sstream>
@@ -201,7 +203,7 @@ void addSupportedFiles(void * archiver, const char * path, const char * configWo
         }
         mz_os_close_dir(dir);
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 }
 //////////////////////////////////////////////////////////////////////////////////////
@@ -657,4 +659,4 @@ void CIOPOciozArchive::buildEntries()
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_ARCHIVE_SUPPORT
+#endif // OCIO_ARCHIVE_SUPPORT

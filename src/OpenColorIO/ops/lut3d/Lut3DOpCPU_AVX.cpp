@@ -327,4 +327,4 @@ void applyTetrahedralAVX(const float *lut3d, int dim, const float *src, float *d
 } // OCIO_NAMESPACE
 
 #endif // OCIO_USE_AVX
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

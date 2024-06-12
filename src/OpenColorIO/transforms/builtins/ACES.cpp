@@ -135,7 +135,7 @@ void GenerateOps(OpRcPtrVec & ops)
     CreateMatrixOp(ops, &EXP_TO_ACES[0], TRANSFORM_DIR_FORWARD);          
 #else
 #pragma message("Needs LUT-free implementation")
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 }
 
@@ -465,7 +465,7 @@ void Generate_roll_white_d60_ops(OpRcPtrVec & ops)
     CreateHalfLut(ops, GenerateLutValues);
 #else
 #   pragma message("Needs lut-free implementation")
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void Generate_roll_white_d65_ops(OpRcPtrVec & ops)
@@ -503,7 +503,7 @@ void Generate_roll_white_d65_ops(OpRcPtrVec & ops)
     CreateHalfLut(ops, GenerateLutValues);
 #else
 #   pragma message("Needs lut-free implementation")
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 }  // namespace ACES_OUTPUT
@@ -634,7 +634,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             ACEScc_to_ACES2065_1_Functor);
 #else
 #   pragma message("Needs lut-free implementation")
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     }
     {
         auto ACEScg_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)

@@ -8,7 +8,6 @@
 
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
-
 #include "Op.h"
 #include "ops/OpArray.h"
 #include "PrivateTypes.h"
@@ -279,6 +278,6 @@ Lut1DOpDataRcPtr MakeFastLut1DFromInverse(ConstLut1DOpDataRcPtr & lut);
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif

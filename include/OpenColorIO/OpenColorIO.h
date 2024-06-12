@@ -249,7 +249,7 @@ extern OCIOEXPORT void ExtractOCIOZArchive(
     const char * archivePath, 
     const char * destinationDir
 );
-#endif //OCIO_ARCHIVE_SUPPORT
+#endif // OCIO_ARCHIVE_SUPPORT
 
 /**
  * \brief
@@ -1028,7 +1028,7 @@ public:
      * Returns the index of the display.
      */
     int instantiateDisplayFromICCProfile(const char * ICCProfileFilepath);
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     /**
      * \brief
@@ -1536,7 +1536,7 @@ public:
      * \param ostream The output stream to write to.
      */
     void archive(std::ostream & ostream) const;
-#endif //OCIO_ARCHIVE_SUPPORT
+#endif // OCIO_ARCHIVE_SUPPORT
 
     Config(const Config &) = delete;
     Config& operator= (const Config &) = delete;
@@ -2048,7 +2048,7 @@ public:
      * Specify the transform for the appropriate direction.
      * Setting the transform to null will clear it.
      */
-    void setTransform(const ConstTransformRcPtr& transform, ColorSpaceDirection dir);
+    void setTransform(const ConstTransformRcPtr & transform, ColorSpaceDirection dir);
 
     ColorSpace(const ColorSpace &) = delete;
     ColorSpace& operator= (const ColorSpace &) = delete;
@@ -2900,7 +2900,7 @@ private:
     Impl * getImpl() { return m_impl; }
     const Impl * getImpl() const { return m_impl; }
 };
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -3222,7 +3222,7 @@ public:
     /// Allow 1D GPU resource type, otherwise always using 2D resources for 1D LUTs.
     virtual void setAllowTexture1D(bool allowed) = 0;
     virtual bool getAllowTexture1D() const = 0;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     /**
      * To avoid global texture sampler and uniform name clashes always append an increasing index
@@ -3317,7 +3317,7 @@ public:
                               unsigned edgelen,
                               Interpolation interpolation,
                               const float * values) = 0;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Methods to specialize parts of a OCIO shader program
     virtual void addToDeclareShaderCode(const char * shaderCode);
@@ -3566,7 +3566,7 @@ public:
                               unsigned & edgelen,
                               Interpolation & interpolation) const = 0;
     virtual void get3DTextureValues(unsigned index, const float *& values) const = 0;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     /// Get the complete OCIO shader program.
     const char * getShaderText() const noexcept;

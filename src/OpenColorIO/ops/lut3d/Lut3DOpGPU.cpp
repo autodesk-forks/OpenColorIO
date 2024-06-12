@@ -247,4 +247,4 @@ void GetLut3DGPUShaderProgram(GpuShaderCreatorRcPtr & shaderCreator, ConstLut3DO
 
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

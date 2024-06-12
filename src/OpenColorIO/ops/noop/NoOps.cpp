@@ -205,7 +205,7 @@ OpRcPtrVec Create3DLut(const OpRcPtrVec & ops, unsigned edgelen)
     CreateLut3DOp(newOps, lut, TRANSFORM_DIR_FORWARD);
     return newOps;
 }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 void PartitionGPUOps(OpRcPtrVec & gpuPreOps,
                         OpRcPtrVec & gpuLatticeOps,

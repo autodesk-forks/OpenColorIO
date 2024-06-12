@@ -49,7 +49,7 @@ void GeneratePQToLinearOps(OpRcPtrVec & ops)
     CreateLut(ops, 4096, GenerateLutValues);
 #else
 #   pragma message("Needs lut-free implementation")
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void GenerateLinearToPQOps(OpRcPtrVec & ops)
@@ -66,11 +66,11 @@ void GenerateLinearToPQOps(OpRcPtrVec & ops)
         return float(N);
     };
 
-	// TODO Nano: do we need this? /coz
+    // TODO Nano: do we need this? /coz
     CreateHalfLut(ops, GenerateLutValues);
 #else
 #   pragma message("Needs lut-free implementation")
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 } // ST_2084

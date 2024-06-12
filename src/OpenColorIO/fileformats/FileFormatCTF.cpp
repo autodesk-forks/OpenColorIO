@@ -2,8 +2,8 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include <OpenColorIO/OpenColorIO.h>
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <cstdio>
 #include <iostream>
@@ -11,7 +11,6 @@
 #include <sstream>
 
 #include <pystring.h>
-
 
 #include "expat.h"
 #include "fileformats/ctf/CTFTransform.h"
@@ -1581,4 +1580,5 @@ FileFormat * CreateFileFormatCLF()
 
 
 } // namespace OCIO_NAMESPACE
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

@@ -58,13 +58,11 @@ void BuildOps(OpRcPtrVec & ops,
     {
         BuildBuiltinOps(ops, *builtInTransform, dir);
     }
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(ConstCDLTransformRcPtr cdlTransform = \
         DynamicPtrCast<const CDLTransform>(transform))
     {
         BuildCDLOp(ops, config, *cdlTransform, dir);
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(ConstColorSpaceTransformRcPtr colorSpaceTransform = \
         DynamicPtrCast<const ColorSpaceTransform>(transform))
     {
@@ -96,7 +94,7 @@ void BuildOps(OpRcPtrVec & ops,
     {
         BuildFileTransformOps(ops, config, context, *fileTransform, dir);
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if (ConstFixedFunctionTransformRcPtr fixedFunctionTransform = \
         DynamicPtrCast<const FixedFunctionTransform>(transform))
     {
@@ -153,7 +151,7 @@ void BuildOps(OpRcPtrVec & ops,
     {
         BuildLut3DOp(ops, *lut3dTransform, dir);
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(ConstMatrixTransformRcPtr matrixTransform = \
         DynamicPtrCast<const MatrixTransform>(transform))
     {
@@ -188,13 +186,11 @@ std::ostream& operator<< (std::ostream & os, const Transform & transform)
     {
         os << *builtInTransform;
     }
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(const CDLTransform * cdlTransform = \
         dynamic_cast<const CDLTransform*>(t))
     {
         os << *cdlTransform;
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(const ColorSpaceTransform * colorSpaceTransform = \
         dynamic_cast<const ColorSpaceTransform*>(t))
     {
@@ -226,7 +222,7 @@ std::ostream& operator<< (std::ostream & os, const Transform & transform)
     {
         os << *fileTransform;
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(const FixedFunctionTransform * fixedFunctionTransform = \
         dynamic_cast<const FixedFunctionTransform*>(t))
     {
@@ -283,7 +279,7 @@ std::ostream& operator<< (std::ostream & os, const Transform & transform)
     {
         os << *lut3dTransform;
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if(const MatrixTransform * matrixTransform = \
         dynamic_cast<const MatrixTransform*>(t))
     {
@@ -315,14 +311,12 @@ void CreateTransform(GroupTransformRcPtr & group, ConstOpRcPtr & op)
         return;
 
     auto data = op->data();
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     if (DynamicPtrCast<const CDLOpData>(data))
     {
         CreateCDLTransform(group, op);
     }
     else 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-	if (DynamicPtrCast<const ExponentOpData>(data))
+    if (DynamicPtrCast<const ExponentOpData>(data))
     {
         CreateExponentTransform(group, op);
     }
@@ -363,7 +357,7 @@ void CreateTransform(GroupTransformRcPtr & group, ConstOpRcPtr & op)
     {
         CreateLut3DTransform(group, op);
     }
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if (DynamicPtrCast<const MatrixOpData>(data))
     {
         CreateMatrixTransform(group, op);

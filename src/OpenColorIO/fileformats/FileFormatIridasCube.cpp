@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
+
 #include <OpenColorIO/OpenColorIO.h>
 
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
 
 #include <algorithm>
 #include <cstdio>
@@ -113,7 +113,7 @@ public:
                         CachedFileRcPtr untypedCachedFile,
                         const FileTransform & fileTransform,
                         TransformDirection dir) const override;
-							  
+
 private:
     static void ThrowErrorMessage(const std::string & error,
                                     const std::string & fileName,
@@ -568,4 +568,4 @@ FileFormat * CreateFileFormatIridasCube()
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

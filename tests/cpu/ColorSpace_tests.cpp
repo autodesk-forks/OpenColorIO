@@ -1689,4 +1689,4 @@ colorspaces:
         );
     }
 }
-#endif //OCIO_HAS_BUILTIN_YAML_CONFIGS
+#endif // OCIO_HAS_BUILTIN_YAML_CONFIGS

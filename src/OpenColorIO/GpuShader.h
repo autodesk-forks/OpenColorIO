@@ -33,7 +33,7 @@ public:
 
     bool getAllowTexture1D() const noexcept override;
     void setAllowTexture1D(bool allowed) override;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Accessors to the uniforms
     //
@@ -82,7 +82,7 @@ public:
                       unsigned & edgelen,
                       Interpolation & interpolation) const override;
     void get3DTextureValues(unsigned index, const float *& value) const override;
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 private:
 

@@ -75,7 +75,7 @@ bool CollectContextVariables(const Config & config,
                              const Context & context,
                              const FileTransform & tr,
                              ContextRcPtr & usedContextVars);
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 bool CollectContextVariables(const Config & config, 
                              const Context & context,

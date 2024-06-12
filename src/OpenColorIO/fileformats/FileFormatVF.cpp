@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the OpenColorIO Project.
-#include <OpenColorIO/OpenColorIO.h>
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
+#include <OpenColorIO/OpenColorIO.h>
+
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <iterator>
-
 
 #include "fileformats/FileFormatUtils.h"
 #include "ops/lut3d/Lut3DOp.h"
@@ -322,4 +322,4 @@ FileFormat * CreateFileFormatVF()
 
 } // namespace OCIO_NAMESPACE
 
-#endif //OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
