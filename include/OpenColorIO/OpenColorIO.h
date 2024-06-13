@@ -2549,6 +2549,7 @@ public:
     ConstGPUProcessorRcPtr getDefaultGPUProcessor() const;
     ConstGPUProcessorRcPtr getOptimizedGPUProcessor(OptimizationFlags oFlags) const;
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     /** 
      * Get an optimized GPUProcessor instance that will emulate the OCIO v1 GPU path. This approach
      * bakes some of the ops into a single Lut3D and so is less accurate than the current GPU
@@ -2556,6 +2557,8 @@ public:
      */
     ConstGPUProcessorRcPtr getOptimizedLegacyGPUProcessor(OptimizationFlags oFlags, 
                                                           unsigned edgelen) const;
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 
     //
     // CPU Renderer

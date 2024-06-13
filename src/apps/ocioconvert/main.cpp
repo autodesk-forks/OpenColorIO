@@ -73,8 +73,10 @@ int main(int argc, const char **argv)
                "--invertview",  &useInvertView,     "Convert from a (display,view) pair rather than "
                                                     "from a color space",
                "--gpu",         &usegpu,            "Use GPU color processing instead of CPU (CPU is the default)",
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
                "--gpulegacy",   &usegpuLegacy,      "Use the legacy (i.e. baked) GPU color processing "
                                                     "instead of the CPU one (--gpu is ignored)",
+#endif
                "--gpuinfo",     &outputgpuInfo,     "Output the OCIO shader program",
                "--h",           &help,              "Display the help and exit",
                "--help",        &help,              "Display the help and exit",
@@ -373,9 +375,19 @@ int main(int argc, const char **argv)
             OCIO::GpuShaderDescRcPtr shaderDesc = OCIO::GpuShaderDesc::CreateShaderDesc();
             shaderDesc->setLanguage(OCIO::GPU_LANGUAGE_GLSL_1_2);
 
-            OCIO::ConstGPUProcessorRcPtr gpu
-                = usegpuLegacy ? processor->getOptimizedLegacyGPUProcessor(OCIO::OPTIMIZATION_DEFAULT, 32)
-                               : processor->getDefaultGPUProcessor();
+            OCIO::ConstGPUProcessorRcPtr gpu;
+
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+            if (usegpuLegacy)
+            {
+                gpu = processor->getOptimizedLegacyGPUProcessor(OCIO::OPTIMIZATION_DEFAULT, 32);
+            }
+            else
+#endif
+            {
+                gpu = processor->getDefaultGPUProcessor();
+            }
+             
             gpu->extractGpuShaderInfo(shaderDesc);
 
             oglApp->setShader(shaderDesc);

@@ -52,6 +52,7 @@ static const LogOpData log(base, params, params, params, TRANSFORM_DIR_INVERSE);
 
 }  // namespace ACEScct_to_LINEAR
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 namespace ADX_to_ACES
 {
 
@@ -73,7 +74,6 @@ static constexpr double nonuniform_LUT[lutSize * 2]
 
 void GenerateOps(OpRcPtrVec & ops)
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     // Note that in CTL, the matrices are stored transposed.
     static constexpr double CDD_TO_CID[4 * 4]
     {
@@ -133,13 +133,10 @@ void GenerateOps(OpRcPtrVec & ops)
 
     // Convert Relative Exposure values to ACES values.
     CreateMatrixOp(ops, &EXP_TO_ACES[0], TRANSFORM_DIR_FORWARD);          
-#else
-#pragma message("Needs LUT-free implementation")
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
 }
 
 }  // namespace ADX_to_ACES
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 namespace ACES_OUTPUT
 {
@@ -430,9 +427,9 @@ void Generate_nit_normalization_ops(OpRcPtrVec & ops, double nit_level)
     CreateScaleOp(ops, scale4, TRANSFORM_DIR_FORWARD);
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 void Generate_roll_white_d60_ops(OpRcPtrVec & ops)
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     auto GenerateLutValues = [](double in) -> float
     {
         const double new_wht = 0.918;
@@ -463,14 +460,10 @@ void Generate_roll_white_d60_ops(OpRcPtrVec & ops)
     };
 
     CreateHalfLut(ops, GenerateLutValues);
-#else
-#   pragma message("Needs lut-free implementation")
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void Generate_roll_white_d65_ops(OpRcPtrVec & ops)
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     auto GenerateLutValues = [](double in) -> float
     {
         const double new_wht = 0.908;
@@ -501,10 +494,8 @@ void Generate_roll_white_d65_ops(OpRcPtrVec & ops)
     };
 
     CreateHalfLut(ops, GenerateLutValues);
-#else
-#   pragma message("Needs lut-free implementation")
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 }  // namespace ACES_OUTPUT
 
@@ -581,8 +572,9 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             "Convert ACEScct to ACES2065-1",
                             ACEScct_to_ACES2065_1_Functor);
     }
-    {
+
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+    {
 
         auto ACEScc_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
         {
@@ -632,10 +624,9 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
         registry.addBuiltin("ACEScc_to_ACES2065-1", 
                             "Convert ACEScc to ACES2065-1",
                             ACEScc_to_ACES2065_1_Functor);
-#else
-#   pragma message("Needs lut-free implementation")
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
     {
         auto ACEScg_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
         {
@@ -667,6 +658,8 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             "Convert ACESproxy 10i to ACES2065-1",
                             ACESproxy10i_to_ACES2065_1_Functor);
     }
+
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
         auto ADX10_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
         {
@@ -707,6 +700,8 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             "Convert ADX16 to ACES2065-1",
                             ADX16_to_ACES2065_1_Functor);
     }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
     {
         auto BLUE_LIGHT_FIX_Functor = [](OpRcPtrVec & ops)
         {
@@ -883,6 +878,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             ACES2065_1_to_CIE_XYZ_video_d60sim_1_0_Functor);
     }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
         auto ACES2065_1_to_CIE_XYZ_cinema_d60sim_dci_1_0_Functor = [](OpRcPtrVec & ops)
         {
@@ -944,6 +940,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             "Component of ACES Output Transforms for SDR DCI cinema simulating D65 white",
                             ACES2065_1_to_CIE_XYZ_cinema_d65sim_dci_1_1_Functor);
     }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     {
         auto ACES2065_1_to_CIE_XYZ_hdr_video_1000nits_rec2020lim_1_1_Functor = [](OpRcPtrVec & ops)

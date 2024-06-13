@@ -400,7 +400,6 @@ OCIO_ADD_TEST(OCIOZArchive, context_test_for_search_paths_and_filetransform_sour
     testPaths(cfgWindowsArchive, ctxWindowsArchive);
     testPaths(cfgLinuxArchive, ctxLinuxArchive);
 }
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 OCIO_ADD_TEST(OCIOZArchive, archive_config_and_compare_to_original)
 {
@@ -576,5 +575,6 @@ OCIO_ADD_TEST(OCIOZArchive, extract_config_and_compare_to_original)
         );
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #endif // OCIO_ARCHIVE_SUPPORT

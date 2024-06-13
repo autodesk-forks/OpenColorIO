@@ -199,6 +199,7 @@ OCIO_ADD_TEST(GpuShader, generic_shader)
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // uses getOptimizedLegacyGPUProcessor which needs LUT support
 OCIO_ADD_TEST(GpuShader, MetalLutTest)
 {
     static constexpr char sFromSpace[] = "ACEScg";
@@ -288,6 +289,8 @@ float4 Display(
         OCIO_CHECK_EQUAL(expected, text);
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 
 OCIO_ADD_TEST(GpuShader, MetalLutTest2)
 {

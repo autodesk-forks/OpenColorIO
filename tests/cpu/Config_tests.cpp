@@ -9231,6 +9231,8 @@ OCIO_ADD_TEST(Config, look_fallback)
 #if OCIO_ARCHIVE_SUPPORT
 OCIO_ADD_TEST(Config, create_from_archive)
 {
+
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
         // CreateFromFile using an archive built on Windows.
         std::vector<std::string> paths = { 
@@ -9288,6 +9290,7 @@ OCIO_ADD_TEST(Config, create_from_archive)
         OCIO_REQUIRE_ASSERT(proc);
         OCIO_CHECK_NO_THROW(proc->getDefaultCPUProcessor());
     }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Scenario with incomplete OCIOZ archive.
     {
@@ -9334,6 +9337,7 @@ OCIO_ADD_TEST(Config, create_from_archive)
         );
     }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
         // Missing LUT files but contains config file.
         // FileTransform will requests a file that is not in the archive.
@@ -9377,9 +9381,12 @@ OCIO_ADD_TEST(Config, create_from_archive)
         );
 #endif
     }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 }
 #endif // OCIO_ARCHIVE_SUPPORT
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT // This test needs FileTransform
 OCIO_ADD_TEST(Config, create_from_config_io_proxy)
 {
     std::vector<std::string> paths = { 
@@ -9496,3 +9503,4 @@ OCIO_ADD_TEST(Config, create_from_config_io_proxy)
         OCIO_CHECK_NO_THROW(proc->getDefaultCPUProcessor());
     }
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

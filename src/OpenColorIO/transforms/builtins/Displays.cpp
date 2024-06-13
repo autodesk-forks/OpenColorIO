@@ -22,6 +22,7 @@ namespace OCIO_NAMESPACE
 namespace DISPLAY
 {
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 namespace ST_2084
 {
 
@@ -33,7 +34,6 @@ static constexpr double c1 = c3 - c2 + 1.;
 
 void GeneratePQToLinearOps(OpRcPtrVec & ops)
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     auto GenerateLutValues = [](double input) -> float
     {
         const double N = std::max(0., input);
@@ -47,14 +47,10 @@ void GeneratePQToLinearOps(OpRcPtrVec & ops)
 
     // TODO Nano: do we need this? /coz
     CreateLut(ops, 4096, GenerateLutValues);
-#else
-#   pragma message("Needs lut-free implementation")
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void GenerateLinearToPQOps(OpRcPtrVec & ops)
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     auto GenerateLutValues = [](double input) -> float
     {
         // Input is in nits/100, convert to [0,1], where 1 is 10000 nits.
@@ -68,12 +64,10 @@ void GenerateLinearToPQOps(OpRcPtrVec & ops)
 
     // TODO Nano: do we need this? /coz
     CreateHalfLut(ops, GenerateLutValues);
-#else
-#   pragma message("Needs lut-free implementation")
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 } // ST_2084
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 
 void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
@@ -243,6 +237,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             CIE_XYZ_D65_to_DisplayP3_Functor);
     }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
         auto ST2084_to_Linear_Functor = [](OpRcPtrVec & ops)
         {
@@ -295,7 +290,6 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             CIE_XYZ_D65_to_ST2084_P3_D65_Functor);
     }
 
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
         auto CIE_XYZ_D65_to_REC2100_HLG_1000nit_Functor = [](OpRcPtrVec & ops)
         {
@@ -348,10 +342,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             "Convert CIE XYZ (D65 white) to Rec.2100-HLG, 1000 nit",
                             CIE_XYZ_D65_to_REC2100_HLG_1000nit_Functor);
     }
-#else
-#   pragma message("Needs lut-free implementation")
 #endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
 
 }
 
