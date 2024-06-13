@@ -445,6 +445,13 @@ if (NOT BUILD_SHARED_LIBS AND NOT OCIO_INSTALL_EXT_PACKAGES STREQUAL NONE)
    expat, yaml-cpp, Imath, pystring, minizip-ng and ZLIB")
 endif()
 
+if(OCIO_BUILD_PYTHON AND NOT OCIO_LUT_AND_FILETRANSFORM_SUPPORT )
+    message(WARNING "Python bindings require LUT and File-Transform support which is turned off,\
+    thus OCIO_BUILD_PYTHON option will be turned off too.")
+    set(OCIO_BUILD_PYTHON OFF CACHE BOOL "Specify whether to build python bindings" FORCE)
+endif()
+    
+
 
 ###############################################################################
 # Find or install external dependencies
