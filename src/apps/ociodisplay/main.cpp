@@ -407,7 +407,7 @@ void UpdateOCIOGLState()
         gpu = processor->getOptimizedLegacyGPUProcessor(g_optimization, 32);
     }
     else
-#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
         gpu = processor->getOptimizedGPUProcessor(g_optimization);
     }

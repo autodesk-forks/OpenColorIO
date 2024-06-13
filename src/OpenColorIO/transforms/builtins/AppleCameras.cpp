@@ -47,7 +47,6 @@ void GenerateAppleLogToLinearOps(OpRcPtrVec & ops)
         }
     };
 
-    //TODO Nano: do we need this? /coz
     CreateHalfLut(ops, GenerateLutValues);
 
 }
