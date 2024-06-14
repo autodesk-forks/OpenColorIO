@@ -21,6 +21,7 @@ typedef OCIO_SHARED_PTR<OpenGLBuilder> OpenGLBuilderRcPtr;
 
 class OpenGLBuilder
 {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     struct TextureId
     {
         unsigned    m_uid = -1;
@@ -40,6 +41,7 @@ class OpenGLBuilder
     };
 
     typedef std::vector<TextureId> TextureIds;
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Uniform are used for dynamic parameters.
     class Uniform
@@ -69,10 +71,12 @@ public:
     inline void setVerbose(bool verbose) { m_verbose = verbose; }
     inline bool isVerbose() const { return m_verbose; }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     // Allocate & upload all the needed textures
     //  (i.e. the index is the first available index for any kind of textures).
     void allocateAllTextures(unsigned startIndex);
     void useAllTextures();
+#endif
 
     // Update all uniforms.
     void useAllUniforms();
@@ -83,9 +87,11 @@ public:
     void useProgram();
     unsigned getProgramHandle();
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     // Determine the maximum width value of a texture
     // depending of the graphic card and its driver.
     static unsigned GetTextureMaxWidth();
+#endif
 
 protected:
     OpenGLBuilder(const GpuShaderDescRcPtr & gpuShader);
@@ -93,8 +99,10 @@ protected:
     // Prepare all the needed uniforms.
     void linkAllUniforms();
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     void deleteAllTextures();
-    void deleteAllUniforms();
+ #endif
+   void deleteAllUniforms();
 
     // To add the version to the fragment shader program (so that GLSL does not use the default
     // of 1.10 when the minimum version for OCIO is 1.20).
@@ -107,7 +115,9 @@ private:
 
     const GpuShaderDescRcPtr m_shaderDesc; // Description of the fragment shader to create
     unsigned m_startIndex;                 // Starting index for texture allocations
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     TextureIds m_textureIds;               // Texture ids of all needed textures
+#endif
     Uniforms m_uniforms;                   // Vector of dynamic parameters
     unsigned m_fragShader;                 // Fragment shader identifier
     unsigned m_program;                    // Program identifier

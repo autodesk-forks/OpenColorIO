@@ -3,8 +3,6 @@
 
 #include "ops/noop/NoOps.cpp"
 
-// #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-
 #include "ops/lut1d/Lut1DOp.h"
 #include "ops/matrix/MatrixOp.h"
 #include "testutils/UnitTest.h"

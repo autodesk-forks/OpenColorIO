@@ -453,6 +453,7 @@ int RemoveTrailingClampIdentity(OpRcPtrVec & opVec)
     return count;
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 // (Note: the term "separable" in mathematics refers to a multi-dimensional
 // function where the dimensions are independent of each other.)
 //
@@ -486,7 +487,6 @@ unsigned FindSeparablePrefix(const OpRcPtrVec & ops)
     // If the only op is a 1D LUT, there is actually nothing to optimize
     // so set the length to 0.  (This also avoids an infinite loop.)
     // (If it is an inverse 1D LUT, proceed since we want to replace it with a 1D LUT.)
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     if (prefixLen == 1)
     {
         ConstOpRcPtr constOp0 = ops[0];
@@ -500,7 +500,6 @@ unsigned FindSeparablePrefix(const OpRcPtrVec & ops)
             }
         }
     }
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Some ops are so fast that it may not make sense to replace just one of those.
     // E.g., if it's just a single matrix, it may not be faster to replace it with a LUT.
@@ -547,7 +546,6 @@ unsigned FindSeparablePrefix(const OpRcPtrVec & ops)
 // the op list with a single 1D LUT that is built to do a look-up for the input bit-depth.
 void OptimizeSeparablePrefix(OpRcPtrVec & ops, BitDepth in)
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     if (ops.empty())
     {
         return;
@@ -588,8 +586,9 @@ void OptimizeSeparablePrefix(OpRcPtrVec & ops, BitDepth in)
     FinalizeOps(lutOps);
 
     ops.insert(ops.begin(), lutOps.begin(), lutOps.end());
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 } // namespace
 
 void OpRcPtrVec::finalize()
@@ -756,10 +755,12 @@ void OpRcPtrVec::optimizeForBitdepth(const BitDepth & inBitDepth,
         {
             RemoveTrailingClampIdentity(*this);
         }
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
         if (HasFlag(oFlags, OPTIMIZATION_COMP_SEPARABLE_PREFIX))
         {
             OptimizeSeparablePrefix(*this, inBitDepth);
         }
+#endif 
     }
 }
 

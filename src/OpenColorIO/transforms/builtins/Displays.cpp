@@ -45,7 +45,6 @@ void GeneratePQToLinearOps(OpRcPtrVec & ops)
         return float(L);
     };
 
-    // TODO Nano: do we need this? /coz
     CreateLut(ops, 4096, GenerateLutValues);
 }
 
@@ -62,7 +61,6 @@ void GenerateLinearToPQOps(OpRcPtrVec & ops)
         return float(N);
     };
 
-    // TODO Nano: do we need this? /coz
     CreateHalfLut(ops, GenerateLutValues);
 }
 

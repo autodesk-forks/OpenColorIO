@@ -424,7 +424,6 @@ private:
 
 }
 
-// TODO Nano: can enable some tests that doesn't require file
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 OCIO_ADD_TEST(DisplayViewHelpers, active_display_view)
 {

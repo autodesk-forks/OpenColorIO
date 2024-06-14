@@ -57,6 +57,7 @@ void CheckStatus()
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 void SetTextureParameters(GLenum textureType, Interpolation interpolation)
 {
     if(interpolation==INTERP_NEAREST)
@@ -96,7 +97,6 @@ void AllocateTexture3D(unsigned index, unsigned & texId,
                     edgelen, edgelen, edgelen, 0, GL_RGB, GL_FLOAT, values);
 }
 
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 void AllocateTexture(unsigned index, unsigned & texId,
                        unsigned width, unsigned height,
                        GpuShaderDesc::TextureType channel,
@@ -287,8 +287,9 @@ OpenGLBuilder::OpenGLBuilder(const GpuShaderDescRcPtr & shaderDesc)
 
 OpenGLBuilder::~OpenGLBuilder()
 {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     deleteAllTextures();
-
+#endif
     if(m_fragShader)
     {
         glDetachShader(m_program, m_fragShader);
@@ -303,9 +304,9 @@ OpenGLBuilder::~OpenGLBuilder()
     }
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 void OpenGLBuilder::allocateAllTextures(unsigned startIndex)
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     deleteAllTextures();
 
@@ -393,12 +394,10 @@ void OpenGLBuilder::allocateAllTextures(unsigned startIndex)
         m_textureIds.push_back(TextureId(texId, textureName, samplerName, type));
         currIndex++;
     }
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void OpenGLBuilder::deleteAllTextures()
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     const size_t max = m_textureIds.size();
     for (size_t idx=0; idx<max; ++idx)
     {
@@ -407,12 +406,10 @@ void OpenGLBuilder::deleteAllTextures()
     }
 
     m_textureIds.clear();
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
 
 void OpenGLBuilder::useAllTextures()
 {
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     const size_t max = m_textureIds.size();
     for (size_t idx=0; idx<max; ++idx)
     {
@@ -424,8 +421,8 @@ void OpenGLBuilder::useAllTextures()
                                  data.m_samplerName.c_str()),
                                  GLint(m_startIndex + idx) );
     }
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 void OpenGLBuilder::linkAllUniforms()
 {
@@ -531,6 +528,7 @@ unsigned OpenGLBuilder::getProgramHandle()
     return m_program;
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 unsigned OpenGLBuilder::GetTextureMaxWidth()
 {
     // Arbitrary huge number only to find the limit.
@@ -595,5 +593,7 @@ unsigned OpenGLBuilder::GetTextureMaxWidth()
 
     return w;
 }
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+
 
 } // namespace OCIO_NAMESPACE

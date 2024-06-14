@@ -4,10 +4,10 @@
 
 #ifndef INCLUDED_OCIO_CDL_H
 #define INCLUDED_OCIO_CDL_H
-#include <OpenColorIO/OpenColorIO.h>
 
 #include <vector>
 
+#include <OpenColorIO/OpenColorIO.h>
 
 #include "Op.h"
 #include "ops/cdl/CDLOpData.h"

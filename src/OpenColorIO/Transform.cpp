@@ -303,7 +303,6 @@ std::ostream& operator<< (std::ostream & os, const Transform & transform)
     return os;
 }
 
-
 void CreateTransform(GroupTransformRcPtr & group, ConstOpRcPtr & op)
 {
     // AllocationNoOp, FileNoOp, LookNoOp won't create a Transform.
@@ -315,8 +314,7 @@ void CreateTransform(GroupTransformRcPtr & group, ConstOpRcPtr & op)
     {
         CreateCDLTransform(group, op);
     }
-    else 
-    if (DynamicPtrCast<const ExponentOpData>(data))
+    else if (DynamicPtrCast<const ExponentOpData>(data))
     {
         CreateExponentTransform(group, op);
     }
@@ -348,7 +346,7 @@ void CreateTransform(GroupTransformRcPtr & group, ConstOpRcPtr & op)
     {
         CreateLogTransform(group, op);
     }
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT //TODO Nano: throw?
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     else if (DynamicPtrCast<const Lut1DOpData>(data))
     {
         CreateLut1DTransform(group, op);
