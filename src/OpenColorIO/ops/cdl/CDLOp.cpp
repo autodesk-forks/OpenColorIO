@@ -265,3 +265,4 @@ void BuildCDLOp(OpRcPtrVec & ops,
 }
 
 } // namespace OCIO_NAMESPACE
+
