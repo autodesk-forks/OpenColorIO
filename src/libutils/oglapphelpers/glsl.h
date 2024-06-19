@@ -71,11 +71,16 @@ public:
     inline void setVerbose(bool verbose) { m_verbose = verbose; }
     inline bool isVerbose() const { return m_verbose; }
 
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     // Allocate & upload all the needed textures
     //  (i.e. the index is the first available index for any kind of textures).
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     void allocateAllTextures(unsigned startIndex);
     void useAllTextures();
+#else
+    // When the LUT support is turned off, textures are not needed anymore thus
+    // these functions become NO-OP.
+    void allocateAllTextures(unsigned startIndex) { ; }
+    void useAllTextures() { ; }
 #endif
 
     // Update all uniforms.

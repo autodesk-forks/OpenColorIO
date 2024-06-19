@@ -307,7 +307,6 @@ OpenGLBuilder::~OpenGLBuilder()
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 void OpenGLBuilder::allocateAllTextures(unsigned startIndex)
 {
-
     deleteAllTextures();
 
     // This is the first available index for the textures.

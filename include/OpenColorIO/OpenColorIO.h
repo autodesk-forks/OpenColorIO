@@ -3489,7 +3489,7 @@ protected:
  *    //
  *    OpenGLBuilderRcPtr oglBuilder = OpenGLBuilder::Create(shaderDesc);
  *
- *    // Step 4: Allocate & upload all the LUTs
+ *    // Step 4: Allocate & upload all the LUTs if the transform uses any.
  *    //
  *    oglBuilder->allocateAllTextures();
  *
@@ -3502,7 +3502,7 @@ protected:
  *    //
  *    glUseProgram(g_programId);
  *    glUniform1i(glGetUniformLocation(g_programId, "tex1"), 1);  // image texture
- *    oglBuilder->useAllTextures(g_programId);                    // LUT textures
+ *    oglBuilder->useAllTextures(g_programId);                    // LUT textures (if any)
  *
  *    // Step 7: Update uniforms from dynamic property instances.
  *    m_oglBuilder->useAllUniforms();
