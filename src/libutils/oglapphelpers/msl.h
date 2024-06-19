@@ -66,7 +66,7 @@ class MetalBuilder
     };
 
     typedef std::vector<TextureId> TextureIds;
-#endif OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
     // Uniform are used for dynamic parameters.
     class Uniform
