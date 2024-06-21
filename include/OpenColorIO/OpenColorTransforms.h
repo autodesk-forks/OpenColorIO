@@ -585,6 +585,8 @@ struct OCIOEXPORT GradingHueCurves
    ConstGradingBSplineCurveRcPtr lumLum;
    ConstGradingBSplineCurveRcPtr satLum;
    ConstGradingBSplineCurveRcPtr hueFx;
+   ConstGradingBSplineCurveRcPtr test;
+
 };
 
 /**
