@@ -3,6 +3,7 @@
 
 set(SOURCES
     main.cpp
+    CPPEmitter.cpp
 )
 
 add_executable(ociocheck ${SOURCES})

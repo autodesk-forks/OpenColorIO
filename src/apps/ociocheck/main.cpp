@@ -14,6 +14,7 @@ namespace OCIO = OCIO_NAMESPACE;
 #include "apputils/logGuard.h"
 #include "utils/StringUtils.h"
 
+#include "CPPEmitter.h"
 
 const char * DESC_STRING = "\n\n"
 "Ociocheck is useful to validate that the specified OCIO configuration\n"
@@ -32,13 +33,15 @@ int main(int argc, const char **argv)
     int errorcount = 0;
     std::string inputconfig;
     std::string outputconfig;
+    std::string outputcode;
 
     ArgParse ap;
     ap.options("ociocheck -- validate an OpenColorIO configuration\n\n"
-               "usage:  ociocheck [options]\n",
-               "--help", &help, "Print help message",
-               "--iconfig %s", &inputconfig, "Input .ocio configuration file (default: $OCIO)",
-               "--oconfig %s", &outputconfig, "Output .ocio file",
+                "usage:  ociocheck [options]\n",
+                "--help", &help, "Print help message",
+                "--iconfig %s", &inputconfig, "Input .ocio configuration file (default: $OCIO)",
+                "--oconfig %s", &outputconfig, "Output .ocio file",
+                "--ocode %s", &outputcode, "Output c++ code that generates the config from scratch",
                NULL);
 
     if (ap.parse(argc, argv) < 0)
@@ -553,6 +556,29 @@ int main(int argc, const char **argv)
                 config->serialize(output);
                 output.close();
                 std::cout << "Wrote " << outputconfig << std::endl;
+            }
+        }
+
+        if(!outputcode.empty())
+        {
+            // Generate the code in memory first
+            CPPEmitter emitter(srcConfig);
+            emitter.SetAddMain(true);
+            std::string sout = emitter.Emit();
+
+            // then save to file
+            std::ofstream output;
+            output.open(outputcode.c_str());
+
+            if (!output.is_open())
+            {
+                std::cout << "Error opening " << outputcode << " for writing." << std::endl;
+            }
+            else
+            {
+                output << sout;
+                output.close();
+                std::cout << "Wrote " << outputcode << std::endl;
             }
         }
     }
