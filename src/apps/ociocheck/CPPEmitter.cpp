@@ -225,7 +225,8 @@ std::string CPPEmitter::_s(const char* s)
     std::string sTerm(")\"");
     std::string dseq{};
 
-    while (str.find(sTerm, 0) != -1)
+    // find a termination sequence that doesn't occur in the string body
+    while (str.find(sTerm, 0) != std::string::npos)
     {
         dseq += "-";
         sTerm = ")" + dseq + "\"";
@@ -374,7 +375,11 @@ std::string CPPEmitter::_s(const char* s)
     cfg->serialize(ssCfg);
     std::string cfgText = ssCfg.str();
 
-    std::string outText = ss.str(); // TODO: this is for easier debugging. remove
+    // Compare to see if they are identical
+    if (cfgText != srcText)
+    {
+        throw OCIO::Exception("Resulting config is different from the source config.");
+    }
 }
 
  //____________________________________________________________
@@ -411,7 +416,7 @@ std::string CPPEmitter::_s(const char* s)
          src->getDefaultLumaCoefs(luma);
 
          cfg->setDefaultLumaCoefs(luma);
-         ss << tab << "static double luma[] = {" << luma[0] << ", " << luma[1] << ", " << luma[2] << "};\n";
+         ss << tab << "static const double luma[] = {" << luma[0] << ", " << luma[1] << ", " << luma[2] << "};\n";
          ss << tab << "cfg->setDefaultLumaCoefs(luma);\n";
      }
 
@@ -1088,8 +1093,7 @@ void CPPEmitter::ProcessLooks()
         return t;
     }
 
-
-    // TODO: More Transform types
+    throw OCIO::Exception("Transform type is not supported");
 
     return nullptr;
 }
