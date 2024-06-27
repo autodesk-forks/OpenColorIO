@@ -224,10 +224,6 @@ endif()
 if(NOT OCIO_USE_HALF_LOOKUP_TABLE)
     add_compile_definitions(IMATH_HALF_NO_LOOKUP_TABLE)
 endif()
-if(OCIO_HAS_BUILTIN_YAML_CONFIGS)
-    add_compile_definitions(OCIO_HAS_BUILTIN_YAML_CONFIGS)
-endif()
-
 
 configure_file(CPUInfoConfig.h.in CPUInfoConfig.h)
 
@@ -321,8 +317,11 @@ target_link_libraries(OpenColorIO
         "$<BUILD_INTERFACE:utils::from_chars>"
         "$<BUILD_INTERFACE:utils::strings>"
         "$<BUILD_INTERFACE:xxHash>"
-        ${YAML_CPP_LIBRARIES}
 )
+
+if(OCIO_YAML_SUPPORT)
+    target_link_libraries(OpenColorIO PRIVATE ${YAML_CPP_LIBRARIES})
+endif()
 
 if(OCIO_LUT_AND_FILETRANSFORM_SUPPORT)
     target_link_libraries(OpenColorIO PRIVATE expat::expat)

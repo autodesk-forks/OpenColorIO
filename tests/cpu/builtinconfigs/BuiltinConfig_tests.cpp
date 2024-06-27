@@ -16,7 +16,6 @@ namespace OCIO = OCIO_NAMESPACE;
 OCIO_ADD_TEST(BuiltinConfigs, basic)
 {
     const OCIO::BuiltinConfigRegistry & registry = OCIO::BuiltinConfigRegistry::Get();
-#if(OCIO_HAS_BUILTIN_YAML_CONFIGS)    
     OCIO_CHECK_EQUAL(registry.getNumBuiltinConfigs(), 4);
 
     // Test builtin config cg-config-v1.0.0_aces-v1.3_ocio-v2.1.
@@ -130,9 +129,6 @@ OCIO_ADD_TEST(BuiltinConfigs, basic)
 
         OCIO_CHECK_EQUAL(registry.isBuiltinConfigRecommended(3), true);
     }
-#else // OCIO_HAS_BUILTIN_YAML_CONFIGS
-    OCIO_CHECK_EQUAL(registry.getNumBuiltinConfigs(), 0);
-#endif // OCIO_HAS_BUILTIN_YAML_CONFIGS
 
     // ********************************
     // Testing some expected failures.
@@ -201,14 +197,16 @@ OCIO_ADD_TEST(BuiltinConfigs, basic_impl)
             "simple_config_1",
             "My simple config display name #1",
             SIMPLE_CONFIG.c_str(),
-            false
+            false,
+            nullptr
         ));
         // Add second config.
         OCIO_CHECK_NO_THROW(registry.addBuiltin(
             "simple_config_2",
             "My simple config display name #2",
             SIMPLE_CONFIG.c_str(),
-            true
+            true,
+            nullptr
         ));
 
         OCIO_CHECK_EQUAL(registry.getNumBuiltinConfigs(), 2);
@@ -235,7 +233,6 @@ OCIO_ADD_TEST(BuiltinConfigs, basic_impl)
     }
 }
 
-#if OCIO_HAS_BUILTIN_YAML_CONFIGS
 OCIO_ADD_TEST(BuiltinConfigs, create_builtin_config)
 {
     auto testFromBuiltinConfig = [](const std::string name,
@@ -402,7 +399,6 @@ OCIO_ADD_TEST(BuiltinConfigs, create_builtin_config)
         );
     }
 }
-#endif // OCIO_HAS_BUILTIN_YAML_CONFIGS
 
 OCIO_ADD_TEST(BuiltinConfigs, resolve_config_path)
 {

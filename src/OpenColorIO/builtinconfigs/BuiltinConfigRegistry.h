@@ -15,11 +15,12 @@ class BuiltinConfigRegistryImpl : public BuiltinConfigRegistry
 {
 struct BuiltinConfigData
 {
-    BuiltinConfigData(const char * name, const char * uiName, const char * config, bool isRecommended)
+    BuiltinConfigData(const char * name, const char * uiName, const char * config, bool isRecommended, std::function<ConstConfigRcPtr()> creatorFn)
         : m_config(config ? config : "")
         , m_name(name ? name : "")
         , m_uiName(uiName ? uiName : "")
         , m_isRecommended(isRecommended)
+        , m_creatorFn(creatorFn)
     {
     }
 
@@ -33,6 +34,7 @@ struct BuiltinConfigData
     std::string m_name;
     std::string m_uiName;
     bool m_isRecommended;
+    std::function<ConstConfigRcPtr()> m_creatorFn;
 };
 using BuiltinConfigs = std::vector<BuiltinConfigData>;
 
@@ -67,7 +69,7 @@ public:
      * @param config Config as string
      * @param isRecommended Is the built-in config recommended or not.
      */
-    void addBuiltin(const char * name, const char * uiName, const char * config, bool isRecommended);
+    void addBuiltin(const char * name, const char * uiName, const char * config, bool isRecommended, std::function<ConstConfigRcPtr()> creatorFn);
 
     /// Get the number of built-in configs available.
     size_t getNumBuiltinConfigs() const noexcept override;
@@ -88,6 +90,14 @@ public:
     /// Get the Yaml text of the built-in config with the specified name. 
     /// Throws if the name is not found.
     const char * getBuiltinConfigByName(const char * configName) const override;
+
+    /// Creates the built-in config at the specified index and returns a pointer to it.
+    /// Throws for illegal index.
+    ConstConfigRcPtr createBuiltinConfig(size_t configIndex) const override;
+
+    /// Creates the built-in config with the specified name and returns a pointer to it.
+    /// Throws if the name is not found.
+    ConstConfigRcPtr createBuiltinConfigByName(const char* configName) const override;
 
     /// Check if a specific built-in config is recommended.
     /// Throws for illegal index.

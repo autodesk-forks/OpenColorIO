@@ -1260,11 +1260,7 @@ ConstConfigRcPtr Config::CreateFromBuiltinConfig(const char * configName)
     ConstConfigRcPtr builtinConfig;
     const BuiltinConfigRegistry & reg = BuiltinConfigRegistry::Get();
 
-    // getBuiltinConfigByName will throw if config name not found.
-    const char * builtinConfigStr = reg.getBuiltinConfigByName(builtinConfigName.c_str());
-    std::istringstream iss;
-    iss.str(builtinConfigStr);
-    builtinConfig = Config::CreateFromStream(iss);
+    builtinConfig = reg.createBuiltinConfigByName(builtinConfigName.c_str());
 
     return builtinConfig;
 }
@@ -4944,6 +4940,7 @@ const char * Config::getCacheID(const ConstContextRcPtr & context) const
 
 void Config::serialize(std::ostream& os) const
 {
+#if OCIO_YAML_SUPPORT
     try
     {
         getImpl()->checkVersionConsistency();
@@ -4956,6 +4953,9 @@ void Config::serialize(std::ostream& os) const
         error << "Error building YAML: " << e.what();
         throw Exception(error.str().c_str());
     }
+#else
+    throw Exception("YAML support is turned off");
+#endif
 }
 
 ProcessorCacheFlags Config::getProcessorCacheFlags() const noexcept
@@ -5175,6 +5175,7 @@ void Config::Impl::getAllInternalTransforms(ConstTransformVec & transformVec) co
 
 ConstConfigRcPtr Config::Impl::Read(std::istream & istream, const char * filename)
 {
+#if OCIO_YAML_SUPPORT
     ConfigRcPtr config = Config::Create();
     OCIOYaml::Read(istream, config, filename);
 
@@ -5187,10 +5188,15 @@ ConstConfigRcPtr Config::Impl::Read(std::istream & istream, const char * filenam
     config->getImpl()->refreshActiveColorSpaces();
 
     return config;
+#else
+    throw Exception("YAML support is turned off.");
+    return nullptr;
+#endif
 }
 
 ConstConfigRcPtr Config::Impl::Read(std::istream & istream, ConfigIOProxyRcPtr ciop)
 {
+#if OCIO_YAML_SUPPORT
     ConfigRcPtr config = Config::Create();
     // Passing special string for the file path to enable the parser to provide a more
     // meaningful error message if a problem is encountered.  (The working directory is not
@@ -5209,6 +5215,10 @@ ConstConfigRcPtr Config::Impl::Read(std::istream & istream, ConfigIOProxyRcPtr c
     config->setConfigIOProxy(ciop);
 
     return config;
+#else
+    throw Exception("YAML support is turned off.");
+    return nullptr;
+#endif
 }
 
 void Config::Impl::checkVersionConsistency(ConstTransformRcPtr & transform) const

@@ -3777,6 +3777,14 @@ public:
     /// Throws if the name is not found.
     virtual const char * getBuiltinConfigByName(const char * configName) const = 0;
 
+    /// Creates the built-in config at the specified index and returns a pointer to it.
+    /// Throws for illegal index.
+    virtual ConstConfigRcPtr createBuiltinConfig(size_t configIndex) const = 0;
+
+    /// Creates the built-in config with the specified name and returns a pointer to it.
+    /// Throws if the name is not found.
+    virtual ConstConfigRcPtr createBuiltinConfigByName(const char* configName) const = 0;
+
     /**
      * @brief Check if a specific built-in config is recommended.
      * 
