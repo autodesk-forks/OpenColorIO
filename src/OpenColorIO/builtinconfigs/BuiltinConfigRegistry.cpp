@@ -90,9 +90,9 @@ void BuiltinConfigRegistryImpl::init() noexcept
     }
 }
 
-void BuiltinConfigRegistryImpl::addBuiltin(const char * name, const char * uiName, const char * const config, bool isRecommended, std::function<ConstConfigRcPtr()> creatorFn)
+void BuiltinConfigRegistryImpl::addBuiltin(const char * uiName, const char * const config, bool isRecommended, std::function<ConstConfigRcPtr()> creatorFn)
 {
-    BuiltinConfigData data { name, uiName, config, isRecommended, creatorFn };
+    BuiltinConfigData data { uiName, config, isRecommended, creatorFn };
 
     for (auto & builtin : m_builtinConfigs)
     {
@@ -132,38 +132,6 @@ const char * BuiltinConfigRegistryImpl::getBuiltinConfigUIName(size_t configInde
     return m_builtinConfigs[configIndex].m_uiName.c_str();
 }
 
-const char * BuiltinConfigRegistryImpl::getBuiltinConfig(size_t configIndex) const
-{
-    if (configIndex >= m_builtinConfigs.size())
-    {
-        throw Exception(OUT_OF_RANGE_EXCEPTION_TEXT);
-    }
-
-    // TODO: when moving to code based built-in configs, we can't return the
-    // yaml string as const char* safely without keeping a local copy. So maybe
-    // remove this function?
-    return m_builtinConfigs[configIndex].m_config;
-}
-
-const char * BuiltinConfigRegistryImpl::getBuiltinConfigByName(const char * configName) const
-{
-    // Search for config name.
-    for (auto & builtin : m_builtinConfigs)
-    {
-        if (Platform::Strcasecmp(configName, builtin.m_name.c_str()) == 0)
-        {
-            // TODO: when moving to code based built-in configs, we can't return
-            // the yaml string as const char* safely without keeping a local
-            // copy. So maybe remove this function?
-            return builtin.m_config;
-        }
-    }
-
-    std::ostringstream os;
-    os << "Could not find '" << configName << "' in the built-in configurations.";
-    throw Exception(os.str().c_str());
-}
-
 ConstConfigRcPtr BuiltinConfigRegistryImpl::createBuiltinConfig(size_t configIndex) const
 {
     if (configIndex >= m_builtinConfigs.size())
@@ -172,25 +140,15 @@ ConstConfigRcPtr BuiltinConfigRegistryImpl::createBuiltinConfig(size_t configInd
     }
 
     auto& builtin = m_builtinConfigs[configIndex];
-    // If creator is present, call it.
-    if (builtin.m_creatorFn)
+
+    if (!builtin.m_creatorFn)
     {
-        return builtin.m_creatorFn();
+        std::ostringstream os;
+        os << "Creator function for the built-in config at index '" << configIndex << " is missing.'";
+        throw Exception(os.str().c_str());
     }
-
-    // Create through YAML
-    if (builtin.m_config && *builtin.m_config)
-    {
-        std::istringstream iss;
-        iss.str(m_builtinConfigs[configIndex].m_config);
-        auto builtinConfig = Config::CreateFromStream(iss);
-
-        return builtinConfig;
-    }
-
-    std::ostringstream os;
-    os << "Can not create built-in config at index '" << configIndex << "'";
-    throw Exception(os.str().c_str());
+    
+    return builtin.m_creatorFn();
 }
 
 ConstConfigRcPtr BuiltinConfigRegistryImpl::createBuiltinConfigByName(const char* configName) const
@@ -200,20 +158,14 @@ ConstConfigRcPtr BuiltinConfigRegistryImpl::createBuiltinConfigByName(const char
     {
         if (Platform::Strcasecmp(configName, builtin.m_name.c_str()) == 0)
         {
-            if (builtin.m_creatorFn)
-                return builtin.m_creatorFn();
-            
-            if(builtin.m_config && *builtin.m_config)
+            if (!builtin.m_creatorFn)
             {
-                std::istringstream iss;
-                iss.str(builtin.m_config);
-                auto builtinConfig = Config::CreateFromStream(iss);
-                return builtinConfig;
+                std::ostringstream os;
+                os << "Creator function for the built-in config '" << configName << " is missing.'";
+                throw Exception(os.str().c_str());
             }
-
-            std::ostringstream os;
-            os << "Can not create built-in config '" << configName << "'";
-            throw Exception(os.str().c_str());
+            
+            return builtin.m_creatorFn();
         }
     }
 

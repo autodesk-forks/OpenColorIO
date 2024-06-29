@@ -17,8 +17,8 @@ namespace OCIO_NAMESPACE
 namespace STUDIOCONFIG
 {
 
-ConfigRcPtr Create_STUDIO_CONFIG_V100_ACES_V13_OCIO_V21();
-ConfigRcPtr Create_STUDIO_CONFIG_V210_ACES_V13_OCIO_V23();
+ConstConfigRcPtr Create_STUDIO_CONFIG_V100_ACES_V13_OCIO_V21();
+ConstConfigRcPtr Create_STUDIO_CONFIG_V210_ACES_V13_OCIO_V23();
 
 void Register(BuiltinConfigRegistryImpl & registry) noexcept
 {
@@ -28,7 +28,6 @@ void Register(BuiltinConfigRegistryImpl & registry) noexcept
     registry.addBuiltin(
         "studio-config-v1.0.0_aces-v1.3_ocio-v2.1",
         "Academy Color Encoding System - Studio Config [COLORSPACES v1.0.0] [ACES v1.3] [OCIO v2.1]",
-        nullptr, //STUDIO_CONFIG_V100_ACES_V13_OCIO_V21,
         false,
         Create_STUDIO_CONFIG_V100_ACES_V13_OCIO_V21
     );
@@ -36,7 +35,6 @@ void Register(BuiltinConfigRegistryImpl & registry) noexcept
     registry.addBuiltin(
         "studio-config-v2.1.0_aces-v1.3_ocio-v2.3",
         "Academy Color Encoding System - Studio Config [COLORSPACES v2.0.0] [ACES v1.3] [OCIO v2.3]",
-        nullptr, //STUDIO_CONFIG_V210_ACES_V13_OCIO_V23,
         true,
         Create_STUDIO_CONFIG_V210_ACES_V13_OCIO_V23
     );
@@ -146,7 +144,7 @@ namespace
 } // anonymous namespace
 
 // Creates config "studio-config-v1.0.0_aces-v1.3_ocio-v2.1" from scratch using OCIO C++ API
-ConfigRcPtr Create_STUDIO_CONFIG_V100_ACES_V13_OCIO_V21()
+ConstConfigRcPtr Create_STUDIO_CONFIG_V100_ACES_V13_OCIO_V21()
 {
     auto cfg = Config::Create();
     cfg->setVersion(2, 1);
@@ -2346,7 +2344,7 @@ CLFtransformID: urn:aswf:ocio:transformId:1.0:OCIO:Utility:Linear_to_sRGB-Curve:
 };
 
 // Creates config "studio-config-v2.1.0_aces-v1.3_ocio-v2.3" from scratch using OCIO C++ API
-ConfigRcPtr Create_STUDIO_CONFIG_V210_ACES_V13_OCIO_V23()
+ConstConfigRcPtr Create_STUDIO_CONFIG_V210_ACES_V13_OCIO_V23()
 {
     auto cfg = Config::Create();
     cfg->setVersion(2, 3);
