@@ -264,6 +264,24 @@ bool StringFloatVecClose(std::string value, std::string expected, float eps);
         << "FAILED: exception thrown from " << FIELD_STR(S) <<"\n";     \
         ++unit_test_failures; }
 
+#define OCIO_REQUIRE_NO_THROW(S) OCIO_REQUIRE_NO_THROW_FROM(S, __LINE__)
+
+#define OCIO_REQUIRE_NO_THROW_FROM(S, line)                             \
+    try {                                                               \
+        S;                                                              \
+    } catch (std::exception & ex ) {                                    \
+        std::stringstream ss;                                           \
+        ss << __FILE__ << ":" << line << ":\n"                          \
+            << "FAILED: exception thrown from " << FIELD_STR(S)         \
+            << ": \"" << ex.what() << "\"\n";                           \
+        throw std::runtime_error(ss.str());                             \
+    } catch (...) {                                                     \
+        std::stringstream ss;                                           \
+        ss << __FILE__ << ":" << line << ":\n"                          \
+        << "FAILED: exception thrown from " << FIELD_STR(S) <<"\n";     \
+        throw std::runtime_error(ss.str()); }
+
+
 // Note: Add a SonarCloud tag to suppress all warnings for the following method.
 #define OCIO_ADD_TEST(group, name)                                      \
     static void ociotest_##group##_##name();                            \
