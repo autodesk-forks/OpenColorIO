@@ -78,7 +78,7 @@ OCIO_ADD_TEST(OCIOZArchive, is_config_archivable)
     iss.str(CONFIG);
 
     OCIO::ConfigRcPtr cfg;
-    OCIO_CHECK_NO_THROW(cfg = OCIO::Config::CreateFromStream(iss)->createEditableCopy());
+    OCIO_REQUIRE_NO_THROW(cfg = OCIO::Config::CreateFromStream(iss)->createEditableCopy());
     // Since a working directory is needed to archive a config, setting a fake working directory 
     // in order to test the search paths and FileTransform source logic.
 #ifdef _WIN32

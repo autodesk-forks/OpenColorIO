@@ -395,7 +395,7 @@ colorspaces:
 
     std::istringstream is(SIMPLE_CONFIG);
     OCIO::ConstConfigRcPtr config;
-    OCIO_CHECK_NO_THROW(config = OCIO::Config::CreateFromStream(is));
+    OCIO_REQUIRE_NO_THROW(config = OCIO::Config::CreateFromStream(is));
     OCIO_CHECK_NO_THROW(config->validate());
 
     // Check 2 rules of 2 non-existing display/views.

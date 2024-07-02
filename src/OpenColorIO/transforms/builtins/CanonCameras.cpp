@@ -2,7 +2,6 @@
 // Copyright Contributors to the OpenColorIO Project.
 #include <OpenColorIO/OpenColorIO.h>
 
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 #include <cmath>
 
@@ -80,13 +79,16 @@ namespace CANON
 void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 {
     {
+        // FIXME: needs LUT-free implementation
         auto CANON_CLOG2_CGAMUT_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             CreateLut(ops, 4096, CANON_CLOG2::GenerateLutValues);
 
             MatrixOpData::MatrixArrayPtr matrix
                 = build_conversion_matrix(CANON_CGAMUT::primaries, ACES_AP0::primaries, ADAPTATION_CAT02);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
+#endif
         };
 
         registry.addBuiltin("CANON_CLOG2-CGAMUT_to_ACES2065-1",
@@ -94,10 +96,13 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             CANON_CLOG2_CGAMUT_to_ACES2065_1_Functor);
     }
     {
+        // FIXME: needs LUT-free implementation
         auto CANON_CLOG2_to_Linear_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             CreateLut(ops, 4096, CANON_CLOG2::GenerateLutValues);
-        };
+#endif
+            };
 
         registry.addBuiltin("CURVE - CANON_CLOG2_to_LINEAR",
                             "Convert Canon Log 2 to linear",
@@ -105,13 +110,16 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
 
     {
+        // FIXME: needs LUT-free implementation
         auto CANON_CLOG3_CGAMUT_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             CreateLut(ops, 4096, CANON_CLOG3::GenerateLutValues);
 
             MatrixOpData::MatrixArrayPtr matrix
                 = build_conversion_matrix(CANON_CGAMUT::primaries, ACES_AP0::primaries, ADAPTATION_CAT02);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
+#endif
         };
 
         registry.addBuiltin("CANON_CLOG3-CGAMUT_to_ACES2065-1",
@@ -119,9 +127,12 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             CANON_CLOG3_CGAMUT_to_ACES2065_1_Functor);
     }
     {
+        // FIXME: needs LUT-free implementation
         auto CANON_CLOG3_to_Linear_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             CreateLut(ops, 4096, CANON_CLOG3::GenerateLutValues);
+#endif
         };
 
         registry.addBuiltin("CURVE - CANON_CLOG3_to_LINEAR",
@@ -135,5 +146,3 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 } // namespace CAMERA
 
 } // namespace OCIO_NAMESPACE
-
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

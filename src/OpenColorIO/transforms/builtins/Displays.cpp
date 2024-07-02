@@ -235,11 +235,13 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                             CIE_XYZ_D65_to_DisplayP3_Functor);
     }
 
-#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
     {
+        // FIXME: needs LUT-free implementation
         auto ST2084_to_Linear_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             ST_2084::GeneratePQToLinearOps(ops);
+#endif
         };
 
         registry.addBuiltin("CURVE - ST-2084_to_LINEAR",
@@ -248,9 +250,12 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
 
     {
+        // FIXME: needs LUT-free implementation
         auto Linear_to_ST2084_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             ST_2084::GenerateLinearToPQOps(ops);
+#endif
         };
 
         registry.addBuiltin("CURVE - LINEAR_to_ST-2084",
@@ -259,13 +264,16 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
 
     {
+        // FIXME: needs LUT-free implementation
         auto CIE_XYZ_D65_to_REC2100_PQ_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             MatrixOpData::MatrixArrayPtr matrix
                 = build_conversion_matrix_from_XYZ_D65(REC2020::primaries, ADAPTATION_NONE);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
 
             ST_2084::GenerateLinearToPQOps(ops);
+#endif
         };
 
         registry.addBuiltin("DISPLAY - CIE-XYZ-D65_to_REC.2100-PQ", 
@@ -274,13 +282,16 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
 
     {
+        // FIXME: needs LUT-free implementation
         auto CIE_XYZ_D65_to_ST2084_P3_D65_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             MatrixOpData::MatrixArrayPtr matrix
                 = build_conversion_matrix_from_XYZ_D65(P3_D65::primaries, ADAPTATION_NONE);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
 
             ST_2084::GenerateLinearToPQOps(ops);
+#endif
         };
 
         registry.addBuiltin("DISPLAY - CIE-XYZ-D65_to_ST2084-P3-D65", 
@@ -289,8 +300,10 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
 
     {
+        // FIXME: needs LUT-free implementation
         auto CIE_XYZ_D65_to_REC2100_HLG_1000nit_Functor = [](OpRcPtrVec & ops)
         {
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
             MatrixOpData::MatrixArrayPtr matrix
                 = build_conversion_matrix_from_XYZ_D65(REC2020::primaries, ADAPTATION_NONE);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
@@ -334,13 +347,13 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
             };
 
             CreateHalfLut(ops, GenerateLutValues);
+#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
         };
 
         registry.addBuiltin("DISPLAY - CIE-XYZ-D65_to_REC.2100-HLG-1000nit", 
                             "Convert CIE XYZ (D65 white) to Rec.2100-HLG, 1000 nit",
                             CIE_XYZ_D65_to_REC2100_HLG_1000nit_Functor);
     }
-#endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 }
 
