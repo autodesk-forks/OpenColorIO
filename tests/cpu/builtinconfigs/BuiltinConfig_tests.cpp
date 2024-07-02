@@ -32,10 +32,10 @@ OCIO_ADD_TEST(BuiltinConfigs, basic)
 
         OCIO::ConstConfigRcPtr config;
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfig(0));
-        OCIO_CHECK_EQUAL(config->getCacheID(), "4871d7167654c2f5249f01ec9315619a:6001c324468d497f99aa06d3014798d8");
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("4871d7167654c2f5249f01ec9315619a:6001c324468d497f99aa06d3014798d8"));
 
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfigByName(cgConfigName.c_str()));
-        OCIO_CHECK_EQUAL(config->getCacheID(), "4871d7167654c2f5249f01ec9315619a:6001c324468d497f99aa06d3014798d8");
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("4871d7167654c2f5249f01ec9315619a:6001c324468d497f99aa06d3014798d8"));
 
         OCIO_CHECK_EQUAL(registry.isBuiltinConfigRecommended(0), false);
     }
@@ -57,10 +57,10 @@ OCIO_ADD_TEST(BuiltinConfigs, basic)
 
         OCIO::ConstConfigRcPtr config;
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfig(1));
-        OCIO_CHECK_EQUAL(config->getCacheID(), "5a1c960ada65792d97c37f01be9378cc:6001c324468d497f99aa06d3014798d8");
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("5a1c960ada65792d97c37f01be9378cc:6001c324468d497f99aa06d3014798d8"));
 
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfigByName(cgConfigName.c_str()));
-        OCIO_CHECK_EQUAL(config->getCacheID(), "5a1c960ada65792d97c37f01be9378cc:6001c324468d497f99aa06d3014798d8");
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("5a1c960ada65792d97c37f01be9378cc:6001c324468d497f99aa06d3014798d8"));
 
         OCIO_CHECK_EQUAL(registry.isBuiltinConfigRecommended(1), true);
     }
@@ -82,10 +82,10 @@ OCIO_ADD_TEST(BuiltinConfigs, basic)
 
         OCIO::ConstConfigRcPtr config;
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfig(2));
-        OCIO_CHECK_EQUAL(config->getCacheID(), "3ad8ac30d4bc0aa216a3a6444332ac1e:6001c324468d497f99aa06d3014798d8");
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("3ad8ac30d4bc0aa216a3a6444332ac1e:6001c324468d497f99aa06d3014798d8"));
 
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfigByName(studioConfigName.c_str()));
-        OCIO_CHECK_EQUAL(config->getCacheID(), "3ad8ac30d4bc0aa216a3a6444332ac1e:6001c324468d497f99aa06d3014798d8");
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("3ad8ac30d4bc0aa216a3a6444332ac1e:6001c324468d497f99aa06d3014798d8"));
 
         OCIO_CHECK_EQUAL(registry.isBuiltinConfigRecommended(2), false);
     }
@@ -106,11 +106,11 @@ OCIO_ADD_TEST(BuiltinConfigs, basic)
         );
 
         OCIO::ConstConfigRcPtr config;
-        OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfig(2));
-        OCIO_CHECK_EQUAL(config->getCacheID(), "9f79a8713372163d99e62b3995115b8b:6001c324468d497f99aa06d3014798d8");
+        OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfig(3));
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("9f79a8713372163d99e62b3995115b8b:6001c324468d497f99aa06d3014798d8"));
 
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfigByName(studioConfigName.c_str()));
-        OCIO_CHECK_EQUAL(config->getCacheID(), "9f79a8713372163d99e62b3995115b8b:6001c324468d497f99aa06d3014798d8");
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("9f79a8713372163d99e62b3995115b8b:6001c324468d497f99aa06d3014798d8"));
 
         OCIO_CHECK_EQUAL(registry.isBuiltinConfigRecommended(3), true);
     }
