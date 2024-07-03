@@ -70,27 +70,6 @@ constexpr double DEFAULT_LUMA_COEFF_R = 0.2126;
 constexpr double DEFAULT_LUMA_COEFF_G = 0.7152;
 constexpr double DEFAULT_LUMA_COEFF_B = 0.0722;
 
-
-constexpr char INTERNAL_RAW_PROFILE[] =
-    "ocio_profile_version: 2\n"
-    "strictparsing: false\n"
-    "roles:\n"
-    "  default: raw\n"
-    "file_rules:\n"
-    "  - !<Rule> {name: Default, colorspace: default}\n"
-    "displays:\n"
-    "  sRGB:\n"
-    "  - !<View> {name: Raw, colorspace: raw}\n"
-    "colorspaces:\n"
-    "  - !<ColorSpace>\n"
-    "      name: raw\n"
-    "      family: raw\n"
-    "      equalitygroup:\n"
-    "      bitdepth: 32f\n"
-    "      isdata: true\n"
-    "      allocation: uniform\n"
-    "      description: 'A raw color space. Conversions to and from this space are no-ops.'\n";
-
 } // anon.
 
 
@@ -1129,10 +1108,26 @@ void Config::deleter(Config* c)
 
 ConstConfigRcPtr Config::CreateRaw()
 {
-    std::istringstream istream;
-    istream.str(INTERNAL_RAW_PROFILE);
+    ConfigRcPtr cfg = Create();
+    cfg->setVersion(2, 0);
+    cfg->setStrictParsingEnabled(false);
+    cfg->setRole("default", "raw");
+    cfg->addDisplayView("sRGB", "Raw", "", "raw", "", "", "");
 
-    return CreateFromStream(istream);
+    // raw color space
+    {
+        auto cs = ColorSpace::Create(REFERENCE_SPACE_SCENE);
+        cs->setBitDepth(BIT_DEPTH_F32);
+        cs->setDescription("A raw color space. Conversions to and from this space are no-ops.");
+        cs->setEncoding("");
+        cs->setEqualityGroup("");
+        cs->setFamily("raw");
+        cs->setName("raw");
+        cs->setIsData(true);
+        cfg->addColorSpace(cs);
+    }
+
+    return cfg;
 }
 
 ConstConfigRcPtr Config::CreateFromEnv()
@@ -4881,6 +4876,7 @@ const char * Config::getCacheID(const ConstContextRcPtr & context) const
         return cacheiditer->second.c_str();
     }
 
+#if OCIO_YAML_SUPPORT
     // Include the hash of the yaml config serialization
     if(getImpl()->m_cacheidnocontext.empty())
     {
@@ -4889,6 +4885,7 @@ const char * Config::getCacheID(const ConstContextRcPtr & context) const
         const std::string fullstr = cacheid.str();
         getImpl()->m_cacheidnocontext = CacheIDHash(fullstr.c_str(), fullstr.size());
     }
+#endif
 
     // Also include all file references, using the context (if specified)
     std::string fileReferencesFastHash;

@@ -210,7 +210,7 @@ active_views: []
         std::istringstream is;
         is.str(cfgString);
         OCIO::ConstConfigRcPtr config;
-        OCIO_REQUIRE_NO_THROW(config = OCIO::Config::CreateFromStream(is));
+        OCIO_REQUIRE_NO_THROW_COND(config = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
         OCIO_REQUIRE_ASSERT(config);
         OCIO_CHECK_NO_THROW(config->validate());
 
@@ -279,7 +279,7 @@ active_views: []
         std::istringstream is;
         is.str(cfgString);
         OCIO::ConstConfigRcPtr config;
-        OCIO_REQUIRE_NO_THROW(config = OCIO::Config::CreateFromStream(is));
+        OCIO_REQUIRE_NO_THROW_COND(config = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
         OCIO_CHECK_NO_THROW(config->validate());
 
         // Check colorspace.
@@ -352,7 +352,7 @@ active_views: []
         std::istringstream is;
         is.str(cfgString);
         OCIO::ConstConfigRcPtr config;
-        OCIO_REQUIRE_NO_THROW(config = OCIO::Config::CreateFromStream(is));
+        OCIO_REQUIRE_NO_THROW_COND(config = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
         OCIO_CHECK_NO_THROW(config->validate());
 
         // Check colorspace.
@@ -462,7 +462,7 @@ active_views: []
         std::istringstream is;
         is.str(cfgString);
         OCIO::ConstConfigRcPtr config;
-        OCIO_REQUIRE_NO_THROW(config = OCIO::Config::CreateFromStream(is));
+        OCIO_REQUIRE_NO_THROW_COND(config = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
         OCIO_CHECK_NO_THROW(config->validate());
 
         // Check colorspace descriptions.
@@ -661,7 +661,7 @@ colorspaces:
     // Load config.
 
     OCIO::ConstConfigRcPtr config;
-    OCIO_REQUIRE_NO_THROW(config = OCIO::Config::CreateFromStream(is));
+    OCIO_REQUIRE_NO_THROW_COND(config = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
     OCIO_CHECK_NO_THROW(config->validate());
 
     // Get a color space from alias.
@@ -893,7 +893,7 @@ colorspaces:
     is.str(TEST_CONFIG);
     OCIO::ConstConfigRcPtr src_config;
     
-    OCIO_CHECK_NO_THROW(src_config = OCIO::Config::CreateFromStream(is));
+    OCIO_REQUIRE_NO_THROW_COND(src_config = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
 
     OCIO::ConfigRcPtr config = src_config->createEditableCopy();
     config->setSearchPath(OCIO::GetTestFilesDir().c_str());
@@ -1106,7 +1106,7 @@ colorspaces:
     std::istringstream is;
     is.str(CONFIG);
     OCIO::ConstConfigRcPtr cfg;
-    OCIO_REQUIRE_NO_THROW(cfg = OCIO::Config::CreateFromStream(is));
+    OCIO_REQUIRE_NO_THROW_COND(cfg = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
     OCIO::ConfigRcPtr editableCfg = cfg->createEditableCopy();
 
     editableCfg->setSearchPath(OCIO::GetTestFilesDir().c_str());
@@ -1510,7 +1510,7 @@ colorspaces:
     std::istringstream is;
     is.str(CONFIG);
     OCIO::ConstConfigRcPtr cfg;
-    OCIO_REQUIRE_NO_THROW(cfg = OCIO::Config::CreateFromStream(is));
+    OCIO_REQUIRE_NO_THROW_COND(cfg = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
     OCIO::ConfigRcPtr editableCfg = cfg->createEditableCopy();
 
     OCIO::ConfigRcPtr builtinConfig = OCIO::Config::CreateFromFile("ocio://default")->createEditableCopy();

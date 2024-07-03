@@ -167,7 +167,7 @@ colorspaces:
     iss.str(configStr);
 
     OCIO::ConstConfigRcPtr config;
-    OCIO_REQUIRE_NO_THROW(config = OCIO::Config::CreateFromStream(iss));
+    OCIO_REQUIRE_NO_THROW_COND(config = OCIO::Config::CreateFromStream(iss), OCIO_YAML_SUPPORT);
     OCIO_CHECK_NO_THROW(config->validate());
 
     // Serialize all the existing builtin transforms.
