@@ -6,8 +6,6 @@
 #include "builtinconfigs/BuiltinConfigRegistry.h"
 #include "builtinconfigs/StudioConfig.h"
 
-//#include "Studio.cpp"
-
 namespace OCIO_NAMESPACE
 {
 // Create the built-in configs for all versions of the OCIO Studio config for ACES.

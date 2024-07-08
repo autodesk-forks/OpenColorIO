@@ -4876,6 +4876,11 @@ const char * Config::getCacheID(const ConstContextRcPtr & context) const
         return cacheiditer->second.c_str();
     }
 
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // FIXME: Without the YAML representation of the config, the generated
+    // cacheID's will collide a lot! We need to implement a new way to generate
+    // unique ID's that doesn't need YAML.
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #if OCIO_YAML_SUPPORT
     // Include the hash of the yaml config serialization
     if(getImpl()->m_cacheidnocontext.empty())

@@ -231,9 +231,9 @@ bool StringFloatVecClose(std::string value, std::string expected, float eps);
 
 #define OCIO_CHECK_STR_FLOAT_VEC_CLOSE(x,y,tol) OCIO_CHECK_STR_FLOAT_VEC_CLOSE_FROM(x,y,tol,__LINE__)
 
-// Check that an exception E is thrown and that what() contains W When a
+// Check that an exception E is thrown and that what() contains W. When a
 // function can throw different exceptions this can be used to verify that the
-// right one is thrown. If cond is false, it marks the test skipped instead of
+// right one is thrown. If condition is false, it marks the test skipped instead of
 // failed. 
 #define OCIO_CHECK_THROW_WHAT(S, E, W) OCIO_CHECK_THROW_WHAT_COND(S, E, W, true)                       
 #define OCIO_CHECK_THROW_WHAT_COND(S, E, W, condition)                  \
@@ -255,7 +255,7 @@ bool StringFloatVecClose(std::string value, std::string expected, float eps);
         << "FAILED: " << FIELD_STR(E) << " is expected to be thrown\n"; \
         ++unit_test_failures; }
 
-// If the condition is true, expects no throw. Fails the test if it throws but
+// Expects no throw. If the condition is true, fails the test if it throws but
 // continues. If the condition is false, it'll mark the test skipped instead of
 // failed.
 #define OCIO_CHECK_NO_THROW(S) OCIO_CHECK_NO_THROW_FROM(S, __LINE__)
@@ -278,7 +278,7 @@ bool StringFloatVecClose(std::string value, std::string expected, float eps);
         << "FAILED: exception thrown from " << FIELD_STR(S) <<"\n";     \
         ++unit_test_failures; }
 
-// If the condition is true, expects no throw. Fails the test if it throws AND
+// Expects no throw. If the condition is true, fails the test if it throws AND
 // DOES NOT CONTINUE. If the condition is false, it'll mark the test skipped
 // instead of failed.
 #define OCIO_REQUIRE_NO_THROW(S) OCIO_REQUIRE_NO_THROW_FROM(S, __LINE__)

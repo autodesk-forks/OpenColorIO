@@ -6,8 +6,6 @@
 #include "builtinconfigs/BuiltinConfigRegistry.h"
 #include "builtinconfigs/CGConfig.h"
 
-// #include "CG.cpp"
-
 namespace OCIO_NAMESPACE
 {
 // Create the built-in configs for all versions of the OCIO CG config for ACES.
