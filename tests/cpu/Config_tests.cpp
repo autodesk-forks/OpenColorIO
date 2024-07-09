@@ -651,7 +651,7 @@ OCIO_ADD_TEST(Config, serialize_searchpath)
         }
 
         std::ostringstream os;
-        config->serialize(os);
+        OCIO_REQUIRE_NO_THROW_COND(config->serialize(os), OCIO_YAML_SUPPORT);
 
         std::string PROFILE_OUT =
             "ocio_profile_version: 2.2\n"
@@ -779,7 +779,7 @@ OCIO_ADD_TEST(Config, serialize_environment)
         config->setMinorVersion(0);
 
         std::ostringstream os;
-        config->serialize(os);
+        OCIO_REQUIRE_NO_THROW_COND(config->serialize(os), OCIO_YAML_SUPPORT);
         StringUtils::StringVec osvec = StringUtils::SplitByLines(os.str());
 
         // A v1 config does not write the environment section if it's empty.
@@ -1705,15 +1705,17 @@ OCIO_ADD_TEST(Config, context_variable_with_display_view)
         OCIO::ConstConfigRcPtr config;
         OCIO_REQUIRE_NO_THROW_COND(config = OCIO::Config::CreateFromStream(iss), OCIO_YAML_SUPPORT);
 
-        OCIO_CHECK_THROW_WHAT(config->validate(),
+        OCIO_CHECK_THROW_WHAT_COND(config->validate(),
                               OCIO::Exception,
                               "Display 'disp1' has a view 'view1' that refers to a color space or "
-                              "a named transform, '$ENV1', which is not defined.");
+                              "a named transform, '$ENV1', which is not defined.",
+                              OCIO_YAML_SUPPORT);
 
-        OCIO_CHECK_THROW_WHAT(config->getProcessor("cs1", "disp1", "view1", OCIO::TRANSFORM_DIR_FORWARD),
+        OCIO_CHECK_THROW_WHAT_COND(config->getProcessor("cs1", "disp1", "view1", OCIO::TRANSFORM_DIR_FORWARD),
                               OCIO::Exception,
                               "DisplayViewTransform error. Cannot find color space or "
-                              "named transform with name '$ENV1'.");
+                              "named transform with name '$ENV1'.",
+                              OCIO_YAML_SUPPORT);
     }
 }
 
@@ -6610,7 +6612,7 @@ OCIO_ADD_TEST(Config, display_view)
     // Validate how the config is serialized.
 
     std::stringstream os;
-    os << *config.get();
+    OCIO_REQUIRE_NO_THROW_COND(os << *config.get(), OCIO_YAML_SUPPORT);
     constexpr char expected[]{ R"(ocio_profile_version: 2.1
 
 environment:
@@ -6674,7 +6676,7 @@ colorspaces:
     OCIO_CHECK_EQUAL(os.str(), expected);
 
     OCIO::ConstConfigRcPtr configRead;
-    OCIO_CHECK_NO_THROW(configRead = OCIO::Config::CreateFromStream(os));
+    OCIO_CHECK_NO_THROW_COND(configRead = OCIO::Config::CreateFromStream(os), OCIO_YAML_SUPPORT);
     OCIO_CHECK_EQUAL(configRead->getNumViews("display"), 2);
     const std::string v1{ configRead->getView("display", 0) };
     OCIO_CHECK_EQUAL(v1, "view1");
@@ -7173,9 +7175,10 @@ OCIO_ADD_TEST(Config, transform_versions)
     OCIO_CHECK_NO_THROW(config->addColorSpace(cs));
 
     std::ostringstream oss;
-    OCIO_CHECK_THROW_WHAT((oss << *config),
+    OCIO_CHECK_THROW_WHAT_COND((oss << *config),
                           OCIO::Exception,
-                          "Error building YAML: Only config version 2 (or higher) can have RangeTransform.");
+                          "Error building YAML: Only config version 2 (or higher) can have RangeTransform.",
+                          OCIO_YAML_SUPPORT);
 
     // Loading a v1 config containing v2 transforms must fail.
 
@@ -7197,9 +7200,10 @@ colorspaces:
     std::istringstream is;
     is.str(OCIO_CONFIG);
     OCIO::ConstConfigRcPtr cfg;
-    OCIO_CHECK_THROW_WHAT(cfg = OCIO::Config::CreateFromStream(is),
+    OCIO_CHECK_THROW_WHAT_COND(cfg = OCIO::Config::CreateFromStream(is),
                           OCIO::Exception,
-                          "Only config version 2 (or higher) can have RangeTransform.");
+                          "Only config version 2 (or higher) can have RangeTransform.",
+                          OCIO_YAML_SUPPORT);
 
     // NOTE: For more tests of Config::Impl::checkVersionConsistency(ConstTransformRcPtr & transform)
     // for Builtin Transform styles, please see BuiltinTransformRegistry_tests.cpp.
@@ -7229,12 +7233,12 @@ OCIO_ADD_TEST(Config, dynamic_properties)
     // Save config and load it back.
 
     std::ostringstream os;
-    config->serialize(os);
+    OCIO_REQUIRE_NO_THROW_COND(config->serialize(os), OCIO_YAML_SUPPORT);
     std::istringstream is;
     is.str(os.str());
 
     OCIO::ConstConfigRcPtr configBack;
-    OCIO_CHECK_NO_THROW(configBack = OCIO::Config::CreateFromStream(is));
+    OCIO_REQUIRE_NO_THROW_COND(configBack = OCIO::Config::CreateFromStream(is), OCIO_YAML_SUPPORT);
     OCIO_REQUIRE_ASSERT(configBack);
     OCIO::ConstColorSpaceRcPtr csBack;
     OCIO_CHECK_NO_THROW(csBack = configBack->getColorSpace("test"));
@@ -8524,9 +8528,10 @@ colorspaces:
     std::istringstream iss;
     iss.str(CONFIG);
 
-    OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(iss),
+    OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(iss),
                           OCIO::Exception,
-                          "Only version 2 (or higher) can have a virtual display.");
+                          "Only version 2 (or higher) can have a virtual display.",
+                          OCIO_YAML_SUPPORT);
 
     OCIO::ConfigRcPtr cfg = OCIO::Config::CreateRaw()->createEditableCopy();
     cfg->addVirtualDisplaySharedView("sview");
@@ -8538,9 +8543,10 @@ colorspaces:
                           "Only version 2 (or higher) can have a virtual display.");
 
     std::ostringstream oss;
-    OCIO_CHECK_THROW_WHAT(oss << *cfg.get(),
+    OCIO_CHECK_THROW_WHAT_COND(oss << *cfg.get(),
                           OCIO::Exception,
-                          "Only version 2 (or higher) can have a virtual display.");
+                          "Only version 2 (or higher) can have a virtual display.",
+                          OCIO_YAML_SUPPORT);
 }
 
 OCIO_ADD_TEST(Config, virtual_display_exceptions)
@@ -8635,7 +8641,7 @@ OCIO_ADD_TEST(Config, description_and_name)
 {
     auto cfg = OCIO::Config::CreateRaw()->createEditableCopy();
     std::ostringstream oss;
-    cfg->serialize(oss);
+    OCIO_REQUIRE_NO_THROW_COND(cfg->serialize(oss), OCIO_YAML_SUPPORT);
     static constexpr char CONFIG_NO_DESC[]{ R"(ocio_profile_version: 2
 
 environment:

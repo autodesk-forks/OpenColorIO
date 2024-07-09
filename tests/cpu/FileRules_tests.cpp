@@ -365,7 +365,7 @@ OCIO_ADD_TEST(FileRules, config_rule_customkeys)
     config->setFileRules(fileRules);
 
     std::ostringstream os;
-    config->serialize(os);
+    OCIO_CHECK_NO_THROW_COND(config->serialize(os), OCIO_YAML_SUPPORT);
 
     const std::string expected{ R"(ocio_profile_version: 2
 
@@ -442,7 +442,7 @@ OCIO_ADD_TEST(FileRules, config_rule_u8)
     config->setFileRules(fileRules);
 
     std::ostringstream os;
-    config->serialize(os);
+    OCIO_REQUIRE_NO_THROW_COND(config->serialize(os), OCIO_YAML_SUPPORT);
 
     // Reload.
     std::istringstream is_reload;
@@ -1113,8 +1113,9 @@ colorspaces:
 
     std::istringstream is;
     is.str(configNoDefault);
-    OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                          "must contain either a Default file rule or the 'default' role");
+    OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                          "must contain either a Default file rule or the 'default' role",
+                          OCIO_YAML_SUPPORT);
 }
 
 OCIO_ADD_TEST(FileRules, config_default_missmatch)
@@ -1226,8 +1227,9 @@ file_rules:
 
     std::istringstream is;
     is.str(configDefaultMissmatch);
-    OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                          "'Default' rule cannot have an empty color space name");
+    OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                          "'Default' rule cannot have an empty color space name",
+                          OCIO_YAML_SUPPORT);
 }
 
 OCIO_ADD_TEST(FileRules, config_no_default_rule)
@@ -1254,8 +1256,9 @@ file_rules:
 
     std::istringstream is;
     is.str(configNoDefaultRule);
-    OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                          "'file_rules' does not contain a Default <Rule>");
+    OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                          "'file_rules' does not contain a Default <Rule>",
+                          OCIO_YAML_SUPPORT);
 }
 
 OCIO_ADD_TEST(FileRules, config_filerule_no_colorspace)
@@ -1283,8 +1286,9 @@ file_rules:
 
     std::istringstream is;
     is.str(configNoDefaultRule);
-    OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                          "File rule 'Custom' cannot have an empty color space name");
+    OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                          "File rule 'Custom' cannot have an empty color space name",
+                          OCIO_YAML_SUPPORT);
 }
 
 OCIO_ADD_TEST(FileRules, config_v1_faulty)
@@ -1311,8 +1315,9 @@ file_rules:
 
     std::istringstream is;
     is.str(config_v1);
-    OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                          "Config v1 can't use 'file_rules'");
+    OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                          "Config v1 can't use 'file_rules'",
+                          OCIO_YAML_SUPPORT);
 
 }
 
@@ -1842,8 +1847,9 @@ OCIO_ADD_TEST(FileRules, config_v2_wrong_rule)
 )";
         std::istringstream is;
         is.str(config_v2);
-        OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                              "Default rule has to be the last rule");
+        OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                              "Default rule has to be the last rule",
+                              OCIO_YAML_SUPPORT);
 
     }
     // Default rule parameters.
@@ -1854,8 +1860,9 @@ OCIO_ADD_TEST(FileRules, config_v2_wrong_rule)
 )";
         std::istringstream is;
         is.str(config_v2);
-        OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                              "'Default' rule can't use pattern, extension or regex.");
+        OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                              "'Default' rule can't use pattern, extension or regex.", 
+                              OCIO_YAML_SUPPORT);
 
     }
     // Default should be at the end.
@@ -1867,8 +1874,9 @@ OCIO_ADD_TEST(FileRules, config_v2_wrong_rule)
 )";
         std::istringstream is;
         is.str(config_v2);
-        OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                              "Default rule has to be the last rule");
+        OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                              "Default rule has to be the last rule",
+                              OCIO_YAML_SUPPORT);
 
     }
     // 2 parse rules.
@@ -1881,8 +1889,9 @@ OCIO_ADD_TEST(FileRules, config_v2_wrong_rule)
 )";
         std::istringstream is;
         is.str(config_v2);
-        OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                              "A rule named 'ColorSpaceNamePathSearch' already exists");
+        OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                              "A rule named 'ColorSpaceNamePathSearch' already exists",
+                              OCIO_YAML_SUPPORT);
 
     }
     // Rule with regex & glob.
@@ -1894,8 +1903,9 @@ OCIO_ADD_TEST(FileRules, config_v2_wrong_rule)
 )";
         std::istringstream is;
         is.str(config_v2);
-        OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
-                              R"(can't use regex '.*\.TIF?F$' and pattern & extension)");
+        OCIO_CHECK_THROW_WHAT_COND(OCIO::Config::CreateFromStream(is), OCIO::Exception,
+                              R"(can't use regex '.*\.TIF?F$' and pattern & extension)",
+                              OCIO_YAML_SUPPORT);
 
     }
 }

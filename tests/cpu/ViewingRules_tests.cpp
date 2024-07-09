@@ -236,11 +236,12 @@ OCIO_ADD_TEST(ViewingRules, config_io)
 
     // Save config and load back.
     std::ostringstream oss;
-    oss << *config.get();
+    OCIO_REQUIRE_NO_THROW_COND(oss << *config.get(), OCIO_YAML_SUPPORT);
     auto configStr = oss.str();
     std::istringstream back;
     back.str(configStr);
-    auto configBack = OCIO::Config::CreateFromStream(back);
+    OCIO::ConstConfigRcPtr configBack;
+    OCIO_REQUIRE_NO_THROW_COND(configBack = OCIO::Config::CreateFromStream(back), OCIO_YAML_SUPPORT);
 
     // Verify rules have been loaded.
     auto vr = configBack->getViewingRules();
