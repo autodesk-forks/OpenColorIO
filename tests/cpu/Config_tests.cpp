@@ -5151,7 +5151,7 @@ OCIO_ADD_TEST(Config, file_transform_serialization)
     OCIO_CHECK_NO_THROW(config->validate());
 
     std::ostringstream oss;
-    OCIO_CHECK_NO_THROW(oss << *config.get());
+    OCIO_CHECK_NO_THROW_COND(oss << *config.get(), OCIO_YAML_SUPPORT);
     OCIO_CHECK_EQUAL(oss.str(), str);
 }
 
@@ -5175,7 +5175,7 @@ OCIO_ADD_TEST(Config, file_transform_serialization_v1)
     cs->setName("cs");
     cfg->addColorSpace(cs);
     std::ostringstream os;
-    cfg->serialize(os);
+    OCIO_REQUIRE_NO_THROW_COND(cfg->serialize(os), OCIO_YAML_SUPPORT);
     OCIO_CHECK_EQUAL(os.str(), R"(ocio_profile_version: 1
 
 search_path: ""
@@ -9500,7 +9500,7 @@ OCIO_ADD_TEST(Config, create_from_config_io_proxy)
         );
         
         OCIO::ConstConfigRcPtr config;
-        OCIO_REQUIRE_NO_THROW(config = OCIO::Config::CreateFromConfigIOProxy(ciop));
+        OCIO_REQUIRE_NO_THROW_COND(config = OCIO::Config::CreateFromConfigIOProxy(ciop), OCIO_YAML_SUPPORT);
         OCIO_REQUIRE_ASSERT(config);
         OCIO_CHECK_NO_THROW(config->validate());
 
