@@ -4856,7 +4856,7 @@ std::ostream& operator<< (std::ostream& os, const Config& config)
 
 ///////////////////////////////////////////////////////////////////////////
 //  CacheID
-
+#if OCIO_YAML_SUPPORT
 const char * Config::getCacheID() const
 {
     return getCacheID(getCurrentContext());
@@ -4881,7 +4881,6 @@ const char * Config::getCacheID(const ConstContextRcPtr & context) const
     // cacheID's will collide a lot! We need to implement a new way to generate
     // unique ID's that doesn't need YAML.
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#if OCIO_YAML_SUPPORT
     // Include the hash of the yaml config serialization
     if(getImpl()->m_cacheidnocontext.empty())
     {
@@ -4890,7 +4889,6 @@ const char * Config::getCacheID(const ConstContextRcPtr & context) const
         const std::string fullstr = cacheid.str();
         getImpl()->m_cacheidnocontext = CacheIDHash(fullstr.c_str(), fullstr.size());
     }
-#endif
 
     // Also include all file references, using the context (if specified)
     std::string fileReferencesFastHash;
@@ -4936,6 +4934,7 @@ const char * Config::getCacheID(const ConstContextRcPtr & context) const
     getImpl()->m_cacheids[contextcacheid] = getImpl()->m_cacheidnocontext + ":" + fileReferencesFastHash;
     return getImpl()->m_cacheids[contextcacheid].c_str();
 }
+#endif // OCIO_YAML_SUPPORT
 
 ///////////////////////////////////////////////////////////////////////////
 //  Serialization

@@ -7386,7 +7386,10 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
     // with same or different contexts.
 
     const std::string contextCacheID = cfg->getCurrentContext()->getCacheID();
+
+#if OCIO_YAML_SUPPORT
     const std::string configCacheID  = cfg->getCacheID();
+#endif
 
     // Using the default context variables.
     {
@@ -7401,7 +7404,10 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
         OCIO_CHECK_NO_THROW(cfg->getProcessor(ctx, "cs2", "disp1", "view1", OCIO::TRANSFORM_DIR_FORWARD));
 
         OCIO_CHECK_EQUAL(contextCacheID, ctx->getCacheID());
+
+#if OCIO_YAML_SUPPORT
         OCIO_CHECK_EQUAL(configCacheID,  cfg->getCacheID(ctx));
+#endif
     }
 
     // Set the context variable to its default value.
@@ -7410,7 +7416,9 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
         OCIO_CHECK_NO_THROW(cfg->getProcessor("cs2", "disp1", "view1", OCIO::TRANSFORM_DIR_FORWARD));
 
         OCIO_CHECK_EQUAL(contextCacheID, cfg->getCurrentContext()->getCacheID());
+#if OCIO_YAML_SUPPORT
         OCIO_CHECK_EQUAL(configCacheID,  cfg->getCacheID());
+#endif
     }
 
     // Set the context variable to a different file using the context.
@@ -7421,10 +7429,12 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
         OCIO_CHECK_NO_THROW(cfg->getProcessor(ctx, "cs2", "disp1", "view1", OCIO::TRANSFORM_DIR_FORWARD));
 
         OCIO_CHECK_NE(contextCacheID, ctx->getCacheID());
+#if OCIO_YAML_SUPPORT
         OCIO_CHECK_NE(configCacheID,  cfg->getCacheID(ctx));
 
         // As expected the 'current' context is unchanged.
         OCIO_CHECK_EQUAL(configCacheID, cfg->getCacheID());
+#endif  
     }
 
     // Set the context variable to a different file using the config i.e. add a new value.
@@ -7433,7 +7443,9 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
         OCIO_CHECK_NO_THROW(cfg->getProcessor("cs2", "disp1", "view1", OCIO::TRANSFORM_DIR_FORWARD));
 
         OCIO_CHECK_NE(contextCacheID, cfg->getCurrentContext()->getCacheID());
+#if OCIO_YAML_SUPPORT
         OCIO_CHECK_NE(configCacheID,  cfg->getCacheID());
+#endif  
     }
 
     // $LOOK1 was missing so set to something.
@@ -7442,7 +7454,9 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
         OCIO_CHECK_NO_THROW(cfg->getProcessor("cs2", "disp1", "view2", OCIO::TRANSFORM_DIR_FORWARD));
 
         OCIO_CHECK_NE(contextCacheID, cfg->getCurrentContext()->getCacheID());
+#if OCIO_YAML_SUPPORT
         OCIO_CHECK_NE(configCacheID,  cfg->getCacheID());
+#endif  
     }
 
     // Set $CS3 to its default value.
@@ -7451,7 +7465,9 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
         OCIO_CHECK_NO_THROW(cfg->getProcessor("cs2", "disp1", "view2", OCIO::TRANSFORM_DIR_FORWARD));
 
         OCIO_CHECK_NE(contextCacheID, cfg->getCurrentContext()->getCacheID());
+#if OCIO_YAML_SUPPORT
         OCIO_CHECK_NE(configCacheID,  cfg->getCacheID());
+#endif  
     }
 
     // Remove $LOOK1 from context.
@@ -7460,7 +7476,9 @@ OCIO_ADD_TEST(Config, config_context_cacheids)
         OCIO_CHECK_NO_THROW(cfg->addEnvironmentVar("LOOK1", nullptr));
 
         OCIO_CHECK_EQUAL(contextCacheID, cfg->getCurrentContext()->getCacheID());
+#if OCIO_YAML_SUPPORT
         OCIO_CHECK_EQUAL(configCacheID,  cfg->getCacheID());
+#endif  
     }
 }
 #endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT

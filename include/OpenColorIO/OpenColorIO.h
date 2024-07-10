@@ -464,6 +464,10 @@ public:
      */
     void serialize(std::ostream & os) const;
 
+    // Currently cacheID depends on YAML output to generate unique ID's, thus to
+    // avoid confusion if the YAML support is turned off, these functions will
+    // be unavailable.
+#if OCIO_YAML_SUPPORT
     /**
      * This will produce a hash of the all colorspace definitions, etc. All external references, 
      * such as files used in FileTransforms, etc., will be incorporated into the cacheID. While 
@@ -477,6 +481,7 @@ public:
      */
     const char * getCacheID() const;
     const char * getCacheID(const ConstContextRcPtr & context) const;
+#endif
 
     // 
     // Resources
