@@ -152,7 +152,7 @@ option(OCIO_BUILD_PYTHON "Specify whether to build python bindings" ON)
 ###############################################################################
 # OCIO Library Features
 
-set(OCIO_FEATURE_SET "Nano" CACHE STRING "Determines which core library features are enabled. [Full, Nano, Custom]")
+set(OCIO_FEATURE_SET "Full" CACHE STRING "Determines which core library features are enabled. [Full, Nano, Custom]")
 set_property(CACHE OCIO_FEATURE_SET PROPERTY STRINGS Nano Full Custom)
 option(OCIO_LUT_AND_FILETRANSFORM_SUPPORT "Specify whether to build with LUT and file-transform support. Requies Expat dependency" ON)
 option(OCIO_USE_HALF_LOOKUP_TABLE "Determines if the Imath library should use a 64k LUT for half conversions" ON)
