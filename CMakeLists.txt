@@ -504,6 +504,11 @@ if(OCIO_BUILD_DOCS AND NOT OCIO_BUILD_PYTHON )
     set(OCIO_BUILD_DOCS OFF CACHE BOOL "Specify whether to build documentation" FORCE)
 endif()
 
+if(OCIO_FEATURE_SET MATCHES "[Nn][Aa][Nn][Oo]" AND OCIO_BUILD_OPENFX)
+    message(WARNING "OpenFx is not compatible with Nano feature set,\
+    thus OCIO_BUILD_OPENFX option will be turned off.")
+    set(OCIO_BUILD_OPENFX OFF CACHE BOOL "Specify whether to build OpenFX plugins" FORCE)
+endif()
 
 ###############################################################################
 # Find or install external dependencies
