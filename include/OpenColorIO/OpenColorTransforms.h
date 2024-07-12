@@ -1789,7 +1789,7 @@ extern OCIOEXPORT std::ostream& operator<< (std::ostream&, const Lut3DTransform&
 #endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 
 /// A pair of chromaticity coordinates.
-struct Chromaticities
+struct OCIOEXPORT Chromaticities
 {
     Chromaticities() = delete;
     ~Chromaticities() = default;
