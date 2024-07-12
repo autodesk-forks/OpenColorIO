@@ -761,6 +761,8 @@ void OpRcPtrVec::optimizeForBitdepth(const BitDepth & inBitDepth,
         {
             OptimizeSeparablePrefix(*this, inBitDepth);
         }
+#else
+        (void)oFlags; // silence the unused variable warning.
 #endif 
     }
 }
