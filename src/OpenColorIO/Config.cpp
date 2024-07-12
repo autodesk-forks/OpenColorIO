@@ -4955,6 +4955,7 @@ void Config::serialize(std::ostream& os) const
         throw Exception(error.str().c_str());
     }
 #else
+    (void)os; // silence the unused variable warning.
     throw Exception("YAML support is turned off");
 #endif
 }
@@ -5190,6 +5191,9 @@ ConstConfigRcPtr Config::Impl::Read(std::istream & istream, const char * filenam
 
     return config;
 #else
+    (void)istream;  // silence the unused variable warnings.
+    (void)filename; 
+
     throw Exception("YAML support is turned off.");
     return nullptr;
 #endif
@@ -5217,6 +5221,9 @@ ConstConfigRcPtr Config::Impl::Read(std::istream & istream, ConfigIOProxyRcPtr c
 
     return config;
 #else
+    (void)istream;  // silence the unused variable warnings.
+    (void)ciop;
+
     throw Exception("YAML support is turned off.");
     return nullptr;
 #endif
