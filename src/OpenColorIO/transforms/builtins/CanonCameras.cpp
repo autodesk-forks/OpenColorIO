@@ -27,6 +27,7 @@ static const Chromaticities wht_xy(0.3127,  0.3290);
 const Primaries primaries(red_xy, grn_xy, blu_xy, wht_xy);
 }
 
+#if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
 namespace CANON_CLOG2
 {
 auto GenerateLutValues = [](double in) -> float
@@ -45,6 +46,7 @@ auto GenerateLutValues = [](double in) -> float
     return float(out * 0.9);
 };
 }
+
 
 namespace CANON_CLOG3
 {
@@ -68,6 +70,7 @@ auto GenerateLutValues = [](double in) -> float
     return float(out * 0.9);
 };
 }
+#endif
 
 
 namespace CAMERA
