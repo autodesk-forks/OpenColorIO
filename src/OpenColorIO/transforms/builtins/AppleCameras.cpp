@@ -62,16 +62,17 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 {
     {
         // FIXME: needs LUT-free implementation
-        auto APPLE_LOG_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
-        {
+        std::function<void(OpRcPtrVec& ops)> APPLE_LOG_to_ACES2065_1_Functor;
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+        APPLE_LOG_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
+        {
             APPLE_LOG::GenerateAppleLogToLinearOps(ops);
             
             MatrixOpData::MatrixArrayPtr matrix
             = build_conversion_matrix(REC2020::primaries, ACES_AP0::primaries, ADAPTATION_BRADFORD);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
-#endif
         };
+#endif
         
         registry.addBuiltin("APPLE_LOG_to_ACES2065-1",
                             "Convert Apple Log to ACES2065-1",
@@ -79,12 +80,13 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
     {
         // FIXME: needs LUT-free implementation
-        auto APPLE_LOG_to_Linear_Functor = [](OpRcPtrVec & ops)
-        {
+        std::function<void(OpRcPtrVec& ops)> APPLE_LOG_to_Linear_Functor;
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+        APPLE_LOG_to_Linear_Functor = [](OpRcPtrVec & ops)
+        {
             APPLE_LOG::GenerateAppleLogToLinearOps(ops);
-#endif
         };
+#endif
         
         registry.addBuiltin("CURVE - APPLE_LOG_to_LINEAR",
                             "Convert Apple Log to linear",

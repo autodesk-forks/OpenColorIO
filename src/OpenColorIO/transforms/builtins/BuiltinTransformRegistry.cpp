@@ -94,7 +94,10 @@ void BuiltinTransformRegistryImpl::createOps(size_t index, OpRcPtrVec & ops) con
         throw Exception("Invalid index.");
     }
     
-    m_builtins[index].m_creator(ops);
+    if(m_builtins[index].m_creator)
+    {
+        m_builtins[index].m_creator(ops);
+    }
 }
 
 void BuiltinTransformRegistryImpl::registerAll() noexcept

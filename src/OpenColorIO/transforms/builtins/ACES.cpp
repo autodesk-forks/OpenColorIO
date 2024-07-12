@@ -575,9 +575,10 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 
     {
         // FIXME: needs LUT-free implementation
-        auto ACEScc_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
-        {
+        std::function<void(OpRcPtrVec & ops)> ACEScc_to_ACES2065_1_Functor;
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+        ACEScc_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
+        {
             auto GenerateLutValues = [](double input) -> float
             {
                 // The functor input will be [0,1].  Remap this to a wider domain to better capture
@@ -619,8 +620,8 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                           0.00, RangeOpData::EmptyValue(), // don't clamp high end, 
                           0.00, RangeOpData::EmptyValue(), // don't clamp high end
                           TRANSFORM_DIR_FORWARD);
+    };
 #endif // OCIO_LUT_AND_FILETRANSFORM_SUPPORT
-        };
 
         registry.addBuiltin("ACEScc_to_ACES2065-1", 
                             "Convert ACEScc to ACES2065-1",
@@ -661,9 +662,10 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 
     {
         // FIXME: needs LUT-free implementation
-        auto ADX10_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
-        {
+        std::function<void(OpRcPtrVec& ops)> ADX10_to_ACES2065_1_Functor;
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+        ADX10_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
+        {
             static constexpr double scale     = 1023. / 500.;
             static constexpr double scale4[4] = { scale, scale, scale, 1. };
     
@@ -675,8 +677,8 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 
             // Convert to ACES2065-1.
             ADX_to_ACES::GenerateOps(ops);
-#endif 
         };
+#endif 
 
         registry.addBuiltin("ADX10_to_ACES2065-1",
                             "Convert ADX10 to ACES2065-1",
@@ -684,9 +686,10 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     }
     {
         // FIXME: needs LUT-free implementation
-        auto ADX16_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
-        {
+        std::function<void(OpRcPtrVec& ops)> ADX16_to_ACES2065_1_Functor;
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+        ADX16_to_ACES2065_1_Functor = [](OpRcPtrVec & ops)
+        {
             static constexpr double scale     = 65535. / 8000.;
             static constexpr double scale4[4] = { scale, scale, scale, 1. };
     
@@ -698,8 +701,8 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 
             // Convert to ACES2065-1.
             ADX_to_ACES::GenerateOps(ops);
-#endif 
         };
+#endif 
 
         registry.addBuiltin("ADX16_to_ACES2065-1",
                             "Convert ADX16 to ACES2065-1",
@@ -884,9 +887,10 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 
     {
         // FIXME: needs LUT-free implementation
-        auto ACES2065_1_to_CIE_XYZ_cinema_d60sim_dci_1_0_Functor = [](OpRcPtrVec & ops)
-        {
+        std::function<void(OpRcPtrVec& ops)> ACES2065_1_to_CIE_XYZ_cinema_d60sim_dci_1_0_Functor;
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+        ACES2065_1_to_CIE_XYZ_cinema_d60sim_dci_1_0_Functor = [](OpRcPtrVec& ops)
+        {
             ACES_OUTPUT::Generate_RRT_preamble_ops(ops);
 
             ACES_OUTPUT::Generate_tonecurve_ops(ops);
@@ -909,8 +913,8 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
             MatrixOpData::MatrixArrayPtr matrix2
                 = build_vonkries_adapt(WHITEPOINT::DCI_XYZ, WHITEPOINT::D65_XYZ, ADAPTATION_BRADFORD);
             CreateMatrixOp(ops, matrix2, TRANSFORM_DIR_FORWARD);
-#endif
         };
+#endif
 
         registry.addBuiltin("ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - SDR-CINEMA-D60sim-DCI_1.0", 
                             "Component of ACES Output Transforms for SDR DCI cinema simulating D60 white",
@@ -919,9 +923,10 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 
     {
         // FIXME: needs LUT-free implementation
-        auto ACES2065_1_to_CIE_XYZ_cinema_d65sim_dci_1_1_Functor = [](OpRcPtrVec & ops)
-        {
+        std::function<void(OpRcPtrVec& ops)> ACES2065_1_to_CIE_XYZ_cinema_d65sim_dci_1_1_Functor;
 #if OCIO_LUT_AND_FILETRANSFORM_SUPPORT
+        ACES2065_1_to_CIE_XYZ_cinema_d65sim_dci_1_1_Functor = [](OpRcPtrVec & ops)
+        {
             ACES_OUTPUT::Generate_RRT_preamble_ops(ops);
 
             ACES_OUTPUT::Generate_tonecurve_ops(ops);
@@ -942,8 +947,8 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
             MatrixOpData::MatrixArrayPtr matrix2
                 = build_vonkries_adapt(WHITEPOINT::DCI_XYZ, WHITEPOINT::D65_XYZ, ADAPTATION_BRADFORD);
             CreateMatrixOp(ops, matrix2, TRANSFORM_DIR_FORWARD);
-#endif
         };
+#endif
 
         registry.addBuiltin("ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - SDR-CINEMA-D65sim-DCI_1.1", 
                             "Component of ACES Output Transforms for SDR DCI cinema simulating D65 white",
