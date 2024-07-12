@@ -79,6 +79,7 @@ struct GCProperties
     std::string m_coefs{ "coefs" };
     std::string m_localBypass{ "localBypass" };
     std::string m_eval{ "evalBSplineCurve" };
+    std::string m_curveToDraw{ "curveToDraw" };
 };
 
 void AddUniform(GpuShaderCreatorRcPtr & shaderCreator,
@@ -109,6 +110,21 @@ void AddUniform(GpuShaderCreatorRcPtr & shaderCreator,
         GpuShaderText stDecl(shaderCreator->getLanguage());
         // Need 2 ints for each curves.
         stDecl.declareUniformArrayInt(name, 16); // TODO: Avoid magic numbers (8 Curves * 2 values)
+        shaderCreator->addToDeclareShaderCode(stDecl.string().c_str());
+    }
+}
+
+void AddSingleIntUniform(GpuShaderCreatorRcPtr & shaderCreator,
+                         const GpuShaderCreator::SizeGetter & getSize,
+                         const GpuShaderCreator::VectorIntGetter & getVector,
+                         const std::string & name)
+{
+    // Add the uniform if it does not already exist.
+    if (shaderCreator->addUniform(name.c_str(), getSize, getVector))
+    {
+        // Declare uniform.
+        GpuShaderText stDecl(shaderCreator->getLanguage());
+        stDecl.declareUniformArrayInt(name, 1);
         shaderCreator->addToDeclareShaderCode(stDecl.string().c_str());
     }
 }
@@ -184,6 +200,9 @@ void AddGCPropertiesUniforms(GpuShaderCreatorRcPtr & shaderCreator,
     // Note: No need to add an index to the name to avoid collisions as the dynamic properties
     // are unique.
 
+    auto getCurveToDraw = std::bind(&DynamicPropertyGradingHueCurveImpl::getCurveToDraw, curveProp);
+    auto getNCurveToDraw = std::bind(&DynamicPropertyGradingHueCurveImpl::getNumCurveToDraw, curveProp);
+    
     auto getNK = std::bind(&DynamicPropertyGradingHueCurveImpl::getNumKnots, curveProp);
     auto getKO = std::bind(&DynamicPropertyGradingHueCurveImpl::getKnotsOffsetsArray,
                            curveProp);
@@ -205,6 +224,11 @@ void AddGCPropertiesUniforms(GpuShaderCreatorRcPtr & shaderCreator,
                DynamicPropertyGradingHueCurveImpl::GetMaxCoefs(),
                propNames.m_coefs);
     AddUniform(shaderCreator, getLB, propNames.m_localBypass);
+
+    AddSingleIntUniform(shaderCreator, 
+                        getNCurveToDraw, 
+                        getCurveToDraw, 
+                        propNames.m_curveToDraw);
 }
 
 void AddCurveEvalMethodTextToShaderProgram(GpuShaderCreatorRcPtr & shaderCreator,
@@ -256,8 +280,18 @@ void AddGCForwardShader(GpuShaderCreatorRcPtr & shaderCreator,
                         const GCProperties & props,
                         bool dyn,
                         bool doLinToLog,
+                        bool drawCurveOnly,
                         GradingStyle style)
 {
+    const std::string pix(shaderCreator->getPixelName());
+    if(drawCurveOnly)
+    {
+        st.newLine() << pix << ".r = " << props.m_eval << "(" << props.m_curveToDraw << "[0], " << pix << ".r, 1.);";
+        st.newLine() << pix << ".g = " << props.m_eval << "(" << props.m_curveToDraw << "[0], " << pix << ".g, 1.);";
+        st.newLine() << pix << ".b = " << props.m_eval << "(" << props.m_curveToDraw << "[0], " << pix << ".b, 1.);";
+        return;
+    }
+
     if (dyn)
     {
         st.newLine() << "if (!" << props.m_localBypass << ")";
@@ -298,8 +332,6 @@ void AddGCForwardShader(GpuShaderCreatorRcPtr & shaderCreator,
         AddLinToLogShaderChannelBlue(shaderCreator, st);
         st.newLine() << "";
     }
-
-    const std::string pix(shaderCreator->getPixelName());
 
     st.newLine() << "";
     st.newLine() << "float hueSatGain = max(0., " << props.m_eval << "(1, " << pix << ".r, 1.));"; // HUE-SAT
@@ -478,7 +510,7 @@ void GetHueCurveGPUShaderProgram(GpuShaderCreatorRcPtr & shaderCreator,
     switch (dir)
     {
     case TRANSFORM_DIR_FORWARD:
-        AddGCForwardShader(shaderCreator, st, properties, dyn, bypassLinToLog, style); // _addProcessingTextToShaderProgram
+        AddGCForwardShader(shaderCreator, st, properties, dyn, bypassLinToLog, gcData->getDrawCurveOnly(), style); // _addProcessingTextToShaderProgram
         break;
     case TRANSFORM_DIR_INVERSE: // TODO: Implement the inverse shader.
         //AddGCInverseShader(shaderCreator, st, properties, dyn, bypassLinToLog, style); // _addProcessingTextToShaderProgram
