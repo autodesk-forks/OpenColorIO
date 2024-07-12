@@ -498,6 +498,12 @@ if(OCIO_ARCHIVE_SUPPORT AND NOT OCIO_YAML_SUPPORT )
     set(OCIO_ARCHIVE_SUPPORT OFF CACHE BOOL "Specify whether to build with OCIOZ archive support. Requires ZLIB and minizip-ng dependencies" FORCE)
 endif()
 
+if(OCIO_BUILD_DOCS AND NOT OCIO_BUILD_PYTHON )
+    message(WARNING "Documentation requires Python bindings which is turned off,\
+    thus OCIO_BUILD_DOCS option will be turned off too.")
+    set(OCIO_BUILD_DOCS OFF CACHE BOOL "Specify whether to build documentation" FORCE)
+endif()
+
 
 ###############################################################################
 # Find or install external dependencies
