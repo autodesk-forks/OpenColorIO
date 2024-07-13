@@ -487,27 +487,28 @@ elseif(NOT OCIO_FEATURE_SET MATCHES "[Cc][Uu][Ss][Tt][Oo][Mm]")
 endif()
 
 if(OCIO_BUILD_PYTHON AND NOT OCIO_LUT_AND_FILETRANSFORM_SUPPORT )
-    message(WARNING "Python bindings require LUT and File-Transform support which is turned off,\
-    thus OCIO_BUILD_PYTHON option will be turned off too.")
+    message(WARNING "Python bindings require LUT and File-Transform support which is turned off, thus OCIO_BUILD_PYTHON option will be turned off too.")
     set(OCIO_BUILD_PYTHON OFF CACHE BOOL "Specify whether to build python bindings" FORCE)
 endif()
 
 if(OCIO_ARCHIVE_SUPPORT AND NOT OCIO_YAML_SUPPORT )
-    message(WARNING "Archive support requires YAML support which is turned off,\
-    thus OCIO_ARCHIVE_SUPPORT option will be turned off too.")
+    message(WARNING "Archive support requires YAML support which is turned off, thus OCIO_ARCHIVE_SUPPORT option will be turned off too.")
     set(OCIO_ARCHIVE_SUPPORT OFF CACHE BOOL "Specify whether to build with OCIOZ archive support. Requires ZLIB and minizip-ng dependencies" FORCE)
 endif()
 
 if(OCIO_BUILD_DOCS AND NOT OCIO_BUILD_PYTHON )
-    message(WARNING "Documentation requires Python bindings which is turned off,\
-    thus OCIO_BUILD_DOCS option will be turned off too.")
+    message(WARNING "Documentation requires Python bindings which is turned off, thus OCIO_BUILD_DOCS option will be turned off too.")
     set(OCIO_BUILD_DOCS OFF CACHE BOOL "Specify whether to build documentation" FORCE)
 endif()
 
-if(OCIO_FEATURE_SET MATCHES "[Nn][Aa][Nn][Oo]" AND OCIO_BUILD_OPENFX)
-    message(WARNING "OpenFx is not compatible with Nano feature set,\
-    thus OCIO_BUILD_OPENFX option will be turned off.")
-    set(OCIO_BUILD_OPENFX OFF CACHE BOOL "Specify whether to build OpenFX plugins" FORCE)
+if(OCIO_USE_OIIO_FOR_APPS AND NOT OCIO_USE_HALF_LOOKUP_TABLE)
+	message(WARNING "OIIO is needs OCIO_USE_HALF_LOOKUP_TABLE which is turned off, thus OCIO_USE_OIIO_FOR_APPS option will be turned off too.")
+	set(OCIO_USE_OIIO_FOR_APPS OFF CACHE BOOL "Request OIIO to build apps (ociolutimage, ocioconvert and ociodisplay), the default uses OpenEXR." FORCE)
+endif()
+
+if(OCIO_BUILD_OPENFX AND OCIO_FEATURE_SET MATCHES "[Nn][Aa][Nn][Oo]")
+	message(WARNING "OpenFx is not compatible with Nano feature set thus OCIO_BUILD_OPENFX option will be turned off.")
+	set(OCIO_BUILD_OPENFX OFF CACHE BOOL "Specify whether to build OpenFX plugins" FORCE)
 endif()
 
 ###############################################################################

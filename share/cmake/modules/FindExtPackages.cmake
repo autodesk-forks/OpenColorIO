@@ -74,14 +74,14 @@ message(STATUS "Checking for optional dependencies...")
 
 
 if(OCIO_USE_HALF_LOOKUP_TABLE)
-# Imath (>=3.1) 
-# If lookup table is not needed, then we'll use the internal
-# header-only half implementation instead of the external imath dependency.
-# https://github.com/AcademySoftwareFoundation/Imath
-ocio_handle_dependency(  Imath REQUIRED ALLOW_INSTALL
-                         MIN_VERSION 3.1.1
-                         RECOMMENDED_VERSION 3.1.6
-                         RECOMMENDED_VERSION_REASON "Latest version tested with OCIO")
+    # Imath (>=3.1) 
+    # If lookup table is not needed, then we'll use the internal
+    # header-only half implementation instead of the external imath dependency.
+    # https://github.com/AcademySoftwareFoundation/Imath
+    ocio_handle_dependency(  Imath REQUIRED ALLOW_INSTALL
+                            MIN_VERSION 3.1.1
+                            RECOMMENDED_VERSION 3.1.6
+                            RECOMMENDED_VERSION_REASON "Latest version tested with OCIO")
 endif()
 
 if(OCIO_YAML_SUPPORT)
