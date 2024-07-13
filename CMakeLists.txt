@@ -502,7 +502,7 @@ if(OCIO_BUILD_DOCS AND NOT OCIO_BUILD_PYTHON )
 endif()
 
 if(OCIO_USE_OIIO_FOR_APPS AND NOT OCIO_USE_HALF_LOOKUP_TABLE)
-	message(WARNING "OIIO is needs OCIO_USE_HALF_LOOKUP_TABLE which is turned off, thus OCIO_USE_OIIO_FOR_APPS option will be turned off too.")
+	message(WARNING "OIIO needs OCIO_USE_HALF_LOOKUP_TABLE which is turned off, thus OCIO_USE_OIIO_FOR_APPS option will be turned off too.")
 	set(OCIO_USE_OIIO_FOR_APPS OFF CACHE BOOL "Request OIIO to build apps (ociolutimage, ocioconvert and ociodisplay), the default uses OpenEXR." FORCE)
 endif()
 
