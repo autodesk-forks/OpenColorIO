@@ -39,13 +39,13 @@ a set of color primaries. These are methods on the MatrixTransform class:
 ConvertTo_XYZ_D65 and ConvertTo_AP0. Usage is demonstrated in unit test:
 OpenColorIO/tests/cpu/transforms/BuiltinTransform_tests.cpp:line 304.
 
+
 Installation instructions
 -------------------------
 
-There are various CMake flags that control whether full OCIO or
-nanoColor is built. But in the nanoColor branch, for simplicity
-everything is already configured to build in nanoColor mode.
-Here are the basic steps for macOS or Linux (Windows is supported
+The CMake flag OCIO_FEATURE_SET may be set to "Full" to build full OCIO
+and set to "Nano" to build nanoColor. In the nanoColor branch, the default
+is "Nano". Here are the basic steps for macOS or Linux (Windows is supported
 as well, but the commands are slightly different)::
 
     $ git clone git@github.com:autodesk-forks/OpenColorIO.git
