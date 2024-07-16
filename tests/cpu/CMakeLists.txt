@@ -137,8 +137,10 @@ endfunction(add_ocio_test)
 # but for now, we will maintain the status quo and copy all from the
 # OpenColorIO target
 set(SOURCES
+    builtinconfigs/BuiltinConfigUtils.cpp
     builtinconfigs/CGConfig.cpp
     builtinconfigs/StudioConfig.cpp
+	builtinconfigs/CoreRendererConfig.cpp
     ConfigUtils.cpp
     fileformats/cdl/CDLParser.cpp
     fileformats/cdl/CDLReaderHelper.cpp
