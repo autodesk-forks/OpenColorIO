@@ -37,13 +37,13 @@ function(add_ocio_test NAME SOURCES PRIVATE_INCLUDES)
             xxHash
     )
 
-	if(OCIO_USE_HALF_LOOKUP_TABLE)
-		target_link_libraries(${TEST_BINARY} PRIVATE Imath::Imath)    
-	else()
-		target_link_libraries(${TEST_BINARY} PRIVATE "$<BUILD_INTERFACE:half>")    
-	endif()
+    if(OCIO_USE_HALF_LOOKUP_TABLE)
+        target_link_libraries(${TEST_BINARY} PRIVATE Imath::Imath)    
+    else()
+        target_link_libraries(${TEST_BINARY} PRIVATE "$<BUILD_INTERFACE:half>")    
+    endif()
 
-	if(OCIO_YAML_SUPPORT)
+    if(OCIO_YAML_SUPPORT)
         target_link_libraries(${TEST_BINARY} PRIVATE ${YAML_CPP_LIBRARIES})
     endif()
 
@@ -140,7 +140,7 @@ set(SOURCES
     builtinconfigs/BuiltinConfigUtils.cpp
     builtinconfigs/CGConfig.cpp
     builtinconfigs/StudioConfig.cpp
-	builtinconfigs/CoreRendererConfig.cpp
+    builtinconfigs/CoreRendererConfig.cpp
     ConfigUtils.cpp
     fileformats/cdl/CDLParser.cpp
     fileformats/cdl/CDLReaderHelper.cpp

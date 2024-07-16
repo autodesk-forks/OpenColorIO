@@ -11,10 +11,10 @@ set(SOURCES
     BakingUtils.cpp
     BitDepthUtils.cpp
     builtinconfigs/BuiltinConfigRegistry.cpp
-	builtinconfigs/BuiltinConfigUtils.cpp
+    builtinconfigs/BuiltinConfigUtils.cpp
     builtinconfigs/CGConfig.cpp
     builtinconfigs/StudioConfig.cpp
-	builtinconfigs/CoreRendererConfig.cpp
+    builtinconfigs/CoreRendererConfig.cpp
     Caching.cpp
     ColorSpace.cpp
     ColorSpaceSet.cpp
