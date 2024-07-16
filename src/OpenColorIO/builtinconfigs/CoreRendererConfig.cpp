@@ -24,7 +24,7 @@ void Register(BuiltinConfigRegistryImpl & registry) noexcept
 
     registry.addBuiltin(
         "core-renderer-config-v1.0.0-rc1",
-        "WIP nanoColor config",
+        "Core Renderer Config",
         true,
         Create_CORE_RENDERER_CONFIG_V100_RC1
     );

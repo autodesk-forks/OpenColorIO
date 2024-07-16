@@ -20,23 +20,19 @@
 static constexpr char OUT_OF_RANGE_EXCEPTION_TEXT[] = "Config index is out of range.";
 
 // TODO: Remove once getDefaultBuiltinConfigName is removed.
-#if defined(OCIO_FEATURESET_NANO)
 static constexpr char DEFAULT_BUILTIN_CONFIG[] = "cg-config-v2.1.0_aces-v1.3_ocio-v2.3";
-#else
-static constexpr char DEFAULT_BUILTIN_CONFIG[] = "ocio://core-renderer-config-v1.0.0-rc1";
-#endif
 
 // These are used for ResolveConfigPath function and we need to return a variable that still exists
 // once the function finishes since we are returning a const char *.
 static constexpr char DEFAULT_BUILTIN_CONFIG_URI[] = "ocio://cg-config-v2.1.0_aces-v1.3_ocio-v2.3";
-static constexpr char LATEST_CORE_RENDERER_BUILTIN_CONFIG_URI[] = "ocio://core-renderer-config-v1.0.0-rc1";
 static constexpr char LATEST_CG_BUILTIN_CONFIG_URI[] = "ocio://cg-config-v2.1.0_aces-v1.3_ocio-v2.3";
 static constexpr char LATEST_STUDIO_BUILTIN_CONFIG_URI[] = "ocio://studio-config-v2.1.0_aces-v1.3_ocio-v2.3";
+static constexpr char LATEST_CORE_RENDERER_BUILTIN_CONFIG_URI[] = "ocio://core-renderer-config-v1.0.0-rc1";
 
 static constexpr char BUILTIN_DEFAULT_NAME[] = "default";
-static constexpr char BUILTIN_LATEST_CORE_RENDERER_NAME[] = "core-renderer-config-latest";
 static constexpr char BUILTIN_LATEST_CG_NAME[] = "cg-config-latest";
 static constexpr char BUILTIN_LATEST_STUDIO_NAME[] = "studio-config-latest";
+static constexpr char BUILTIN_LATEST_CORE_RENDERER_NAME[] = "core-renderer-config-latest";
 
 namespace OCIO_NAMESPACE
 {
