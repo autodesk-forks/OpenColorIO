@@ -52,8 +52,6 @@ public:
     bool getDrawCurveOnly() const noexcept override;
     void setDrawCurveOnly(bool drawCurveOnly) noexcept override;
 
-    void setCurveToDraw(HueCurveType type) noexcept override;
-
     bool isDynamic() const noexcept override;
     void makeDynamic() noexcept override;
     void makeNonDynamic() noexcept override;

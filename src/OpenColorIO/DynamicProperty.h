@@ -189,11 +189,6 @@ public:
     bool getLocalBypass() const;
     int getNumKnots() const;
     int getNumCoefs() const;
-
-    const int* getCurveToDraw() const override { return &m_curveToDraw; }
-    int getNumCurveToDraw() { return 1; }
-    void setCurveToDraw( HueCurveType curveToDraw ) override { m_curveToDraw = curveToDraw; }
-
     static int GetNumOffsetValues() { return 16; }
     const int * getKnotsOffsetsArray() const;
     const int * getCoefsOffsetsArray() const;
@@ -211,7 +206,6 @@ private:
     void precompute();
 
     ConstGradingHueCurveRcPtr m_hueCurve;
-    int m_curveToDraw = 1 ;
 
     // Holds curve data as knots and coefs. There are 8 curves.
     GradingBSplineCurveImpl::KnotsCoefs m_knotsCoefs{ 8 };

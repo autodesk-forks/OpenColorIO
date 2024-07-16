@@ -844,9 +844,6 @@ public:
     /// Will throw if value is not valid.
     virtual void setValue(const ConstGradingHueCurveRcPtr & value) = 0;
 
-    virtual const int* getCurveToDraw() const = 0;
-    virtual void setCurveToDraw( HueCurveType curveToDraw ) = 0;
-
     DynamicPropertyGradingHueCurve(const DynamicPropertyGradingHueCurve &) = delete;
     DynamicPropertyGradingHueCurve & operator=(const DynamicPropertyGradingHueCurve &) = delete;
     /// Do not use (needed only for pybind11).
@@ -1313,8 +1310,6 @@ public:
 
     virtual bool getDrawCurveOnly() const = 0;
     virtual void setDrawCurveOnly( bool drawCurveOnly ) = 0;
-
-    virtual void setCurveToDraw( HueCurveType curveToDraw ) noexcept = 0;
 
     ///**
     // * Parameters can be made dynamic so the values can be changed through the CPU or GPU processor,

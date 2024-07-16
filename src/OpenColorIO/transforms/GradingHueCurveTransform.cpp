@@ -131,11 +131,6 @@ void GradingHueCurveTransformImpl::setDrawCurveOnly( bool drawCurveOnly ) noexce
     data().setDrawCurveOnly( drawCurveOnly );
 }
 
-void GradingHueCurveTransformImpl::setCurveToDraw( HueCurveType type ) noexcept
-{
-    data().setCurveToDraw( type );
-}
-
 bool GradingHueCurveTransformImpl::isDynamic() const noexcept
 {
     return data().isDynamic();

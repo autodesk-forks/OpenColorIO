@@ -77,7 +77,6 @@ GradingHueCurveOpData & GradingHueCurveOpData::operator=(const GradingHueCurveOp
         m_value->makeDynamic();
     }
 
-    m_value->setCurveToDraw(static_cast<const HueCurveType>(rhs.m_value->getCurveToDraw()[0]));
 
     return *this;
 }

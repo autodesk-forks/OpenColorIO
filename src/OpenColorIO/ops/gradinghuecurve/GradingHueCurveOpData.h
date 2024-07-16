@@ -68,7 +68,6 @@ public:
 
     bool getDrawCurveOnly() const noexcept { return m_drawCurveOnly; }
     void setDrawCurveOnly(bool drawCurveOnly) noexcept { m_drawCurveOnly = drawCurveOnly; }
-    void setCurveToDraw(HueCurveType type) noexcept { m_value->setCurveToDraw(type); }
 
     TransformDirection getDirection() const noexcept;
     void setDirection(TransformDirection dir) noexcept;
