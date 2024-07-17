@@ -482,11 +482,11 @@ void GetHueCurveGPUShaderProgram(GpuShaderCreatorRcPtr & shaderCreator,
         AddCurveEvalMethodTextToShaderProgram(shaderCreator, gcData, properties, dyn);
     }
 
-    const bool bypassLinToLog = (style == GRADING_LIN) && !gcData->getBypassLinToLog();
+    const bool doLinToLog = (style == GRADING_LIN) && !gcData->getBypassLinToLog();
     switch (dir)
     {
     case TRANSFORM_DIR_FORWARD:
-        AddGCForwardShader(shaderCreator, st, properties, dyn, bypassLinToLog, gcData->getDrawCurveOnly(), style);
+        AddGCForwardShader(shaderCreator, st, properties, dyn, doLinToLog, gcData->getDrawCurveOnly(), style);
         break;
     case TRANSFORM_DIR_INVERSE: // TODO: Implement the inverse shader.
         //AddGCInverseShader(shaderCreator, st, properties, dyn, bypassLinToLog, style);
