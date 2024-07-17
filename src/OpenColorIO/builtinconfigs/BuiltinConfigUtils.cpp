@@ -8,7 +8,19 @@ namespace OCIO_NAMESPACE
     namespace BUILTIN_CONFIG_UTILS
     {
 
-    void AddColorSpace(ConfigRcPtr& cfg, const char* name, ReferenceSpaceType type, const char** aliases, BitDepth bitDepth, const char** categories, const char* encoding, const char* eqGroup, const char* family, bool isData, ConstTransformRcPtr trFrom, ConstTransformRcPtr trTo, const char* desc)
+    void AddColorSpace(ConfigRcPtr& cfg
+        , const char* name
+        , ReferenceSpaceType type
+        , const char** aliases
+        , BitDepth bitDepth
+        , const char** categories
+        , const char* encoding
+        , const char* eqGroup
+        , const char* family
+        , bool isData
+        , ConstTransformRcPtr trFrom
+        , ConstTransformRcPtr trTo
+        , const char* desc)
     {
         auto out = ColorSpace::Create(type);
 
@@ -49,7 +61,15 @@ namespace OCIO_NAMESPACE
         cfg->addColorSpace(out);
     }
 
-    void AddNamedTramsform(ConfigRcPtr& cfg, const char* name, const char** aliases, const char** categories, const char* encoding, const char* family, ConstTransformRcPtr trFwd, ConstTransformRcPtr trInv, const char* desc)
+    void AddNamedTramsform(ConfigRcPtr& cfg
+        , const char* name
+        , const char** aliases
+        , const char** categories
+        , const char* encoding
+        , const char* family
+        , ConstTransformRcPtr trFwd
+        , ConstTransformRcPtr trInv
+        , const char* desc)    
     {
         auto out = NamedTransform::Create();
 
