@@ -230,7 +230,7 @@ bool GradingHueCurveOpData::equals(const OpData & other) const
     if (m_direction      != rop->m_direction ||
         m_style          != rop->m_style ||
         m_bypassLinToLog != rop->m_bypassLinToLog ||
-        m_drawCurveOnly != rop->m_drawCurveOnly ||
+        m_drawCurveOnly  != rop->m_drawCurveOnly ||
        !m_value->equals(  *(rop->m_value)  ))
     {
         return false;
