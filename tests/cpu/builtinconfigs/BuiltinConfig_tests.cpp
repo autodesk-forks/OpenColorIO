@@ -134,7 +134,7 @@ OCIO_ADD_TEST(BuiltinConfigs, basic)
 
         OCIO_CHECK_EQUAL(
             std::string(registry.getBuiltinConfigUIName(4)),
-            std::string("Core Renderer Config")
+            std::string("ASWF Color Interop Forum -- Color Space Encodings for Texture Assets and CG Rendering")
         );
 
         OCIO::ConstConfigRcPtr config;
