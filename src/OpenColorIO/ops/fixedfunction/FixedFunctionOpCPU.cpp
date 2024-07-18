@@ -156,6 +156,66 @@ public:
     void apply(const void * inImg, void * outImg, long numPixels) const override;
 };
 
+class Renderer_RGB_TO_HSY_LOG : public OpCPU
+{
+    const float MIN_0 = -0.1f;
+public:
+    Renderer_RGB_TO_HSY_LOG() = delete;
+    explicit Renderer_RGB_TO_HSY_LOG(ConstFixedFunctionOpDataRcPtr & data);
+
+    void apply(const void * inImg, void * outImg, long numPixels) const override;
+};
+
+class Renderer_HSY_LOG_TO_RGB : public OpCPU
+{
+    const float MIN_0 = -0.1f;;
+public:
+    Renderer_HSY_LOG_TO_RGB() = delete;
+    explicit Renderer_HSY_LOG_TO_RGB(ConstFixedFunctionOpDataRcPtr & data);
+
+    void apply(const void * inImg, void * outImg, long numPixels) const override;
+};
+
+class Renderer_RGB_TO_HSY_VID : public OpCPU
+{
+    const float MIN_0 = 0.0f;
+public:
+    Renderer_RGB_TO_HSY_VID() = delete;
+    explicit Renderer_RGB_TO_HSY_VID(ConstFixedFunctionOpDataRcPtr & data);
+
+    void apply(const void * inImg, void * outImg, long numPixels) const override;
+};
+
+class Renderer_HSY_VID_TO_RGB : public OpCPU
+{
+    const float MIN_0 = 0.0f;
+public:
+    Renderer_HSY_VID_TO_RGB() = delete;
+    explicit Renderer_HSY_VID_TO_RGB(ConstFixedFunctionOpDataRcPtr & data);
+
+    void apply(const void * inImg, void * outImg, long numPixels) const override;
+};
+
+class Renderer_RGB_TO_HSY_LIN : public OpCPU
+{
+    const float MIN_0 = 0.2f;
+public:
+    Renderer_RGB_TO_HSY_LIN() = delete;
+    explicit Renderer_RGB_TO_HSY_LIN(ConstFixedFunctionOpDataRcPtr & data);
+
+    void apply(const void * inImg, void * outImg, long numPixels) const override;
+};
+
+class Renderer_HSY_LIN_TO_RGB : public OpCPU
+{
+    const float MIN_0 = 0.2f;
+public:
+    Renderer_HSY_LIN_TO_RGB() = delete;
+    explicit Renderer_HSY_LIN_TO_RGB(ConstFixedFunctionOpDataRcPtr & data);
+
+    void apply(const void * inImg, void * outImg, long numPixels) const override;
+};
+
 class Renderer_XYZ_TO_xyY : public OpCPU
 {
 public:
@@ -974,6 +1034,146 @@ void Renderer_HSV_TO_RGB::apply(const void * inImg, void * outImg, long numPixel
     }
 }
 
+void applyRGBToHSY(const void * inImg, void * outImg, long numPixels, float min0)
+{
+    const float * in = (const float *)inImg;
+    float * out = (float *)outImg;
+
+    for (long idx=0; idx<numPixels; ++idx)
+    {
+        const float red = in[0];
+        const float grn = in[1];
+        const float blu = in[2];
+  
+        const float rgbMin = std::min( std::min( red, grn ), blu );
+        const float rgbMax = std::max( std::max( red, grn ), blu );
+  
+        const float luma = 0.2126f * red + 0.7152f * grn + 0.0722f * blu;
+  
+        const float rm = red - luma;
+        const float gm = grn - luma;
+        const float bm = blu - luma;
+  
+        const float distRGB = std::fabs(rm) + std::fabs(gm) + std::fabs(bm);
+  
+        float sat = 0.f;
+  
+        if (min0 > 0.f)         // linear
+        {
+            const float sumRgb = red + grn + blu;
+            const float k = 0.15f;
+            const float satHi = distRGB / (k + sumRgb);
+            const float loGain = 5.f;
+            const float satLo = distRGB * loGain;
+            const float maxLum = 0.01f;
+            const float minLum = maxLum * 0.1;
+            const float alpha = CLAMP( (luma - minLum) / (maxLum - minLum), 0.f, 1.f );
+            sat = satLo + alpha * (satHi - satLo);
+            sat *= 1.4f;
+        }
+        else if (min0 < 0.f)    // log
+        {
+            const float sat_gain = 4.f;
+            sat = distRGB * sat_gain;
+        }
+        else                     // video
+        {
+            const float sat_gain = 1.25f;
+            sat = distRGB * sat_gain;
+        }
+  
+        float hue = 0.f;
+        if (rgbMin != rgbMax)
+        {
+            float delta = rgbMax - rgbMin;
+            if (red == rgbMax)
+            {
+              hue = 1.0f + (grn - blu) / delta;
+            }
+            else
+            {
+              if (grn == rgbMax)
+              {
+                hue = 3.0f + (blu - red) / delta;
+              }
+              else
+              {
+                hue = 5.0f + (red - grn) / delta;
+              }
+            }
+            hue *= 0.16666666666666666f;
+        }
+
+        out[0] = hue;
+        out[1] = sat;
+        out[2] = luma;
+        out[3] = in[3];
+
+        in  += 4;
+        out += 4;
+    }
+}
+
+Renderer_RGB_TO_HSY_LOG::Renderer_RGB_TO_HSY_LOG(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    :   OpCPU()
+{
+}
+
+void Renderer_RGB_TO_HSY_LOG::apply(const void * inImg, void * outImg, long numPixels) const
+{
+    applyRGBToHSY(inImg, outImg, numPixels, MIN_0);
+}
+
+Renderer_HSY_LOG_TO_RGB::Renderer_HSY_LOG_TO_RGB(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    :   OpCPU()
+{   
+}
+
+void Renderer_HSY_LOG_TO_RGB::apply(const void * inImg, void * outImg, long numPixels) const
+{
+    applyRGBToHSY(inImg, outImg, numPixels, MIN_0);  
+}
+
+Renderer_RGB_TO_HSY_LIN::Renderer_RGB_TO_HSY_LIN(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    :   OpCPU()
+{   
+}
+
+void Renderer_RGB_TO_HSY_LIN::apply(const void * inImg, void * outImg, long numPixels) const
+{
+    applyRGBToHSY(inImg, outImg, numPixels, MIN_0); 
+}
+
+Renderer_HSY_LIN_TO_RGB::Renderer_HSY_LIN_TO_RGB(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    :   OpCPU()
+{   
+}
+
+void Renderer_HSY_LIN_TO_RGB::apply(const void * inImg, void * outImg, long numPixels) const
+{
+    applyRGBToHSY(inImg, outImg, numPixels, MIN_0);   
+}
+
+Renderer_RGB_TO_HSY_VID::Renderer_RGB_TO_HSY_VID(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    :   OpCPU()
+{
+}
+
+void Renderer_RGB_TO_HSY_VID::apply(const void * inImg, void * outImg, long numPixels) const
+{
+    applyRGBToHSY(inImg, outImg, numPixels, MIN_0); 
+}
+
+Renderer_HSY_VID_TO_RGB::Renderer_HSY_VID_TO_RGB(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    :   OpCPU()
+{   
+}
+
+void Renderer_HSY_VID_TO_RGB::apply(const void * inImg, void * outImg, long numPixels) const
+{
+    applyRGBToHSY(inImg, outImg, numPixels, MIN_0); 
+}
+
 Renderer_XYZ_TO_xyY::Renderer_XYZ_TO_xyY(ConstFixedFunctionOpDataRcPtr & /*data*/)
     :   OpCPU()
 {   
@@ -1254,41 +1454,29 @@ ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func
 
         case FixedFunctionOpData::RGB_TO_HSY_LOG:
         {
-            // TODO: Handle CPU rendering for this FixedFunction   
-            return nullptr;
-            //return std::make_shared<Renderer_RGB_TO_HSY_LOG>(func);
+            return std::make_shared<Renderer_RGB_TO_HSY_LOG>(func);
         }
         case FixedFunctionOpData::HSY_LOG_TO_RGB:
         {
-            // TODO: Handle CPU rendering for this FixedFunction   
-            return nullptr;
-            //return std::make_shared<Renderer_HSY_LOG_TO_RGB>(func);
+            return std::make_shared<Renderer_HSY_LOG_TO_RGB>(func);
         }
 
         case FixedFunctionOpData::RGB_TO_HSY_LIN:
         {
-            // TODO: Handle CPU rendering for this FixedFunction   
-            return nullptr;
-            //return std::make_shared<Renderer_RGB_TO_HSY_LIN>(func);
+            return std::make_shared<Renderer_RGB_TO_HSY_LIN>(func);
         }
         case FixedFunctionOpData::HSY_LIN_TO_RGB:
         {
-            // TODO: Handle CPU rendering for this FixedFunction   
-            return nullptr;
-            //return std::make_shared<Renderer_HSY_LIN_TO_RGB>(func);
+            return std::make_shared<Renderer_HSY_LIN_TO_RGB>(func);
         }
 
         case FixedFunctionOpData::RGB_TO_HSY_VID:
         {
-            // TODO: Handle CPU rendering for this FixedFunction   
-            return nullptr;
-            //return std::make_shared<Renderer_RGB_TO_HSY_VID>(func);
+            return std::make_shared<Renderer_RGB_TO_HSY_VID>(func);
         }
         case FixedFunctionOpData::HSY_VID_TO_RGB:
         {
-            // TODO: Handle CPU rendering for this FixedFunction   
-            return nullptr;
-            //return std::make_shared<Renderer_HSY_VID_TO_RGB>(func);
+            return std::make_shared<Renderer_HSY_VID_TO_RGB>(func);
         }
 
         case FixedFunctionOpData::XYZ_TO_xyY:
