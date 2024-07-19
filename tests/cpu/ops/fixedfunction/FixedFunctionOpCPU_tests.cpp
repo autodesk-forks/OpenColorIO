@@ -488,62 +488,63 @@ OCIO_ADD_TEST(FixedFunctionOpCPU, RGB_TO_HSV)
 
 OCIO_ADD_TEST(FixedFunctionOpCPU, RGB_TO_HSY_LIN)
 {
-    //TODO: Change the data
     const std::vector<float> hsyFrame {
-        0.41666668653488f,  0.79574185609818f,  2.1429998874664f,  0.5f,
-        0.08333333581686f,  1.6844416856766f,  0.30762499570847f,  1.0f };
+         4.70554752e-01f, 9.12594033f, 3.26650218e-02f, 0.f,
+         0.75f,           0.22196741f, 0.38596f,        1.f,
+         0.08333333f,     0.12976444f, 0.034974f,       0.f,
+         0.96296296f,     9.7034f,     -0.1862f,        1.f };
 
     const std::vector<float> rgbFrame {
-        1.500f,   2.500f,   0.500f,   0.50f,
-        3.125f,  -0.625f,   1.250f,   1.00f };
+        -0.075290f,  0.078996f, -0.108397f, 0.f,
+         0.3f,       0.4f,       0.5f,      1.f,
+         0.05f,      0.03f,      0.04f,     0.f,
+         0.3f,      -0.4f,       0.5f,      1.f };
 
     OCIO::ConstFixedFunctionOpDataRcPtr dataFwdLin 
         = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::RGB_TO_HSY_LIN);
 
     std::vector<float> img = rgbFrame;
-    ApplyFixedFunction(&img[0], &hsyFrame[0], 2, dataFwdLin, 1e-6f, __LINE__);
+    ApplyFixedFunction(&img[0], &hsyFrame[0], 4, dataFwdLin, 1e-6f, __LINE__);
 
     OCIO::ConstFixedFunctionOpDataRcPtr dataFInvLin
         = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::HSY_LIN_TO_RGB);
 
     img = hsyFrame;
-    ApplyFixedFunction(&img[0], &rgbFrame[0], 2, dataFInvLin, 1e-6f, __LINE__);
+    ApplyFixedFunction(&img[0], &rgbFrame[0], 4, dataFInvLin, 1e-6f, __LINE__);
 }
 
 OCIO_ADD_TEST(FixedFunctionOpCPU, RGB_TO_HSY_LOG)
 {
-    //TODO: Change the data
     const std::vector<float> hsyFrame {
-        0.41666668653488f,  0.79574185609818f,  2.1429998874664f,  0.5f,
-        0.08333333581686f,  1.6844416856766f,  0.30762499570847f,  1.0f };
+        14563.0f / 65535, 64392.0f / 65535, 20899.0f / 65535, 32007.0f / 65535,
+        50061.0f / 65535, 64310.0f / 65535, 6328.0f / 65535, 65535.0f / 65535 };
 
     const std::vector<float> rgbFrame {
-        1.500f,   2.500f,   0.500f,   0.50f,
-        3.125f,  -0.625f,   1.250f,   1.00f };
+        1800.0f / 4095, 1200.0f / 4095, 900.0f / 4095, 2000.0f / 4095,
+        40.0f / 4095, 440.0f / 4095, 1000.0f / 4095, 4095.0f / 4095 };
 
     OCIO::ConstFixedFunctionOpDataRcPtr dataFwdLin 
         = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::RGB_TO_HSY_LOG);
 
     std::vector<float> img = rgbFrame;
-    ApplyFixedFunction(&img[0], &hsyFrame[0], 2, dataFwdLin, 1e-6f, __LINE__);
+    ApplyFixedFunction(&img[0], &hsyFrame[0], 2, dataFwdLin, 1e-5f, __LINE__);
 
     OCIO::ConstFixedFunctionOpDataRcPtr dataFInvLin
         = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::HSY_LOG_TO_RGB);
 
     img = hsyFrame;
-    ApplyFixedFunction(&img[0], &rgbFrame[0], 2, dataFInvLin, 1e-6f, __LINE__);
+    ApplyFixedFunction(&img[0], &rgbFrame[0], 2, dataFInvLin, 1e-5f, __LINE__);
 }
 
 OCIO_ADD_TEST(FixedFunctionOpCPU, RGB_TO_HSY_VID)
 {
-    //TODO: Change the data
     const std::vector<float> hsyFrame {
-        0.41666668653488f,  0.79574185609818f,  2.1429998874664f,  0.5f,
-        0.08333333581686f,  1.6844416856766f,  0.30762499570847f,  1.0f };
+        0.54190051555634f, 1.0851333141327f,  0.55111348628998f, 0.48840048909187f,
+        0.54262113571167f, 1.4824789762497f,  1.1281162500381f,   1.f };
 
     const std::vector<float> rgbFrame {
-        1.500f,   2.500f,   0.500f,   0.50f,
-        3.125f,  -0.625f,   1.250f,   1.00f };
+        0.12152557820082f, 0.70731294155121f, 0.26879417896271f, 0.48840048909187f,
+        0.53938156366348f, 1.3418402671814f,  0.74459171295166f, 1.f };
 
     OCIO::ConstFixedFunctionOpDataRcPtr dataFwdLin 
         = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::RGB_TO_HSY_VID);
@@ -552,7 +553,7 @@ OCIO_ADD_TEST(FixedFunctionOpCPU, RGB_TO_HSY_VID)
     ApplyFixedFunction(&img[0], &hsyFrame[0], 2, dataFwdLin, 1e-6f, __LINE__);
 
     OCIO::ConstFixedFunctionOpDataRcPtr dataFInvLin
-        = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::RGB_TO_HSY_VID);
+        = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::HSY_VID_TO_RGB);
 
     img = hsyFrame;
     ApplyFixedFunction(&img[0], &rgbFrame[0], 2, dataFInvLin, 1e-6f, __LINE__);
