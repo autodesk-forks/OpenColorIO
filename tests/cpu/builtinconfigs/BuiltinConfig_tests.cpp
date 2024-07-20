@@ -140,11 +140,11 @@ OCIO_ADD_TEST(BuiltinConfigs, basic)
         OCIO::ConstConfigRcPtr config;
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfig(4));
 #if OCIO_YAML_SUPPORT
-        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("a5024e33e3ed2b873044f4902b14d2a3:6001c324468d497f99aa06d3014798d8"));
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("d08df5fbe04c6f7440a60bdb66447af4:6001c324468d497f99aa06d3014798d8"));
 #endif
         OCIO_REQUIRE_NO_THROW(config = registry.createBuiltinConfigByName(coreRendererConfigName.c_str()));
 #if OCIO_YAML_SUPPORT
-        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("a5024e33e3ed2b873044f4902b14d2a3:6001c324468d497f99aa06d3014798d8"));
+        OCIO_CHECK_EQUAL(std::string(config->getCacheID()), std::string("d08df5fbe04c6f7440a60bdb66447af4:6001c324468d497f99aa06d3014798d8"));
 #endif
         OCIO_CHECK_EQUAL(registry.isBuiltinConfigRecommended(4), true);
     }

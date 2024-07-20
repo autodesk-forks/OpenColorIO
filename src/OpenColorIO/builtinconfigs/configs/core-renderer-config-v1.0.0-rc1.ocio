@@ -103,8 +103,8 @@ colorspaces:
         - !<MatrixTransform> {matrix: [0.614763305501725, 0.200243702572018, 0.184992991926256, 0, 0.125539404683864, 0.773521622216629, 0.100938973099507, 0, 0.0245287963611042, 0.0671715435381276, 0.908299660100768, 0, 0, 0, 0, 1]}
 
   - !<ColorSpace>
-    name: Linear ProPhotoRGB
-    aliases: [lin_prophotorgb_scene]
+    name: CIE XYZ-D65 - Scene-referred
+    aliases: [lin_ciexyzd65_scene]
     family: ""
     equalitygroup: ""
     bitdepth: 32f
@@ -113,7 +113,7 @@ colorspaces:
     allocation: uniform
     to_scene_reference: !<GroupTransform>
       children:
-        - !<MatrixTransform> {matrix: [0.80521891298626, 0.124669059595803, 0.0701120274179371, 0, -0.00432677792113733, 0.921798414646975, 0.082528363274162, 0, 0.0027067102395218, -0.00884887444206909, 1.00614216420255, 0, 0, 0, 0, 1]}
+        - !<MatrixTransform> {matrix: [1.0634954914942, 0.00640891019711789, -0.0158067866176054, 0, -0.492074127923892, 1.36822340747333, 0.0913370883144736, 0, -0.00281646163925351, 0.00464417105680067, 0.916418574593656, 0, 0, 0, 0, 1]}
 
   - !<ColorSpace>
     name: sRGB - Scene-referred
@@ -212,21 +212,6 @@ colorspaces:
       children:
         - !<ExponentTransform> {value: 2.19921875, style: pass_thru}
         - !<MatrixTransform> {matrix: [0.614763305501725, 0.200243702572018, 0.184992991926256, 0, 0.125539404683864, 0.773521622216629, 0.100938973099507, 0, 0.0245287963611042, 0.0671715435381276, 0.908299660100768, 0, 0, 0, 0, 1]}
-
-  - !<ColorSpace>
-    name: ProPhotoRGB - Scene-referred
-    aliases: [g18_prophotorgb_scene]
-    family: ""
-    equalitygroup: ""
-    bitdepth: 32f
-    description: "FIXME: The transfer function is not exactly 1.8, need to add a slope limit."
-    isdata: false
-    encoding: sdr-video
-    allocation: uniform
-    to_scene_reference: !<GroupTransform>
-      children:
-        - !<ExponentTransform> {value: 1.8, style: pass_thru}
-        - !<MatrixTransform> {matrix: [0.80521891298626, 0.124669059595803, 0.0701120274179371, 0, -0.00432677792113733, 0.921798414646975, 0.082528363274162, 0, 0.0027067102395218, -0.00884887444206909, 1.00614216420255, 0, 0, 0, 0, 1]}
 
   - !<ColorSpace>
     name: Data

@@ -233,7 +233,7 @@ ASWF Color Interop Forum Recommendation)");
             );
         }
 
-        // Linear ProPhotoRGB
+        // CIE XYZ-D65 - Scene-referred
         {
             auto trTo = GroupTransform::Create();
             trTo->setDirection(TRANSFORM_DIR_FORWARD);
@@ -241,12 +241,12 @@ ASWF Color Interop Forum Recommendation)");
                 auto trTo0 = MatrixTransform::Create();
                 trTo0->setDirection(TRANSFORM_DIR_FORWARD);
                 trTo0->setOffset(std::array<double, 4>({ 0, 0, 0, 0 }).data());
-                static const double trTo0Mat[] = { 0.80521891298626, 0.124669059595803, 0.0701120274179371, 0, -0.00432677792113733, 0.921798414646975, 0.082528363274162, 0, 0.0027067102395218, -0.00884887444206909, 1.00614216420255, 0, 0, 0, 0, 1 };
+                static const double trTo0Mat[] = { 1.0634954914942, 0.00640891019711789, -0.0158067866176054, 0, -0.492074127923892, 1.36822340747333, 0.0913370883144736, 0, -0.00281646163925351, 0.00464417105680067, 0.916418574593656, 0, 0, 0, 0, 1 };
                 trTo0->setMatrix(trTo0Mat);
                 trTo->appendTransform(trTo0);
             }
-            static const char* aliases[] = { u8R"(lin_prophotorgb_scene)","" };
-            AddColorSpace(cfg, u8R"(Linear ProPhotoRGB)"
+            static const char* aliases[] = { u8R"(lin_ciexyzd65_scene)","" };
+            AddColorSpace(cfg, u8R"(CIE XYZ-D65 - Scene-referred)"
                 , REFERENCE_SPACE_SCENE, aliases
                 , BIT_DEPTH_F32
                 , nullptr
@@ -484,38 +484,6 @@ ASWF Color Interop Forum Recommendation)");
                 , nullptr
                 , trTo
                 , ""
-            );
-        }
-
-        // ProPhotoRGB - Scene-referred
-        {
-            auto trTo = GroupTransform::Create();
-            trTo->setDirection(TRANSFORM_DIR_FORWARD);
-            {
-                auto trTo0 = ExponentTransform::Create();
-                trTo0->setNegativeStyle(NEGATIVE_PASS_THRU);
-                trTo0->setDirection(TRANSFORM_DIR_FORWARD);
-                trTo0->setValue({ 1.8, 1.8, 1.8, 1 });
-                trTo->appendTransform(trTo0);
-                auto trTo1 = MatrixTransform::Create();
-                trTo1->setDirection(TRANSFORM_DIR_FORWARD);
-                trTo1->setOffset(std::array<double, 4>({ 0, 0, 0, 0 }).data());
-                static const double trTo1Mat[] = { 0.80521891298626, 0.124669059595803, 0.0701120274179371, 0, -0.00432677792113733, 0.921798414646975, 0.082528363274162, 0, 0.0027067102395218, -0.00884887444206909, 1.00614216420255, 0, 0, 0, 0, 1 };
-                trTo1->setMatrix(trTo1Mat);
-                trTo->appendTransform(trTo1);
-            }
-            static const char* aliases[] = { u8R"(g18_prophotorgb_scene)","" };
-            AddColorSpace(cfg, u8R"(ProPhotoRGB - Scene-referred)"
-                , REFERENCE_SPACE_SCENE, aliases
-                , BIT_DEPTH_F32
-                , nullptr
-                , u8R"(sdr-video)"
-                , ""
-                , ""
-                , false
-                , nullptr
-                , trTo
-                , u8R"(FIXME: The transfer function is not exactly 1.8, need to add a slope limit.)"
             );
         }
 
