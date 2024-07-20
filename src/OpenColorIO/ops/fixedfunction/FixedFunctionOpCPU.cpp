@@ -210,6 +210,22 @@ public:
     void apply(const void * inImg, void * outImg, long numPixels) const override;
 };
 
+class Renderer_PQ_TO_LINEAR : public OpCPU {
+ public:
+  Renderer_PQ_TO_LINEAR() = delete;
+  explicit Renderer_PQ_TO_LINEAR(ConstFixedFunctionOpDataRcPtr &data);
+
+  void apply(const void *inImg, void *outImg, long numPixels) const override;
+};
+
+class Renderer_LINEAR_TO_PQ : public OpCPU {
+ public:
+  Renderer_LINEAR_TO_PQ() = delete;
+  explicit Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr &data);
+
+  void apply(const void *inImg, void *outImg, long numPixels) const override;
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1178,7 +1194,150 @@ void Renderer_LUV_TO_XYZ::apply(const void * inImg, void * outImg, long numPixel
 }
 
 
+namespace ST_2084
+{
+    static constexpr float m1 = float(0.25 * 2610. / 4096.);
+    static constexpr float m2 = float(128. * 2523. / 4096.);
+    static constexpr float c2 = float(32. * 2413. / 4096.);
+    static constexpr float c3 = float(32. * 2392. / 4096.);
+    static constexpr float c1 = c3 - c2 + 1.;
+} // ST_2084
 
+Renderer_PQ_TO_LINEAR::Renderer_PQ_TO_LINEAR(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    : OpCPU() 
+{
+}
+
+void Renderer_PQ_TO_LINEAR::apply(const void *inImg, void *outImg, long numPixels) const 
+{
+    // TODO optimize
+    using namespace ST_2084;
+    const float *in = (const float *)inImg;
+    float *out = (float *)outImg;
+
+    for (long idx = 0; idx < numPixels; ++idx, out += 4, in += 4) 
+    {
+        // (0..1) values will be pass through 
+        // output values are scaled by 100 to convert nits/10,000 into nits/100
+
+        // R
+        {
+            float r = in[0]; 
+            if ((r <= 0.0f) || (r >= 1.0f))
+            {
+                out[0] = r * 100.0f;
+            }
+            else
+            {
+                const float x = std::pow(r, 1.f / m2);
+                out[0] = 100.0f * std::pow(std::max(0.f, x - c1) / (c2 - c3 * x), 1.f / m1);
+            };
+        }
+
+        // G
+        {
+            float g = in[1];
+            if ((g <= 0.0f) || (g >= 1.0f))
+            {
+                out[1] = g * 100.0f;
+            }
+            else
+            {
+                const float x = std::pow(g, 1.f / m2);
+                out[1] = 100.0f * std::pow(std::max(0.f, x - c1) / (c2 - c3 * x), 1.f / m1);
+            };
+        }
+
+        // B
+        {
+            float b = in[2];
+            if ((b <= 0.0f) || (b >= 1.0f))
+            {
+                out[2] = b * 100.0f;
+            }
+            else
+            {
+                const float x = std::pow(b, 1.f / m2);
+                out[2] = 100.0f * std::pow(std::max(0.f, x - c1) / (c2 - c3 * x), 1.f / m1);
+            };
+        }
+
+        // A
+        out[3] = in[3];
+    }
+}
+
+Renderer_LINEAR_TO_PQ::Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    : OpCPU() 
+{
+
+}
+
+void Renderer_LINEAR_TO_PQ::apply(const void *inImg, void *outImg, long numPixels) const 
+{
+    using namespace ST_2084;
+    const float* in = (const float*)inImg;
+    float* out = (float*)outImg;
+
+    // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
+
+    for (long idx = 0; idx < numPixels; ++idx, out += 4, in += 4)
+    {
+        // R
+        {
+            float r = 0.01f * in[0];
+            if (r < 0.0f || r > 1.0f)
+            {
+                out[0] = r;
+            }
+            else
+            {
+                const float L = std::max(0.0f, r);
+                const float y = std::pow(L, m1);
+                const float ratpoly = (c1 + c2 * y) / (1.f + c3 * y);
+                const float N = std::pow(std::max(0.f, ratpoly), m2);
+                out[0] = N;
+            }
+        }
+
+        // G
+        {
+            float g = 0.01f * in[1];
+            if (g < 0.0f || g > 1.0f)
+            {
+                out[1] = g;
+            }
+            else
+            {
+                const float L = std::max(0.0f, g);
+                const float y = std::pow(L, m1);
+                const float ratpoly = (c1 + c2 * y) / (1.f + c3 * y);
+                const float N = std::pow(std::max(0.f, ratpoly), m2);
+                out[1] = N;
+            }
+        }
+
+        // B
+        {
+            float b = 0.01f * in[2];
+            if (b < 0.0f || b > 1.0f)
+            {
+                out[2] = b;
+            }
+            else
+            {
+                const float L = std::max(0.0f, b);
+                const float y = std::pow(L, m1);
+                const float ratpoly = (c1 + c2 * y) / (1.f + c3 * y);
+                const float N = std::pow(std::max(0.f, ratpoly), m2);
+                out[2] = N;
+            }
+        }
+
+        //A
+        out[3] = in[3];
+    };
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1277,6 +1436,14 @@ ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func
         case FixedFunctionOpData::LUV_TO_XYZ:
         {
             return std::make_shared<Renderer_LUV_TO_XYZ>(func);
+        }
+        case FixedFunctionOpData::PQ_TO_LINEAR:
+        {
+            return std::make_shared<Renderer_PQ_TO_LINEAR>(func);
+        }
+        case FixedFunctionOpData::LINEAR_TO_PQ:
+        {
+            return std::make_shared<Renderer_LINEAR_TO_PQ>(func);
         }
     }
 
