@@ -671,6 +671,14 @@ void GetFixedFunctionGPUShaderProgram(GpuShaderCreatorRcPtr & shaderCreator,
         {
             Add_LUV_TO_XYZ(shaderCreator, ss);
         }
+        case FixedFunctionOpData::PQ_TO_LINEAR:
+        {
+            // TODO: Add function
+        }
+        case FixedFunctionOpData::LINEAR_TO_PQ:
+        {
+            // TODO: Add function
+        }
     }
 
     ss.dedent();
