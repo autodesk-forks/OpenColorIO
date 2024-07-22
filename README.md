@@ -18,7 +18,13 @@ NanoColor does not support custom config files or LUTs like full OCIO.
 Several config files are built into the library itself and these provide
 complete implementation of ACES color management. In addition, it's
 possible for clients to copy and edit the built-in configs to suit their
-needs. This includes the addition of custom color spaces.
+needs. This includes the addition of custom color spaces. However, the
+color spaces in the ASWF Color Interop Forum rendering core set reserved 
+and the behavior of that set may not be modified.
+
+There is a new built-in config that only contains the color spaces in
+the ASWF Color Interop Forum core set. This config is available via
+the string: "core-renderer-config-v1.0.0-rc1".
 
 NanoColor uses the same underlying transform chain optimization and
 CPU and GPU rendering paths as full OCIO. For developers, working with
@@ -62,8 +68,6 @@ TODO
 
 This is currently a prototype and there are a number of tasks remaining:
 
-* Add the built-in config for the Color Interop Forum core color space set
-  (although note that the built-in configs already have most of the spaces).
 * Prevent clients from overriding the core color space set.
 * A few built-in transforms have been disabled since they required LUTs but
   could be re-enabled by converting to use fixed functions instead.
@@ -71,3 +75,4 @@ This is currently a prototype and there are a number of tasks remaining:
 * Make further optimizations to reduce the size of the library.
 * Add JavaScript binding.
 * Add documentation.
+* Improve the Config cacheID algorithm to not require Yaml.
