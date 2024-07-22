@@ -71,6 +71,7 @@ This is currently a prototype and there are a number of tasks remaining:
 * Prevent clients from overriding the core color space set.
 * A few built-in transforms have been disabled since they required LUTs but
   could be re-enabled by converting to use fixed functions instead.
+* Add function to check nanoColor compatibility of a color space
 * Clean up the removal of Imath and Pystring.
 * Make further optimizations to reduce the size of the library.
 * Add JavaScript binding.
