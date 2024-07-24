@@ -466,6 +466,14 @@ OCIO_ADD_GPU_TEST(FixedFunction, style_RGB_TO_HSY_LIN_inv)
 
     test.setErrorThreshold(1e-6f);
 
+    OCIOGPUTest::CustomValues values;
+    values.m_inputValues = {
+        4.70554752e-01f, 9.12594033f, 3.26650218e-02f, 0.f,
+        0.75f,           0.22196741f, 0.38596f,        1.f,
+        0.08333333f,     0.12976444f, 0.034974f,       0.f,
+        0.96296296f,     9.7034f,     -0.1862f,        1.f };
+    test.setCustomValues(values);
+
 #ifdef __APPLE__
     test.setTestNaN(false);
     test.setTestInfinity(false);
