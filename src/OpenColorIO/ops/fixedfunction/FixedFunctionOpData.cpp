@@ -286,7 +286,8 @@ FixedFunctionOpData::Style FixedFunctionOpData::ConvertStyle(FixedFunctionStyle 
         }
         case FIXED_FUNCTION_PQ_TO_LINEAR: 
         {
-            return FixedFunctionOpData::PQ_TO_LINEAR;
+            return isForward ? FixedFunctionOpData::PQ_TO_LINEAR :
+                               FixedFunctionOpData::LINEAR_TO_PQ;
         }
     }
 

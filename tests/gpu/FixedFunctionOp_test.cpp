@@ -505,3 +505,26 @@ OCIO_ADD_GPU_TEST(FixedFunction, style_XYZ_TO_LUV_inv)
 
     test.setErrorThreshold(1e-5f);
 }
+
+OCIO_ADD_GPU_TEST(FixedFunction, style_PQ_TO_LINEAR_fwd)
+{
+    OCIO::FixedFunctionTransformRcPtr func =
+        OCIO::FixedFunctionTransform::Create(OCIO::FIXED_FUNCTION_PQ_TO_LINEAR);
+    func->setDirection(OCIO::TRANSFORM_DIR_FORWARD);
+
+    test.setTestWideRange(false);
+    test.setProcessor(func);
+    test.setErrorThreshold(1e-4f);
+    test.setRelativeComparison(true); // since output will be 0..100, let's set the relative epsilon.
+}
+
+OCIO_ADD_GPU_TEST(FixedFunction, style_PQ_TO_LINEAR_inv)
+{
+    OCIO::FixedFunctionTransformRcPtr func =
+        OCIO::FixedFunctionTransform::Create(OCIO::FIXED_FUNCTION_PQ_TO_LINEAR);
+    func->setDirection(OCIO::TRANSFORM_DIR_INVERSE);
+
+    test.setTestWideRange(false);
+    test.setProcessor(func);
+    test.setErrorThreshold(1e-5f);
+}

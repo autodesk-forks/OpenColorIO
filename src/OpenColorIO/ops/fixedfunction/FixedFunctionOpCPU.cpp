@@ -1210,60 +1210,32 @@ Renderer_PQ_TO_LINEAR::Renderer_PQ_TO_LINEAR(ConstFixedFunctionOpDataRcPtr & /*d
 
 void Renderer_PQ_TO_LINEAR::apply(const void *inImg, void *outImg, long numPixels) const 
 {
-    // TODO optimize
+    /// TODO: This is a short, proof-of-concept implementation, needs optimization.
+
     using namespace ST_2084;
     const float *in = (const float *)inImg;
     float *out = (float *)outImg;
 
-    for (long idx = 0; idx < numPixels; ++idx, out += 4, in += 4) 
+    for (long idx = 0; idx < numPixels; ++idx) 
     {
-        // (0..1) values will be pass through 
-        // output values are scaled by 100 to convert nits/10,000 into nits/100
-
-        // R
+        // RGB
+        for (int ch = 0; ch < 3; ++ch)
         {
-            float r = in[0]; 
-            if ((r <= 0.0f) || (r >= 1.0f))
+            float v = *(in++); 
+            if ((v <= 0.0f) /*|| (v >= 1.0f)*/)
             {
-                out[0] = r * 100.0f;
+                //*(out++) = v * 100.0f;
+                *(out++) = 0.0f;
             }
             else
             {
-                const float x = std::pow(r, 1.f / m2);
-                out[0] = 100.0f * std::pow(std::max(0.f, x - c1) / (c2 - c3 * x), 1.f / m1);
+                const float x = std::pow(v, 1.f / m2);
+                *(out++) = 100.0f * std::pow(std::max(0.f, x - c1) / (c2 - c3 * x), 1.f / m1);
             };
         }
 
-        // G
-        {
-            float g = in[1];
-            if ((g <= 0.0f) || (g >= 1.0f))
-            {
-                out[1] = g * 100.0f;
-            }
-            else
-            {
-                const float x = std::pow(g, 1.f / m2);
-                out[1] = 100.0f * std::pow(std::max(0.f, x - c1) / (c2 - c3 * x), 1.f / m1);
-            };
-        }
-
-        // B
-        {
-            float b = in[2];
-            if ((b <= 0.0f) || (b >= 1.0f))
-            {
-                out[2] = b * 100.0f;
-            }
-            else
-            {
-                const float x = std::pow(b, 1.f / m2);
-                out[2] = 100.0f * std::pow(std::max(0.f, x - c1) / (c2 - c3 * x), 1.f / m1);
-            };
-        }
-
-        // A
-        out[3] = in[3];
+        // Alpha
+        *(out++) = *(in++);
     }
 }
 
@@ -1279,63 +1251,32 @@ void Renderer_LINEAR_TO_PQ::apply(const void *inImg, void *outImg, long numPixel
     const float* in = (const float*)inImg;
     float* out = (float*)outImg;
 
+    // TODO: This is a short, proof of concept implementation, needs optimization.
+
     // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
-
-    for (long idx = 0; idx < numPixels; ++idx, out += 4, in += 4)
+    for (long idx = 0; idx < numPixels; ++idx)
     {
-        // R
+        // RGB
+        for(int ch = 0; ch < 3; ++ch)
         {
-            float r = 0.01f * in[0];
-            if (r < 0.0f || r > 1.0f)
+            float v = *(in++) * 0.01f;
+            if (v < 0.0f /*|| v > 1.0f*/)
             {
-                out[0] = r;
+                //*(out++) = v;
+                *(out++) = 0.0f;
             }
             else
             {
-                const float L = std::max(0.0f, r);
+                const float L = std::max(0.0f, v);
                 const float y = std::pow(L, m1);
                 const float ratpoly = (c1 + c2 * y) / (1.f + c3 * y);
                 const float N = std::pow(std::max(0.f, ratpoly), m2);
-                out[0] = N;
+                *(out++) = N;
             }
         }
 
-        // G
-        {
-            float g = 0.01f * in[1];
-            if (g < 0.0f || g > 1.0f)
-            {
-                out[1] = g;
-            }
-            else
-            {
-                const float L = std::max(0.0f, g);
-                const float y = std::pow(L, m1);
-                const float ratpoly = (c1 + c2 * y) / (1.f + c3 * y);
-                const float N = std::pow(std::max(0.f, ratpoly), m2);
-                out[1] = N;
-            }
-        }
-
-        // B
-        {
-            float b = 0.01f * in[2];
-            if (b < 0.0f || b > 1.0f)
-            {
-                out[2] = b;
-            }
-            else
-            {
-                const float L = std::max(0.0f, b);
-                const float y = std::pow(L, m1);
-                const float ratpoly = (c1 + c2 * y) / (1.f + c3 * y);
-                const float N = std::pow(std::max(0.f, ratpoly), m2);
-                out[2] = N;
-            }
-        }
-
-        //A
-        out[3] = in[3];
+        // Alpha
+        *(out++) = *(in++);
     };
 }
 
