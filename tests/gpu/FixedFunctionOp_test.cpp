@@ -526,5 +526,5 @@ OCIO_ADD_GPU_TEST(FixedFunction, style_PQ_TO_LINEAR_inv)
 
     test.setTestWideRange(false);
     test.setProcessor(func);
-    test.setErrorThreshold(1e-5f);
+    test.setErrorThreshold(2e-5f);
 }

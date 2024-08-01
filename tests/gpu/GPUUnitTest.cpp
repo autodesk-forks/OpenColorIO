@@ -271,9 +271,9 @@ namespace
             // Compute the value step based on the remaining number of values.
             const float step = range / float(numEntries);
 
-            for (; idx < predefinedNumEntries; ++idx)
+            for (unsigned int i=0; i < numEntries; ++i, ++idx)
             {
-                tmp.m_inputValues[idx] = min + step * float(idx);
+                tmp.m_inputValues[idx] = min + step * float(i);
             }
 
             test->setCustomValues(tmp);
