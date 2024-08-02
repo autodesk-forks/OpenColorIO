@@ -210,6 +210,22 @@ public:
     void apply(const void * inImg, void * outImg, long numPixels) const override;
 };
 
+class Renderer_PQ_TO_LINEAR : public OpCPU {
+ public:
+  Renderer_PQ_TO_LINEAR() = delete;
+  explicit Renderer_PQ_TO_LINEAR(ConstFixedFunctionOpDataRcPtr &data);
+
+  void apply(const void *inImg, void *outImg, long numPixels) const override;
+};
+
+class Renderer_LINEAR_TO_PQ : public OpCPU {
+ public:
+  Renderer_LINEAR_TO_PQ() = delete;
+  explicit Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr &data);
+
+  void apply(const void *inImg, void *outImg, long numPixels) const override;
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1178,7 +1194,78 @@ void Renderer_LUV_TO_XYZ::apply(const void * inImg, void * outImg, long numPixel
 }
 
 
+namespace ST_2084
+{
+    using FLOAT = double; // Temp: used for fast float/double switching for precision evaluation.
+    static constexpr FLOAT m1 = FLOAT(0.25 * 2610. / 4096.);
+    static constexpr FLOAT m2 = FLOAT(128. * 2523. / 4096.);
+    static constexpr FLOAT c2 = FLOAT(32. * 2413. / 4096.);
+    static constexpr FLOAT c3 = FLOAT(32. * 2392. / 4096.);
+    static constexpr FLOAT c1 = c3 - c2 + 1.;
+} // ST_2084
 
+Renderer_PQ_TO_LINEAR::Renderer_PQ_TO_LINEAR(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    : OpCPU() 
+{
+}
+
+void Renderer_PQ_TO_LINEAR::apply(const void *inImg, void *outImg, long numPixels) const 
+{
+    /// TODO: This is a short, proof-of-concept implementation, needs optimization.
+
+    using namespace ST_2084;
+    const float *in = (const float *)inImg;
+    float *out = (float *)outImg;
+
+    for (long idx = 0; idx < numPixels; ++idx) 
+    {
+        // RGB
+        for (int ch = 0; ch < 3; ++ch)
+        {
+            float v = *(in++);
+            const FLOAT vabs = std::abs(FLOAT(v));
+            const FLOAT x = std::pow(vabs, FLOAT(1.) / m2);
+            float nits100 = float(FLOAT(100.0) * std::pow(std::max(FLOAT(0), x - c1) / (c2 - c3 * x), FLOAT(1.) / m1));
+            *(out++) = std::copysign(nits100, v);
+        }
+
+        // Alpha
+        *(out++) = *(in++);
+    }
+}
+
+Renderer_LINEAR_TO_PQ::Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    : OpCPU() 
+{
+
+}
+
+void Renderer_LINEAR_TO_PQ::apply(const void *inImg, void *outImg, long numPixels) const 
+{
+    using namespace ST_2084;
+    const float* in = (const float*)inImg;
+    float* out = (float*)outImg;
+
+    // TODO: This is a short, proof of concept implementation, needs optimization.
+
+    // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
+    for (long idx = 0; idx < numPixels; ++idx)
+    {
+        // RGB
+        for(int ch = 0; ch < 3; ++ch)
+        {
+            float v = *(in++);
+            const FLOAT L = std::abs(v * FLOAT(0.01));
+            const FLOAT y = std::pow(L, m1);
+            const FLOAT ratpoly = (c1 + c2 * y) / (FLOAT(1.) + c3 * y);
+            const FLOAT N = std::pow(ratpoly, m2);
+            *(out++) = std::copysign(float(N), v);
+        }
+
+        // Alpha
+        *(out++) = *(in++);
+    };
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1277,6 +1364,16 @@ ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func
         case FixedFunctionOpData::LUV_TO_XYZ:
         {
             return std::make_shared<Renderer_LUV_TO_XYZ>(func);
+        }
+        case FixedFunctionOpData::PQ_TO_LINEAR:
+        {
+            // TODO: we may want to implement an SIMD renderer if scalar performance is low.
+            return std::make_shared<Renderer_PQ_TO_LINEAR>(func);
+        }
+        case FixedFunctionOpData::LINEAR_TO_PQ:
+        {
+            // TODO: we may want to implement an SIMD renderer if scalar performance is low.
+            return std::make_shared<Renderer_LINEAR_TO_PQ>(func);
         }
     }
 

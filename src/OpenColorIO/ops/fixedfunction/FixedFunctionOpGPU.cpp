@@ -523,6 +523,59 @@ void Add_LUV_TO_XYZ(GpuShaderCreatorRcPtr & shaderCreator, GpuShaderText & ss)
     ss.newLine() << pxl << ".rgb.g = Y;";
 }
 
+
+namespace 
+{
+    namespace ST_2084
+    {
+        static constexpr double m1 = 0.25 * 2610. / 4096.;
+        static constexpr double m2 = 128. * 2523. / 4096.;
+        static constexpr double c2 = 32. * 2413. / 4096.;
+        static constexpr double c3 = 32. * 2392. / 4096.;
+        static constexpr double c1 = c3 - c2 + 1.;
+    }
+} // anonymous
+
+void Add_PQ_TO_LINEAR(GpuShaderCreatorRcPtr& shaderCreator, GpuShaderText& ss)
+{
+    using namespace ST_2084;
+    const std::string pxl(shaderCreator->getPixelName());
+
+    // TODO: this still clamps negative inputs
+    // sign3 = sign(pxl);
+    // x = abs(pxl);
+    // x = max(x, vec3(0.));
+    // x = pow(x, vec3(1. / m2));
+    // vec3 v = 1. * pow(max(vec3(0.), x - vec3(c1)) / (vec3(c2) - c3 * x), vec3(1. / m1));
+
+    ss.newLine() << ss.float3Decl("sign3") << " = sign(" << pxl << ".rgb);";
+    ss.newLine() << ss.float3Decl("x") << " = abs(" << pxl << ".rgb);";
+    ss.newLine() << "x = max(x, " << ss.float3Const(0.0) << ");";
+    ss.newLine() << "x = pow(x, "<< ss.float3Const(1.0 / m2) << ");";
+    ss.newLine() << pxl << ".rgb = 100. * sign3 * pow(max(" << ss.float3Const(0.0) << ", x - " << ss.float3Const(c1) << ") / ("
+        << ss.float3Const(c2) << " - " << c3 << " * x), " << ss.float3Const(1.0 / m1) << ");";
+}
+
+void Add_LINEAR_TO_PQ(GpuShaderCreatorRcPtr& shaderCreator, GpuShaderText& ss)
+{
+    using namespace ST_2084;
+    const std::string pxl(shaderCreator->getPixelName());
+
+    // TODO: this still clamps negative inputs
+
+    // double L = std::max(0., input * 0.01);
+    // double y = std::pow(L, m1);
+    // double ratpoly = (c1 + c2 * y) / (1. + c3 * y);
+    // double N = std::pow(std::max(0., ratpoly), m2);
+
+    ss.newLine() << ss.float3Decl("sign3") << " = sign(" << pxl << ".rgb);";
+    ss.newLine() << ss.float3Decl("L") << " = abs(0.01 * " << pxl << ".rgb);";
+    ss.newLine() << ss.float3Decl("y") << " = pow(L, " << ss.float3Const(m1) << ");";
+    ss.newLine() << ss.float3Decl("ratpoly") << " = (" << ss.float3Const(c1) << " + " << c2 << " * y) / (" 
+        << ss.float3Const(1.0) << " + " << c3 << " * y);";
+    ss.newLine() << pxl << ".rgb = sign3 * pow(max(" << ss.float3Const(0.0) << ", ratpoly), " << ss.float3Const(m2) << ");"; // Do we need "max" here?
+}
+
 void GetFixedFunctionGPUShaderProgram(GpuShaderCreatorRcPtr & shaderCreator,
                                       ConstFixedFunctionOpDataRcPtr & func)
 {
@@ -670,6 +723,17 @@ void GetFixedFunctionGPUShaderProgram(GpuShaderCreatorRcPtr & shaderCreator,
         case FixedFunctionOpData::LUV_TO_XYZ:
         {
             Add_LUV_TO_XYZ(shaderCreator, ss);
+            break;
+        }
+        case FixedFunctionOpData::PQ_TO_LINEAR:
+        {
+            Add_PQ_TO_LINEAR(shaderCreator, ss);
+            break;
+        }
+        case FixedFunctionOpData::LINEAR_TO_PQ:
+        {
+            Add_LINEAR_TO_PQ(shaderCreator, ss);
+            break;
         }
     }
 
