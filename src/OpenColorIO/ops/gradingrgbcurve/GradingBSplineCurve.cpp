@@ -773,7 +773,7 @@ void GradingBSplineCurveImpl::computeKnotsAndCoefsForHueCurve(KnotsCoefs & knots
         const int numCoefs = static_cast<int>(knotsCoefs.m_numCoefs);
 
         const int N_IDENTITY_KNOTS = 2;
-        const int N_IDENTITY_COEFS = 6;
+        const int N_IDENTITY_COEFS = 3;
         
         knotsCoefs.m_knotsOffsetsArray[curveIdx * 2] = numKnots;
         knotsCoefs.m_knotsOffsetsArray[curveIdx * 2 + 1] = N_IDENTITY_KNOTS;
@@ -783,25 +783,22 @@ void GradingBSplineCurveImpl::computeKnotsAndCoefsForHueCurve(KnotsCoefs & knots
         knotsCoefs.m_knotsArray.begin()[numKnots] = 0.f;
         knotsCoefs.m_knotsArray.begin()[numKnots + 1] = 1.f;
         
-        // Identity curve are linear or constant.
+        // Identity curve are linear or constant, so set the quadratic coefficient to zero.
         knotsCoefs.m_coefsArray.begin()[numCoefs] = 0.f;
-        knotsCoefs.m_coefsArray.begin()[numCoefs + 1] = 0.f;
         
-        // Set a linear curve for the diagonals and the hue hue curves.
+        // Set the constant coefficient for an identity curve.
         const float linearCoef = m_curveType == BSplineCurveType::DIAGONAL_B_SPLINE || 
                                  m_curveType == BSplineCurveType::HUE_HUE_B_SPLINE ? 
                                  1.0f : 0.f;
 
-        knotsCoefs.m_coefsArray.begin()[numCoefs + 2] = linearCoef;
-        knotsCoefs.m_coefsArray.begin()[numCoefs + 3] = linearCoef;
+        knotsCoefs.m_coefsArray.begin()[numCoefs + 1] = linearCoef;
 
         // Set the identity curve constant
         const float constantCoef = m_curveType == BSplineCurveType::PERIODIC_1_B_SPLINE || 
                                    m_curveType == BSplineCurveType::HORIZONTAL1_B_SPLINE ? 
                                    1.0f : 0.f;
         
-        knotsCoefs.m_coefsArray.begin()[numCoefs + 4] = constantCoef;
-        knotsCoefs.m_coefsArray.begin()[numCoefs + 5] = constantCoef;
+        knotsCoefs.m_coefsArray.begin()[numCoefs + 2] = constantCoef;
         
 
         knotsCoefs.m_numKnots += N_IDENTITY_KNOTS;
