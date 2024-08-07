@@ -786,14 +786,14 @@ void GradingBSplineCurveImpl::computeKnotsAndCoefsForHueCurve(KnotsCoefs & knots
         // Identity curve are linear or constant, so set the quadratic coefficient to zero.
         knotsCoefs.m_coefsArray.begin()[numCoefs] = 0.f;
         
-        // Set the constant coefficient for an identity curve.
+        // Set the linear coefficient to match the slope of the identity curve.
         const float linearCoef = m_curveType == BSplineCurveType::DIAGONAL_B_SPLINE || 
                                  m_curveType == BSplineCurveType::HUE_HUE_B_SPLINE ? 
                                  1.0f : 0.f;
 
         knotsCoefs.m_coefsArray.begin()[numCoefs + 1] = linearCoef;
 
-        // Set the identity curve constant
+        // Set the constant coefficient for an identity curve.
         const float constantCoef = m_curveType == BSplineCurveType::PERIODIC_1_B_SPLINE || 
                                    m_curveType == BSplineCurveType::HORIZONTAL1_B_SPLINE ? 
                                    1.0f : 0.f;
