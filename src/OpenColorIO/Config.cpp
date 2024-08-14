@@ -5318,7 +5318,7 @@ void Config::Impl::checkVersionConsistency(ConstTransformRcPtr & transform) cons
                 if(ffstyle == FIXED_FUNCTION_PQ_TO_LINEAR)
                 {
                     throw Exception("Only config version 2.4 (or higher) can have "
-                        "FixedFunctionTransform style 'FIXED_FUNCTION_PQ_TO_LINEAR'.");
+                        "FixedFunctionTransform style 'PQ_TO_LINEAR'.");
                 }
             }
         }

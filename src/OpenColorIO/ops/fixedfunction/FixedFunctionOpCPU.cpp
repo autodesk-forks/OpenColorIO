@@ -1237,7 +1237,6 @@ void Renderer_PQ_TO_LINEAR::apply(const void *inImg, void *outImg, long numPixel
 Renderer_LINEAR_TO_PQ::Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr & /*data*/)
     : OpCPU() 
 {
-
 }
 
 void Renderer_LINEAR_TO_PQ::apply(const void *inImg, void *outImg, long numPixels) const 
