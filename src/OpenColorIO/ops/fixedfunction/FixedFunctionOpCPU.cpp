@@ -1305,6 +1305,7 @@ void Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
         }
             
         // Restore the sign bits and Alpha channel.
+        // TODO: this can be further optimized by using separate SSE constants for alpha channel
         __m128 nits100_signed = _mm_or_ps(_mm_and_ps(abs_rgb_mask, nits100), _mm_andnot_ps(abs_rgb_mask, v)); 
             
         // store
@@ -1359,39 +1360,23 @@ void Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
 
     for (long idx = 0; idx < numPixels; ++idx, in += 4, out += 4)
     {
-        float fv = *in;
-        const float fL = std::abs(fv * 0.01f);
-        const float fy = std::pow(fL, float(m1));
-        const float fratpoly = (float(c1) + float(c2) * fy) / (1.f + float(c3) * fy);
-        const float fN = std::pow(fratpoly, float(m2));
-        float fout = std::copysign(fN, fv);
-
-
         // load
-        //float v = *(in++);
         __m128 v = _mm_loadu_ps(in);
+
         __m128 vabs = _mm_and_ps(abs_rgb_mask, v); // Clear sign bits of RGB and all bits of Alpha
-        
-        //const FLOAT L = v * FLOAT(0.01));
         __m128 L = _mm_mul_ps(_mm_set1_ps(0.01f), vabs);
-
-        //const FLOAT y = std::pow(L, m1);
         __m128 y = FAST_POWER ? ssePower(L, vm1) : _mm_pow_ps(L, vm1);
-
-        //const FLOAT ratpoly = (c1 + c2 * y) / (FLOAT(1.) + c3 * y);
         __m128 ratpoly = _mm_div_ps(
             _mm_add_ps(vc1, _mm_mul_ps (vc2, y)),
-            _mm_add_ps(_mm_set1_ps(1.0f), _mm_mul_ps(vc3, y))
-        );
-
-        //const FLOAT N = std::pow(ratpoly, m2);
+            _mm_add_ps(_mm_set1_ps(1.0f), _mm_mul_ps(vc3, y)));
         __m128 N  = FAST_POWER ? ssePower(ratpoly, vm2) : _mm_pow_ps(ratpoly, vm2);
+
+        // restore sign bits and the alpha channel
+        // TODO: this can be further optimized by using separate SSE constants for alpha channel
         __m128 N_signed = _mm_or_ps(_mm_and_ps(abs_rgb_mask, N), _mm_andnot_ps(abs_rgb_mask, v));
 
         // store
         _mm_storeu_ps(out, N_signed);
-
-
     }
 }
 
