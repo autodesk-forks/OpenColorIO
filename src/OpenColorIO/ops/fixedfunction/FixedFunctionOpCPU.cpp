@@ -9,6 +9,8 @@
 #include "BitDepthUtils.h"
 #include "MathUtils.h"
 #include "ops/fixedfunction/FixedFunctionOpCPU.h"
+#include "SSE.h"
+#include "CPUInfo.h"
 
 
 namespace OCIO_NAMESPACE
@@ -210,6 +212,7 @@ public:
     void apply(const void * inImg, void * outImg, long numPixels) const override;
 };
 
+template <typename T>
 class Renderer_PQ_TO_LINEAR : public OpCPU {
  public:
   Renderer_PQ_TO_LINEAR() = delete;
@@ -218,6 +221,7 @@ class Renderer_PQ_TO_LINEAR : public OpCPU {
   void apply(const void *inImg, void *outImg, long numPixels) const override;
 };
 
+template <typename T>
 class Renderer_LINEAR_TO_PQ : public OpCPU {
  public:
   Renderer_LINEAR_TO_PQ() = delete;
@@ -226,6 +230,26 @@ class Renderer_LINEAR_TO_PQ : public OpCPU {
   void apply(const void *inImg, void *outImg, long numPixels) const override;
 };
 
+#if OCIO_USE_SSE2
+template<bool FAST_POWER>
+class Renderer_PQ_TO_LINEAR_SSE : public OpCPU {
+public:
+    Renderer_PQ_TO_LINEAR_SSE() = delete;
+    explicit Renderer_PQ_TO_LINEAR_SSE(ConstFixedFunctionOpDataRcPtr& data);
+
+    void apply(const void* inImg, void* outImg, long numPixels) const override;
+};
+
+
+template<bool FAST_POWER>
+class Renderer_LINEAR_TO_PQ_SSE : public OpCPU {
+public:
+    Renderer_LINEAR_TO_PQ_SSE() = delete;
+    explicit Renderer_LINEAR_TO_PQ_SSE(ConstFixedFunctionOpDataRcPtr& data);
+
+    void apply(const void* inImg, void* outImg, long numPixels) const override;
+};
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1193,26 +1217,38 @@ void Renderer_LUV_TO_XYZ::apply(const void * inImg, void * outImg, long numPixel
     }
 }
 
-
+namespace 
+{
 namespace ST_2084
 {
-    using FLOAT = double; // Temp: used for fast float/double switching for precision evaluation.
-    static constexpr FLOAT m1 = FLOAT(0.25 * 2610. / 4096.);
-    static constexpr FLOAT m2 = FLOAT(128. * 2523. / 4096.);
-    static constexpr FLOAT c2 = FLOAT(32. * 2413. / 4096.);
-    static constexpr FLOAT c3 = FLOAT(32. * 2392. / 4096.);
-    static constexpr FLOAT c1 = c3 - c2 + 1.;
-} // ST_2084
+    static constexpr double m1 = 0.25 * 2610. / 4096.;
+    static constexpr double m2 = 128. * 2523. / 4096.;
+    static constexpr double c2 = 32. * 2413. / 4096.;
+    static constexpr double c3 = 32. * 2392. / 4096.;
+    static constexpr double c1 = c3 - c2 + 1.;
 
-Renderer_PQ_TO_LINEAR::Renderer_PQ_TO_LINEAR(ConstFixedFunctionOpDataRcPtr & /*data*/)
+#if OCIO_USE_SSE2
+    const __m128 abs_rgb_mask = _mm_castsi128_ps(_mm_setr_epi32(0x7fffffff, 0x7fffffff, 0x7fffffff, 0));
+    const __m128 vm1 = _mm_set1_ps(m1);
+    const __m128 vm2 = _mm_set1_ps(m2);
+    const __m128 vm1_inv = _mm_set1_ps(1.0f / float(m1));
+    const __m128 vm2_inv = _mm_set1_ps(1.0f / float(m2));
+    const __m128 vc1 = _mm_set1_ps(c1);
+    const __m128 vc2 = _mm_set1_ps(c2);
+    const __m128 vc3 = _mm_set1_ps(c3);
+#endif
+} // ST_2084
+} // anonymous
+
+template<typename T>
+Renderer_PQ_TO_LINEAR<T>::Renderer_PQ_TO_LINEAR(ConstFixedFunctionOpDataRcPtr & /*data*/)
     : OpCPU() 
 {
 }
 
-void Renderer_PQ_TO_LINEAR::apply(const void *inImg, void *outImg, long numPixels) const 
+template<typename T>
+void Renderer_PQ_TO_LINEAR<T>::apply(const void *inImg, void *outImg, long numPixels) const 
 {
-    /// TODO: This is a short, proof-of-concept implementation, needs optimization.
-
     using namespace ST_2084;
     const float *in = (const float *)inImg;
     float *out = (float *)outImg;
@@ -1223,10 +1259,10 @@ void Renderer_PQ_TO_LINEAR::apply(const void *inImg, void *outImg, long numPixel
         for (int ch = 0; ch < 3; ++ch)
         {
             float v = *(in++);
-            const FLOAT vabs = std::abs(FLOAT(v));
-            const FLOAT x = std::pow(vabs, FLOAT(1.) / m2);
-            float nits100 = float(FLOAT(100.0) * std::pow(std::max(FLOAT(0), x - c1) / (c2 - c3 * x), FLOAT(1.) / m1));
-            *(out++) = std::copysign(nits100, v);
+            const T vabs = std::abs(T(v));
+            const T x = std::pow(vabs, T(1.) / T(m2));
+            const T nits100 = T(100.0) * std::pow(std::max(T(0), x - T(c1)) / (T(c2) - T(c3) * x), T(1.) / T(m1));
+            *(out++) = std::copysign(float(nits100), v);
         }
 
         // Alpha
@@ -1234,18 +1270,60 @@ void Renderer_PQ_TO_LINEAR::apply(const void *inImg, void *outImg, long numPixel
     }
 }
 
-Renderer_LINEAR_TO_PQ::Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr & /*data*/)
-    : OpCPU() 
+template<bool FAST_POWER>
+Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::Renderer_PQ_TO_LINEAR_SSE(ConstFixedFunctionOpDataRcPtr& /*data*/)
+    : OpCPU()
 {
 }
 
-void Renderer_LINEAR_TO_PQ::apply(const void *inImg, void *outImg, long numPixels) const 
+template<bool FAST_POWER>
+void Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::apply(const void* inImg, void* outImg, long numPixels) const
 {
     using namespace ST_2084;
     const float* in = (const float*)inImg;
     float* out = (float*)outImg;
 
-    // TODO: This is a short, proof of concept implementation, needs optimization.
+    for (long idx = 0; idx < numPixels; ++idx, in+=4, out+=4)
+    {
+        // load
+        __m128 v = _mm_loadu_ps(in);
+
+        // compute R, G and B channels
+        __m128 vabs = _mm_and_ps(abs_rgb_mask, v); // Clear sign bits of RGB and all bits of Alpha
+        __m128 x = FAST_POWER ? ssePower(vabs, vm2_inv) : _mm_pow_ps(vabs, vm2_inv);
+        __m128 nom = _mm_max_ps(_mm_setzero_ps(), _mm_sub_ps(x, vc1));
+        __m128 denom = _mm_sub_ps(vc2, _mm_mul_ps(vc3, x));
+         
+        __m128 nits100;
+        if(FAST_POWER)
+        {
+            nits100 = _mm_mul_ps(_mm_set1_ps(100.0f), ssePower(_mm_div_ps(nom, denom), vm1_inv));
+        }
+        else         
+        {
+            nits100 = _mm_mul_ps(_mm_set1_ps(100.0f), _mm_pow_ps(_mm_div_ps(nom, denom), vm1_inv));
+        }
+            
+        // Restore the sign bits and Alpha channel.
+        __m128 nits100_signed = _mm_or_ps(_mm_and_ps(abs_rgb_mask, nits100), _mm_andnot_ps(abs_rgb_mask, v)); 
+            
+        // store
+        _mm_storeu_ps(out, nits100_signed);
+    }
+}
+
+template <typename T>
+Renderer_LINEAR_TO_PQ<T>::Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr & /*data*/)
+    : OpCPU() 
+{
+}
+
+template <typename T>
+void Renderer_LINEAR_TO_PQ<T>::apply(const void *inImg, void *outImg, long numPixels) const 
+{
+    using namespace ST_2084;
+    const float* in = (const float*)inImg;
+    float* out = (float*)outImg;
 
     // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
     for (long idx = 0; idx < numPixels; ++idx)
@@ -1254,10 +1332,10 @@ void Renderer_LINEAR_TO_PQ::apply(const void *inImg, void *outImg, long numPixel
         for(int ch = 0; ch < 3; ++ch)
         {
             float v = *(in++);
-            const FLOAT L = std::abs(v * FLOAT(0.01));
-            const FLOAT y = std::pow(L, m1);
-            const FLOAT ratpoly = (c1 + c2 * y) / (FLOAT(1.) + c3 * y);
-            const FLOAT N = std::pow(ratpoly, m2);
+            const T L = std::abs(v * T(0.01));
+            const T y = std::pow(L, T(m1));
+            const T ratpoly = (T(c1) + T(c2) * y) / (T(1.) + T(c3) * y);
+            const T N = std::pow(ratpoly, T(m2));
             *(out++) = std::copysign(float(N), v);
         }
 
@@ -1266,11 +1344,63 @@ void Renderer_LINEAR_TO_PQ::apply(const void *inImg, void *outImg, long numPixel
     };
 }
 
+template<bool FAST_POWER>
+Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::Renderer_LINEAR_TO_PQ_SSE(ConstFixedFunctionOpDataRcPtr& /*data*/)
+    : OpCPU()
+{
+}
+
+template<bool FAST_POWER>
+void Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::apply(const void* inImg, void* outImg, long numPixels) const
+{
+    using namespace ST_2084;
+    const float* in = (const float*)inImg;
+    float* out = (float*)outImg;
+
+    for (long idx = 0; idx < numPixels; ++idx, in += 4, out += 4)
+    {
+        float fv = *in;
+        const float fL = std::abs(fv * 0.01f);
+        const float fy = std::pow(fL, float(m1));
+        const float fratpoly = (float(c1) + float(c2) * fy) / (1.f + float(c3) * fy);
+        const float fN = std::pow(fratpoly, float(m2));
+        float fout = std::copysign(fN, fv);
+
+
+        // load
+        //float v = *(in++);
+        __m128 v = _mm_loadu_ps(in);
+        __m128 vabs = _mm_and_ps(abs_rgb_mask, v); // Clear sign bits of RGB and all bits of Alpha
+        
+        //const FLOAT L = v * FLOAT(0.01));
+        __m128 L = _mm_mul_ps(_mm_set1_ps(0.01f), vabs);
+
+        //const FLOAT y = std::pow(L, m1);
+        __m128 y = FAST_POWER ? ssePower(L, vm1) : _mm_pow_ps(L, vm1);
+
+        //const FLOAT ratpoly = (c1 + c2 * y) / (FLOAT(1.) + c3 * y);
+        __m128 ratpoly = _mm_div_ps(
+            _mm_add_ps(vc1, _mm_mul_ps (vc2, y)),
+            _mm_add_ps(_mm_set1_ps(1.0f), _mm_mul_ps(vc3, y))
+        );
+
+        //const FLOAT N = std::pow(ratpoly, m2);
+        __m128 N  = FAST_POWER ? ssePower(ratpoly, vm2) : _mm_pow_ps(ratpoly, vm2);
+        __m128 N_signed = _mm_or_ps(_mm_and_ps(abs_rgb_mask, N), _mm_andnot_ps(abs_rgb_mask, v));
+
+        // store
+        _mm_storeu_ps(out, N_signed);
+
+
+    }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 
 
-ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func)
+ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func, bool fastLogExpPow)
 {
     switch(func->getStyle())
     {
@@ -1366,13 +1496,39 @@ ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func
         }
         case FixedFunctionOpData::PQ_TO_LINEAR:
         {
-            // TODO: we may want to implement an SIMD renderer if scalar performance is low.
-            return std::make_shared<Renderer_PQ_TO_LINEAR>(func);
+            if(OCIO_USE_SSE2 && CPUInfo::instance().hasSSE2())
+            {
+                if (fastLogExpPow)
+                {
+                    return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<true>>(func);
+                }
+                else
+                {
+                    return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<false>>(func);
+                }
+            }
+            else
+            {
+                return std::make_shared<Renderer_PQ_TO_LINEAR<float>>(func);
+            }
         }
         case FixedFunctionOpData::LINEAR_TO_PQ:
         {
-            // TODO: we may want to implement an SIMD renderer if scalar performance is low.
-            return std::make_shared<Renderer_LINEAR_TO_PQ>(func);
+            if(OCIO_USE_SSE2 && CPUInfo::instance().hasSSE2())
+            {
+                if (fastLogExpPow)
+                {
+                    return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<true>>(func);
+                }
+                else
+                {
+                     return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<false>>(func);
+                }
+            }
+            else
+            {
+                return std::make_shared<Renderer_LINEAR_TO_PQ<float>>(func);
+            }
         }
     }
 

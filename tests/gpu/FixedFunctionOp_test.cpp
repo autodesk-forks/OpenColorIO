@@ -512,10 +512,18 @@ OCIO_ADD_GPU_TEST(FixedFunction, style_PQ_TO_LINEAR_fwd)
         OCIO::FixedFunctionTransform::Create(OCIO::FIXED_FUNCTION_PQ_TO_LINEAR);
     func->setDirection(OCIO::TRANSFORM_DIR_FORWARD);
 
-    test.setTestWideRange(false);
+    // Picking a tight epsilon is tricky with this function due to nested pow()
+    // operations and [0,100] output range for [0,1] input range.
+ 
+    // MaxDiff in range [-0.1, 1.1] against...
+    //      scalar double precision         : 0.000094506
+    //      scalar single precision         : 0.000144501
+    //      SSE2 (intrinsic pow)            : 0.000144441
+    //      SSE2 (fastPower)                : 0.002207260
+    test.setWideRangeInterval(-0.1f, 1.1f);
     test.setProcessor(func);
-    test.setErrorThreshold(1e-4f);
-    test.setRelativeComparison(true); // since output will be 0..100, let's set the relative epsilon.
+    test.setRelativeComparison(true); // Since the output range will be 0..100, we set the relative epsilon.
+    test.setErrorThreshold(OCIO_USE_SSE2 ? 0.0023f : 1.5e-4f);
 }
 
 OCIO_ADD_GPU_TEST(FixedFunction, style_PQ_TO_LINEAR_inv)
@@ -524,7 +532,7 @@ OCIO_ADD_GPU_TEST(FixedFunction, style_PQ_TO_LINEAR_inv)
         OCIO::FixedFunctionTransform::Create(OCIO::FIXED_FUNCTION_PQ_TO_LINEAR);
     func->setDirection(OCIO::TRANSFORM_DIR_INVERSE);
 
-    test.setTestWideRange(false);
+    test.setWideRangeInterval(-0.1f, 100.1f);
     test.setProcessor(func);
     test.setErrorThreshold(2e-5f);
 }

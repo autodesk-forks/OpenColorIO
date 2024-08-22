@@ -348,7 +348,7 @@ FixedFunctionStyle FixedFunctionOpData::ConvertStyle(FixedFunctionOpData::Style 
 
     case FixedFunctionOpData::PQ_TO_LINEAR:
     case FixedFunctionOpData::LINEAR_TO_PQ:
-      return FIXED_FUNCTION_PQ_TO_LINEAR;
+        return FIXED_FUNCTION_PQ_TO_LINEAR;
     }
 
     std::stringstream ss("Unknown FixedFunction style: ");

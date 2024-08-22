@@ -22,7 +22,7 @@ void ApplyFixedFunction(float * input_32f,
                         int lineNo)
 {
     OCIO::ConstOpCPURcPtr op;
-    OCIO_CHECK_NO_THROW_FROM(op = OCIO::GetFixedFunctionCPURenderer(fnData), lineNo);
+    OCIO_CHECK_NO_THROW_FROM(op = OCIO::GetFixedFunctionCPURenderer(fnData, false), lineNo);
     OCIO_CHECK_NO_THROW_FROM(op->apply(input_32f, input_32f, numSamples), lineNo);
 
     for(unsigned idx=0; idx<(numSamples*4); ++idx)

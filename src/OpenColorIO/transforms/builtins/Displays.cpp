@@ -15,12 +15,59 @@
 #include "transforms/builtins/Displays.h"
 #include "transforms/builtins/OpHelpers.h"
 
+// This is a preparation for OCIO-lite where LUT support will be turned off.
+#ifndef OCIO_LUT_SUPPORT
+#   define OCIO_LUT_SUPPORT 1
+#endif // !OCIO_LUT_SUPPORT
 
 namespace OCIO_NAMESPACE
 {
 
 namespace DISPLAY
 {
+
+namespace ST_2084
+{
+
+    static constexpr double m1 = 0.25 * 2610. / 4096.;
+    static constexpr double m2 = 128. * 2523. / 4096.;
+    static constexpr double c2 = 32. * 2413. / 4096.;
+    static constexpr double c3 = 32. * 2392. / 4096.;
+    static constexpr double c1 = c3 - c2 + 1.;
+
+    void GeneratePQToLinearOps(OpRcPtrVec& ops)
+    {
+        auto GenerateLutValues = [](double input) -> float
+            {
+                const double N = std::abs(input);
+                const double x = std::pow(N, 1. / m2);
+                double L = std::pow(std::max(0., x - c1) / (c2 - c3 * x), 1. / m1);
+                // L is in nits/10000, convert to nits/100.
+                L *= 100.;
+
+                return float(std::copysign(L, input));
+            };
+
+        CreateLut(ops, 4096, GenerateLutValues);
+    }
+
+    void GenerateLinearToPQOps(OpRcPtrVec& ops)
+    {
+        auto GenerateLutValues = [](double input) -> float
+            {
+                // Input is in nits/100, convert to [0,1], where 1 is 10000 nits.
+                const double L = std::abs(input * 0.01);
+                const double y = std::pow(L, m1);
+                const double ratpoly = (c1 + c2 * y) / (1. + c3 * y);
+                const double N = std::pow(std::max(0., ratpoly), m2);
+
+                return float(std::copysign(N, input));
+            };
+
+        CreateHalfLut(ops, GenerateLutValues);
+    }
+
+} // ST_2084
 
 void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 {
@@ -192,8 +239,14 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     {
         auto ST2084_to_Linear_Functor = [](OpRcPtrVec & ops)
         {
-            //ST_2084::GeneratePQToLinearOps(ops);
-            CreateFixedFunctionOp(ops, FixedFunctionOpData::PQ_TO_LINEAR, {});
+            if(OCIO_LUT_SUPPORT)
+            {
+                ST_2084::GeneratePQToLinearOps(ops);
+            }
+            else
+            {
+                CreateFixedFunctionOp(ops, FixedFunctionOpData::PQ_TO_LINEAR, {});
+            }
         };
 
         registry.addBuiltin("CURVE - ST-2084_to_LINEAR",
@@ -204,8 +257,14 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     {
         auto Linear_to_ST2084_Functor = [](OpRcPtrVec & ops)
         {
-            //ST_2084::GenerateLinearToPQOps(ops);
-            CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
+            if (OCIO_LUT_SUPPORT)
+            {
+                ST_2084::GenerateLinearToPQOps(ops);
+            }
+            else
+            {
+                CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
+            }
         };
 
         registry.addBuiltin("CURVE - LINEAR_to_ST-2084",
@@ -220,8 +279,14 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                 = build_conversion_matrix_from_XYZ_D65(REC2020::primaries, ADAPTATION_NONE);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
 
-            //ST_2084::GenerateLinearToPQOps(ops);
-            CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
+            if (OCIO_LUT_SUPPORT)
+            {
+                ST_2084::GenerateLinearToPQOps(ops);
+            }
+            else
+            {
+                CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
+            }
         };
 
         registry.addBuiltin("DISPLAY - CIE-XYZ-D65_to_REC.2100-PQ", 
@@ -236,8 +301,14 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                 = build_conversion_matrix_from_XYZ_D65(P3_D65::primaries, ADAPTATION_NONE);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
 
-            // ST_2084::GenerateLinearToPQOps(ops);
-            CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
+            if(OCIO_LUT_SUPPORT)
+            {
+                ST_2084::GenerateLinearToPQOps(ops);
+            }
+            else
+            {
+                CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
+            }
         };
 
         registry.addBuiltin("DISPLAY - CIE-XYZ-D65_to_ST2084-P3-D65", 
