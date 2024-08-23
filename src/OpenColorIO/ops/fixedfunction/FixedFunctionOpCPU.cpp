@@ -1483,39 +1483,36 @@ ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func
         }
         case FixedFunctionOpData::PQ_TO_LINEAR:
         {
-            if(OCIO_USE_SSE2 && CPUInfo::instance().hasSSE2())
+#if OCIO_USE_SSE2
+            if(CPUInfo::instance().hasSSE2())
             {
                 if (fastLogExpPow)
                 {
                     return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<true>>(func);
                 }
-                else
-                {
-                    return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<false>>(func);
-                }
+#ifdef _WIN32
+                return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<false>>(func);
+#endif
             }
-            else
-            {
-                return std::make_shared<Renderer_PQ_TO_LINEAR<float>>(func);
-            }
+#endif
+            return std::make_shared<Renderer_PQ_TO_LINEAR<float>>(func);
         }
         case FixedFunctionOpData::LINEAR_TO_PQ:
         {
             if(OCIO_USE_SSE2 && CPUInfo::instance().hasSSE2())
             {
+#if OCIO_USE_SSE2
                 if (fastLogExpPow)
                 {
                     return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<true>>(func);
                 }
-                else
-                {
-                     return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<false>>(func);
-                }
+
+#ifdef _WIN32
+                return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<false>>(func);
+#endif
             }
-            else
-            {
-                return std::make_shared<Renderer_LINEAR_TO_PQ<float>>(func);
-            }
+#endif
+            return std::make_shared<Renderer_LINEAR_TO_PQ<float>>(func);
         }
     }
 
