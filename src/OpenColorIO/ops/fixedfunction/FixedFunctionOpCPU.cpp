@@ -1270,6 +1270,7 @@ void Renderer_PQ_TO_LINEAR<T>::apply(const void *inImg, void *outImg, long numPi
     }
 }
 
+#if OCIO_USE_SSE2
 template<bool FAST_POWER>
 Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::Renderer_PQ_TO_LINEAR_SSE(ConstFixedFunctionOpDataRcPtr& /*data*/)
     : OpCPU()
@@ -1379,6 +1380,7 @@ void Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
         _mm_storeu_ps(out, N_signed);
     }
 }
+#endif //OCIO_USE_SSE2
 
 
 ///////////////////////////////////////////////////////////////////////////////
