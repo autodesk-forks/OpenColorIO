@@ -15,10 +15,10 @@
 #include "transforms/builtins/Displays.h"
 #include "transforms/builtins/OpHelpers.h"
 
-// This is a preparation for OCIO-lite where LUT support will be turned off.
+// This is a preparation for OCIO-lite where LUT support may be turned off.
 #ifndef OCIO_LUT_SUPPORT
 #   define OCIO_LUT_SUPPORT 1
-#endif // !OCIO_LUT_SUPPORT
+#endif 
 
 namespace OCIO_NAMESPACE
 {
@@ -37,6 +37,7 @@ namespace ST_2084
 
     void GeneratePQToLinearOps(OpRcPtrVec& ops)
     {
+#if OCIO_LUT_SUPPORT
         auto GenerateLutValues = [](double input) -> float
             {
                 const double N = std::abs(input);
@@ -49,10 +50,14 @@ namespace ST_2084
             };
 
         CreateLut(ops, 4096, GenerateLutValues);
+#else
+        CreateFixedFunctionOp(ops, FixedFunctionOpData::PQ_TO_LINEAR, {});
+#endif
     }
 
     void GenerateLinearToPQOps(OpRcPtrVec& ops)
     {
+#if OCIO_LUT_SUPPORT
         auto GenerateLutValues = [](double input) -> float
             {
                 // Input is in nits/100, convert to [0,1], where 1 is 10000 nits.
@@ -65,9 +70,46 @@ namespace ST_2084
             };
 
         CreateHalfLut(ops, GenerateLutValues);
+#else
+        CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
+#endif
     }
 
 } // ST_2084
+
+namespace BT_2100
+{
+    static constexpr double Lw = 1000.;
+    static constexpr double E_MAX = 3.;
+
+    static constexpr double a = 0.17883277;
+    static constexpr double b = (1. - 4. * a) * E_MAX / 12.;
+    static const     double c0 = 0.5 - a * std::log(4. * a);
+    static const     double c = std::log(12. / E_MAX) * 0.17883277 + c0;
+    static constexpr double E_scale = 3. / E_MAX;
+    static constexpr double E_break = E_MAX / 12.;
+
+    void GenerateLinearToHLGOps(OpRcPtrVec& ops)
+    {
+        auto GenerateLutValues = [](double in) -> float
+            {
+                double out = 0.0;
+                const double E = std::abs(in);
+                if (in < E_break)
+                {
+                    out = std::sqrt(E * E_scale);
+                }
+                else
+                {
+                    // TODO: do we want remove clamp at 1 too per issue #1968 ?
+                    out = std::min(1., a * std::log(E - b) + c); 
+                }
+                return float(std::copysign(out, in));
+            };
+
+        CreateHalfLut(ops, GenerateLutValues);
+    }
+} // BT_2100
 
 void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
 {
@@ -239,14 +281,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     {
         auto ST2084_to_Linear_Functor = [](OpRcPtrVec & ops)
         {
-            if(OCIO_LUT_SUPPORT)
-            {
-                ST_2084::GeneratePQToLinearOps(ops);
-            }
-            else
-            {
-                CreateFixedFunctionOp(ops, FixedFunctionOpData::PQ_TO_LINEAR, {});
-            }
+            ST_2084::GeneratePQToLinearOps(ops);
         };
 
         registry.addBuiltin("CURVE - ST-2084_to_LINEAR",
@@ -257,14 +292,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
     {
         auto Linear_to_ST2084_Functor = [](OpRcPtrVec & ops)
         {
-            if (OCIO_LUT_SUPPORT)
-            {
-                ST_2084::GenerateLinearToPQOps(ops);
-            }
-            else
-            {
-                CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
-            }
+            ST_2084::GenerateLinearToPQOps(ops);
         };
 
         registry.addBuiltin("CURVE - LINEAR_to_ST-2084",
@@ -279,14 +307,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                 = build_conversion_matrix_from_XYZ_D65(REC2020::primaries, ADAPTATION_NONE);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
 
-            if (OCIO_LUT_SUPPORT)
-            {
-                ST_2084::GenerateLinearToPQOps(ops);
-            }
-            else
-            {
-                CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
-            }
+            ST_2084::GenerateLinearToPQOps(ops);
         };
 
         registry.addBuiltin("DISPLAY - CIE-XYZ-D65_to_REC.2100-PQ", 
@@ -301,14 +322,7 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                 = build_conversion_matrix_from_XYZ_D65(P3_D65::primaries, ADAPTATION_NONE);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
 
-            if(OCIO_LUT_SUPPORT)
-            {
-                ST_2084::GenerateLinearToPQOps(ops);
-            }
-            else
-            {
-                CreateFixedFunctionOp(ops, FixedFunctionOpData::LINEAR_TO_PQ, {});
-            }
+            ST_2084::GenerateLinearToPQOps(ops);
         };
 
         registry.addBuiltin("DISPLAY - CIE-XYZ-D65_to_ST2084-P3-D65", 
@@ -323,45 +337,21 @@ void RegisterAll(BuiltinTransformRegistryImpl & registry) noexcept
                 = build_conversion_matrix_from_XYZ_D65(REC2020::primaries, ADAPTATION_NONE);
             CreateMatrixOp(ops, matrix, TRANSFORM_DIR_FORWARD);
 
-            static constexpr double Lw    = 1000.;
-            static constexpr double E_MAX = 3.;
-            const double gamma            = 1.2 + 0.42 * std::log10(Lw / 1000.);
+            const double gamma            = 1.2 + 0.42 * std::log10(BT_2100::Lw / 1000.);
             {
                 static constexpr double scale     = 100.;
                 static constexpr double scale4[4] = { scale, scale, scale, 1. };
                 CreateScaleOp(ops, scale4, TRANSFORM_DIR_FORWARD);
             }
             {
-                const double scale     = std::pow(E_MAX, gamma) / Lw;
+                const double scale     = std::pow(BT_2100::E_MAX, gamma) / BT_2100::Lw;
                 const double scale4[4] = { scale, scale, scale, 1. };
                 CreateScaleOp(ops, scale4, TRANSFORM_DIR_FORWARD);
             }
 
             CreateFixedFunctionOp(ops, FixedFunctionOpData::REC2100_SURROUND_FWD, {1. / gamma});
 
-            auto GenerateLutValues = [](double in) -> float
-            {
-                const double a = 0.17883277;
-                const double b = (1. - 4. * a) * E_MAX / 12.;
-                const double c0 = 0.5 - a * std::log(4. * a);
-                const double c = std::log(12. / E_MAX) * 0.17883277 + c0;
-                const double E_scale = 3. / E_MAX;
-                const double E_break = E_MAX / 12.;
-                double out = 0.0;
-
-                const double E = std::max(in, 0.);
-                if (in < E_break)
-                {
-                    out = std::sqrt( E * E_scale );
-                }
-                else
-                {
-                    out = std::min( 1., a * std::log(E - b) + c);
-                }
-                return float(out);
-            };
-
-            CreateHalfLut(ops, GenerateLutValues);
+            BT_2100::GenerateLinearToHLGOps(ops);
         };
 
         registry.addBuiltin("DISPLAY - CIE-XYZ-D65_to_REC.2100-HLG-1000nit", 

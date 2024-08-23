@@ -450,10 +450,19 @@ int main(int argc, const char **argv)
                                : processor->getDefaultGPUProcessor();
             gpu->extractGpuShaderInfo(shaderDesc);
 
+            uint64_t renderDuration = 0;
+
             oglApp->setShader(shaderDesc);
             oglApp->reshape(imgInput.getWidth(), imgInput.getHeight());
-            oglApp->redisplay();
+            oglApp->redisplay(&renderDuration);
             oglApp->readImage((float *)imgInput.getData());
+
+            if (verbose)
+            {
+                std::cout << std::endl;
+                std::cout << "GPU processing took: "
+                    << 1.e-3f * renderDuration << " microseconds" << std::endl;
+            }
         }
         else
 #endif // OCIO_GPU_ENABLED
@@ -619,6 +628,7 @@ int main(int argc, const char **argv)
         exit(1);
     }
 
+    std::cout << std::endl;
     std::cout << "Wrote " << outputimage << std::endl;
     std::cout << imgOutput->getImageDescStr() << std::endl;
 

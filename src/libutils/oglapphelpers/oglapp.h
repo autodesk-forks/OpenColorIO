@@ -105,8 +105,10 @@ public:
     // application it should be called by the glutReshapeFunc callback using the windows size.
     void reshape(int width, int height);
 
-    // Process the image.
-    void virtual redisplay();
+    // Process the image.  
+    // If elapsedNanoseconds is not null, it will be filled with the GPU
+    // rendering duration in nanoseconds.
+    void virtual redisplay(uint64_t* elapsedNanoseconds=nullptr);
 
     // Read the image from the rendering buffer. It is not meant to be used by interactive
     // applications used to display the image.
@@ -166,7 +168,7 @@ public:
 
     ~ScreenApp();
 
-    void redisplay() override;
+    void redisplay(uint64_t* pElapsedNanoseconds=nullptr) override;
     void printGLInfo() const noexcept override;
 
 private:
