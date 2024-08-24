@@ -1422,6 +1422,10 @@ void Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
 
 ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func, bool fastLogExpPow)
 {
+    // prevent "unused-parameter" warning/error in case the using code is
+    // ifdef'ed out.
+    (void)fastLogExpPow; 
+
     switch(func->getStyle())
     {
         case FixedFunctionOpData::ACES_RED_MOD_03_FWD:
