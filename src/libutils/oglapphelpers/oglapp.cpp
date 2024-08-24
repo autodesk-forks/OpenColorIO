@@ -80,7 +80,7 @@ void OglApp::updateImage(const float * image)
                  format, GL_FLOAT, &image[0]);
 }
 
-void OglApp::redisplay(uint64_t* elapsedNanoseconds)
+void OglApp::redisplay()
 {
     // The window size (for the UI) may not equal the image size (size of the image being
     // processed).  The goal here is to use OpenGL to resize the image to have the largest
@@ -124,20 +124,12 @@ void OglApp::redisplay(uint64_t* elapsedNanoseconds)
         m_oglBuilder->useAllUniforms();
     }
 
-    GLuint query;
-    glGenQueries(1, &query);
-
     glEnable(GL_TEXTURE_2D);
         glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glColor3f(1, 1, 1);
 
         glPushMatrix();
-            if (elapsedNanoseconds)
-            {
-                glBeginQuery(GL_TIME_ELAPSED, query);
-            }
-
             glBegin(GL_QUADS);
                 glTexCoord2f(0.0f, 1.0f);
                 glVertex2f(pts[0], pts[3]);
@@ -151,22 +143,10 @@ void OglApp::redisplay(uint64_t* elapsedNanoseconds)
                 glTexCoord2f(1.0f, 1.0f);
                 glVertex2f(pts[2], pts[3]);
             glEnd();
-            
-            if (elapsedNanoseconds)
-            {
-                glEndQuery(GL_TIME_ELAPSED);
-            }
         glPopMatrix();
 
     glDisable(GL_TEXTURE_2D);
 
-
-    if(elapsedNanoseconds)
-    {
-        GLuint64 elapsedTime;
-        glGetQueryObjectui64v(query, GL_QUERY_RESULT, &elapsedTime);
-        *elapsedNanoseconds = static_cast<uint64_t>(elapsedTime);
-    }
 }
 
 void OglApp::reshape(int width, int height)
@@ -313,9 +293,9 @@ ScreenApp::~ScreenApp()
     glutDestroyWindow(m_mainWin);
 }
 
-void ScreenApp::redisplay(uint64_t* pElapsedNanoseconds)
+void ScreenApp::redisplay()
 {
-    OglApp::redisplay(pElapsedNanoseconds);
+    OglApp::redisplay();
     glutSwapBuffers();
 }
 
