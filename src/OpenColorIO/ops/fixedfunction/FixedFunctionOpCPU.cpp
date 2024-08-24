@@ -237,6 +237,7 @@ public:
     Renderer_PQ_TO_LINEAR_SSE() = delete;
     explicit Renderer_PQ_TO_LINEAR_SSE(ConstFixedFunctionOpDataRcPtr& data);
 
+    static inline __m128 myPower(__m128 x, __m128 exp);
     void apply(const void* inImg, void* outImg, long numPixels) const override;
 };
 
@@ -247,6 +248,7 @@ public:
     Renderer_LINEAR_TO_PQ_SSE() = delete;
     explicit Renderer_LINEAR_TO_PQ_SSE(ConstFixedFunctionOpDataRcPtr& data);
 
+    static inline __m128 myPower(__m128 x, __m128 exp);
     void apply(const void* inImg, void* outImg, long numPixels) const override;
 };
 #endif
@@ -1270,12 +1272,63 @@ void Renderer_PQ_TO_LINEAR<T>::apply(const void *inImg, void *outImg, long numPi
     }
 }
 
+template <typename T>
+Renderer_LINEAR_TO_PQ<T>::Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr& /*data*/)
+    : OpCPU()
+{
+}
+
+template <typename T>
+void Renderer_LINEAR_TO_PQ<T>::apply(const void* inImg, void* outImg, long numPixels) const
+{
+    using namespace ST_2084;
+    const float* in = (const float*)inImg;
+    float* out = (float*)outImg;
+
+    // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
+    for (long idx = 0; idx < numPixels; ++idx)
+    {
+        // RGB
+        for (int ch = 0; ch < 3; ++ch)
+        {
+            float v = *(in++);
+            const T L = std::abs(v * T(0.01));
+            const T y = std::pow(L, T(m1));
+            const T ratpoly = (T(c1) + T(c2) * y) / (T(1.) + T(c3) * y);
+            const T N = std::pow(ratpoly, T(m2));
+            *(out++) = std::copysign(float(N), v);
+        }
+
+        // Alpha
+        *(out++) = *(in++);
+    };
+}
+
 #if OCIO_USE_SSE2
 template<bool FAST_POWER>
 Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::Renderer_PQ_TO_LINEAR_SSE(ConstFixedFunctionOpDataRcPtr& /*data*/)
     : OpCPU()
 {
 }
+
+// all platforms support ssePower()
+template<>
+__m128 Renderer_PQ_TO_LINEAR_SSE<true>::myPower(__m128 x, __m128 exp)
+{
+    return ssePower(x, exp);
+}
+
+#ifdef _WIN32
+// Only Windows compilers have built-in _mm_pow_ps() SVML intrinsic
+// implementation, so non-fast SIMD version is available only on Windows for
+// now.
+template<>
+__m128 Renderer_PQ_TO_LINEAR_SSE<false>::myPower(__m128 x, __m128 exp)
+{
+    return _mm_pow_ps(x, exp);
+}
+#endif // _WIN32
+
 
 template<bool FAST_POWER>
 void Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::apply(const void* inImg, void* outImg, long numPixels) const
@@ -1291,19 +1344,12 @@ void Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
 
         // compute R, G and B channels
         __m128 vabs = _mm_and_ps(abs_rgb_mask, v); // Clear sign bits of RGB and all bits of Alpha
-        __m128 x = FAST_POWER ? ssePower(vabs, vm2_inv) : _mm_pow_ps(vabs, vm2_inv);
+        __m128 x = myPower(vabs, vm2_inv);
         __m128 nom = _mm_max_ps(_mm_setzero_ps(), _mm_sub_ps(x, vc1));
         __m128 denom = _mm_sub_ps(vc2, _mm_mul_ps(vc3, x));
          
         __m128 nits100;
-        if(FAST_POWER)
-        {
-            nits100 = _mm_mul_ps(_mm_set1_ps(100.0f), ssePower(_mm_div_ps(nom, denom), vm1_inv));
-        }
-        else         
-        {
-            nits100 = _mm_mul_ps(_mm_set1_ps(100.0f), _mm_pow_ps(_mm_div_ps(nom, denom), vm1_inv));
-        }
+        nits100 = _mm_mul_ps(_mm_set1_ps(100.0f), myPower(_mm_div_ps(nom, denom), vm1_inv));
             
         // Restore the sign bits and Alpha channel.
         // TODO: this can be further optimized by using separate SSE constants for alpha channel
@@ -1314,43 +1360,30 @@ void Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
     }
 }
 
-template <typename T>
-Renderer_LINEAR_TO_PQ<T>::Renderer_LINEAR_TO_PQ(ConstFixedFunctionOpDataRcPtr & /*data*/)
-    : OpCPU() 
-{
-}
-
-template <typename T>
-void Renderer_LINEAR_TO_PQ<T>::apply(const void *inImg, void *outImg, long numPixels) const 
-{
-    using namespace ST_2084;
-    const float* in = (const float*)inImg;
-    float* out = (float*)outImg;
-
-    // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
-    for (long idx = 0; idx < numPixels; ++idx)
-    {
-        // RGB
-        for(int ch = 0; ch < 3; ++ch)
-        {
-            float v = *(in++);
-            const T L = std::abs(v * T(0.01));
-            const T y = std::pow(L, T(m1));
-            const T ratpoly = (T(c1) + T(c2) * y) / (T(1.) + T(c3) * y);
-            const T N = std::pow(ratpoly, T(m2));
-            *(out++) = std::copysign(float(N), v);
-        }
-
-        // Alpha
-        *(out++) = *(in++);
-    };
-}
-
 template<bool FAST_POWER>
 Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::Renderer_LINEAR_TO_PQ_SSE(ConstFixedFunctionOpDataRcPtr& /*data*/)
     : OpCPU()
 {
 }
+
+// all platforms support ssePower()
+template<>
+__m128 Renderer_LINEAR_TO_PQ_SSE<true>::myPower(__m128 x, __m128 exp)
+{
+    return ssePower(x, exp);
+}
+
+#ifdef _WIN32
+// Only Windows compilers have built-in _mm_pow_ps() SVML intrinsic
+// implementation, so non-fast SIMD version is available only on Windows for
+// now.
+template<>
+__m128 Renderer_LINEAR_TO_PQ_SSE<false>::myPower(__m128 x, __m128 exp)
+{
+    return _mm_pow_ps(x, exp);
+}
+#endif // _WIN32
+
 
 template<bool FAST_POWER>
 void Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::apply(const void* inImg, void* outImg, long numPixels) const
@@ -1366,11 +1399,11 @@ void Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
 
         __m128 vabs = _mm_and_ps(abs_rgb_mask, v); // Clear sign bits of RGB and all bits of Alpha
         __m128 L = _mm_mul_ps(_mm_set1_ps(0.01f), vabs);
-        __m128 y = FAST_POWER ? ssePower(L, vm1) : _mm_pow_ps(L, vm1);
+        __m128 y = myPower(L, vm1);
         __m128 ratpoly = _mm_div_ps(
             _mm_add_ps(vc1, _mm_mul_ps (vc2, y)),
             _mm_add_ps(_mm_set1_ps(1.0f), _mm_mul_ps(vc3, y)));
-        __m128 N  = FAST_POWER ? ssePower(ratpoly, vm2) : _mm_pow_ps(ratpoly, vm2);
+        __m128 N = myPower(ratpoly, vm2);
 
         // restore sign bits and the alpha channel
         // TODO: this can be further optimized by using separate SSE constants for alpha channel
@@ -1491,6 +1524,9 @@ ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func
                     return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<true>>(func);
                 }
 #ifdef _WIN32
+                // on Windows we can use _mm_pow_ps() SVML "seuqential"
+                // intrinsic which is slower than our ssePower but precise. This
+                // will still be faster than scalar implementation.
                 return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<false>>(func);
 #endif
             }
@@ -1499,15 +1535,17 @@ ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func
         }
         case FixedFunctionOpData::LINEAR_TO_PQ:
         {
-            if(OCIO_USE_SSE2 && CPUInfo::instance().hasSSE2())
-            {
 #if OCIO_USE_SSE2
+            if (CPUInfo::instance().hasSSE2())
+            {
                 if (fastLogExpPow)
                 {
                     return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<true>>(func);
                 }
-
 #ifdef _WIN32
+                // on Windows we can use _mm_pow_ps() SVML "seuqential"
+                // intrinsic which is slower than our ssePower but precise. This
+                // will still be faster than scalar implementation.
                 return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<false>>(func);
 #endif
             }
