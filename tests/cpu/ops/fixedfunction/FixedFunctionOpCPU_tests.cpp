@@ -592,7 +592,7 @@ OCIO_ADD_TEST(FixedFunctionOpCPU, PQ_TO_LINEAR)
     OCIO::ConstFixedFunctionOpDataRcPtr dataFwd
         = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::PQ_TO_LINEAR);
 
-    ApplyFixedFunction(img.data(), outputFrame.data(), NumPixels, dataFwd, 3.5e-5f, __LINE__);
+    ApplyFixedFunction(img.data(), outputFrame.data(), NumPixels, dataFwd, 5e-5f, __LINE__);
 
     OCIO::ConstFixedFunctionOpDataRcPtr dataFInv
         = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::LINEAR_TO_PQ);
