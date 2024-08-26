@@ -2303,7 +2303,7 @@ const std::string PROFILE_V21_START = PROFILE_V21 + SIMPLE_PROFILE_A +
 
 // Generic simple profile prolog for given major,minor version.
 template<int Major, int Minor>
-constexpr const std::string PROFILE_START_V()
+const std::string PROFILE_START_V()
 {
     if(Major<=1)
     {
