@@ -2174,7 +2174,7 @@ namespace
 {
 // Generic profile header generator for given version
 template<int Major, int Minor>
-constexpr const std::string PROFILE_V()
+const std::string PROFILE_V()
 {
     std::string s = std::string("ocio_profile_version: ")
         + std::to_string(Major) + std::string(".") + std::to_string(Minor) + "\n";
@@ -4960,15 +4960,21 @@ OCIO_ADD_TEST(Config, fixed_function_serialization)
 
         {
             const std::string str = PROFILE_START_V<2, 3>() + strEnd;
-            OCIO::ConstConfigRcPtr config;
-            OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(std::istringstream(str)), OCIO::Exception,
+
+            std::istringstream is;
+            is.str(str);
+
+            OCIO_CHECK_THROW_WHAT(OCIO::Config::CreateFromStream(is), OCIO::Exception,
                 "Only config version 2.4 (or higher) can have FixedFunctionTransform style 'PQ_TO_LINEAR'.");
         }
 
         {
             const std::string str = PROFILE_START_V<2, 4>() + strEnd;
-            OCIO::ConstConfigRcPtr config;
-            OCIO_CHECK_NO_THROW(OCIO::Config::CreateFromStream(std::istringstream(str)));
+
+            std::istringstream is;
+            is.str(str);
+
+            OCIO_CHECK_NO_THROW(OCIO::Config::CreateFromStream(is));
         }
     }
 }
