@@ -1263,8 +1263,9 @@ void Renderer_PQ_TO_LINEAR<T>::apply(const void *inImg, void *outImg, long numPi
             float v = *(in++);
             const T vabs = std::abs(T(v));
             const T x = std::pow(vabs, T(1.) / T(m2));
-            const T nits100 = T(100.0) * std::pow(std::max(T(0), x - T(c1)) / (T(c2) - T(c3) * x), T(1.) / T(m1));
-            *(out++) = std::copysign(float(nits100), v);
+            const T nits = std::pow(std::max(T(0), x - T(c1)) / (T(c2) - T(c3) * x), T(1.) / T(m1));
+            // output scale is 1.0 = 10000 nits, we map it to make 1.0 = 100 nits.
+            *(out++) = std::copysign(float(T(100.0) * nits), v);
         }
 
         // Alpha
@@ -1285,14 +1286,14 @@ void Renderer_LINEAR_TO_PQ<T>::apply(const void* inImg, void* outImg, long numPi
     const float* in = (const float*)inImg;
     float* out = (float*)outImg;
 
-    // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
     for (long idx = 0; idx < numPixels; ++idx)
     {
         // RGB
         for (int ch = 0; ch < 3; ++ch)
         {
             float v = *(in++);
-            const T L = std::abs(v * T(0.01));
+            // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
+            const T L = std::abs(v * T(0.01));    
             const T y = std::pow(L, T(m1));
             const T ratpoly = (T(c1) + T(c2) * y) / (T(1.) + T(c3) * y);
             const T N = std::pow(ratpoly, T(m2));
@@ -1348,6 +1349,7 @@ void Renderer_PQ_TO_LINEAR_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
         __m128 nom = _mm_max_ps(_mm_setzero_ps(), _mm_sub_ps(x, vc1));
         __m128 denom = _mm_sub_ps(vc2, _mm_mul_ps(vc3, x));
          
+        // output scale is 1.0 = 10000 nits, we map it to make 1.0 = 100 nits.
         __m128 nits100;
         nits100 = _mm_mul_ps(_mm_set1_ps(100.0f), myPower(_mm_div_ps(nom, denom), vm1_inv));
             
@@ -1397,7 +1399,9 @@ void Renderer_LINEAR_TO_PQ_SSE<FAST_POWER>::apply(const void* inImg, void* outIm
         // load
         __m128 v = _mm_loadu_ps(in);
 
-        __m128 vabs = _mm_and_ps(abs_rgb_mask, v); // Clear sign bits of RGB and all bits of Alpha
+        // Clear sign bits of RGB and all bits of Alpha
+        __m128 vabs = _mm_and_ps(abs_rgb_mask, v); 
+        // Input is in nits/100, convert to [0,1], where 1 is 10000 nits. 
         __m128 L = _mm_mul_ps(_mm_set1_ps(0.01f), vabs);
         __m128 y = myPower(L, vm1);
         __m128 ratpoly = _mm_div_ps(
@@ -1521,39 +1525,33 @@ ConstOpCPURcPtr GetFixedFunctionCPURenderer(ConstFixedFunctionOpDataRcPtr & func
         case FixedFunctionOpData::PQ_TO_LINEAR:
         {
 #if OCIO_USE_SSE2
-            if(CPUInfo::instance().hasSSE2())
+            if (fastLogExpPow)
             {
-                if (fastLogExpPow)
-                {
-                    return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<true>>(func);
-                }
-#ifdef _WIN32
-                // on Windows we can use _mm_pow_ps() SVML "seuqential"
-                // intrinsic which is slower than our ssePower but precise. This
-                // will still be faster than scalar implementation.
-                return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<false>>(func);
-#endif
+                return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<true>>(func);
             }
-#endif
+#ifdef _WIN32
+            // On Windows we can use _mm_pow_ps() SVML "sequential"
+            // intrinsic which is slower than our ssePower but precise. This
+            // will still be faster than scalar implementation.
+            return std::make_shared<Renderer_PQ_TO_LINEAR_SSE<false>>(func);
+#endif // _WIN32
+#endif // OCIO_USE_SSE2
             return std::make_shared<Renderer_PQ_TO_LINEAR<float>>(func);
         }
         case FixedFunctionOpData::LINEAR_TO_PQ:
         {
 #if OCIO_USE_SSE2
-            if (CPUInfo::instance().hasSSE2())
+            if (fastLogExpPow)
             {
-                if (fastLogExpPow)
-                {
-                    return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<true>>(func);
-                }
-#ifdef _WIN32
-                // on Windows we can use _mm_pow_ps() SVML "seuqential"
-                // intrinsic which is slower than our ssePower but precise. This
-                // will still be faster than scalar implementation.
-                return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<false>>(func);
-#endif
+                return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<true>>(func);
             }
-#endif
+#ifdef _WIN32
+            // On Windows we can use _mm_pow_ps() SVML "sequential"
+            // intrinsic which is slower than our ssePower but precise. This
+            // will still be faster than scalar implementation.
+            return std::make_shared<Renderer_LINEAR_TO_PQ_SSE<false>>(func);
+#endif // _WIN32
+#endif // OCIO_USE_SSE2
             return std::make_shared<Renderer_LINEAR_TO_PQ<float>>(func);
         }
     }

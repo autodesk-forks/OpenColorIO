@@ -19,10 +19,12 @@ void ApplyFixedFunction(float * input_32f,
                         unsigned numSamples,
                         OCIO::ConstFixedFunctionOpDataRcPtr & fnData, 
                         float errorThreshold,
-                        int lineNo)
+                        int lineNo,
+                        bool fastLogExpPow = false
+)
 {
     OCIO::ConstOpCPURcPtr op;
-    OCIO_CHECK_NO_THROW_FROM(op = OCIO::GetFixedFunctionCPURenderer(fnData, false), lineNo);
+    OCIO_CHECK_NO_THROW_FROM(op = OCIO::GetFixedFunctionCPURenderer(fnData, fastLogExpPow), lineNo);
     OCIO_CHECK_NO_THROW_FROM(op->apply(input_32f, input_32f, numSamples), lineNo);
 
     for(unsigned idx=0; idx<(numSamples*4); ++idx)
@@ -587,16 +589,36 @@ OCIO_ADD_TEST(FixedFunctionOpCPU, PQ_TO_LINEAR)
         2.6556253e+02f, 4.4137110e+02f, 7.4603927e+02f, 1.0f,
     };
 
-    auto img = inputFrame;
+    // Fast power enabled
+    {
+        auto img = inputFrame;
 
-    OCIO::ConstFixedFunctionOpDataRcPtr dataFwd
-        = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::PQ_TO_LINEAR);
+        OCIO::ConstFixedFunctionOpDataRcPtr dataFwd
+            = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::PQ_TO_LINEAR);
 
-    ApplyFixedFunction(img.data(), outputFrame.data(), NumPixels, dataFwd, 5e-5f, __LINE__);
+        ApplyFixedFunction(img.data(), outputFrame.data(), NumPixels, dataFwd, 2.5e-3f, __LINE__, true);
 
-    OCIO::ConstFixedFunctionOpDataRcPtr dataFInv
-        = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::LINEAR_TO_PQ);
+        OCIO::ConstFixedFunctionOpDataRcPtr dataFInv
+            = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::LINEAR_TO_PQ);
 
-    img = outputFrame;
-    ApplyFixedFunction(&img[0], &inputFrame[0], NumPixels, dataFInv, 1e-5f, __LINE__);
+        img = outputFrame;
+        ApplyFixedFunction(&img[0], &inputFrame[0], NumPixels, dataFInv, 1e-3f, __LINE__, true);
+    }
+
+    // Fast power disabled
+    {
+        auto img = inputFrame;
+
+        OCIO::ConstFixedFunctionOpDataRcPtr dataFwd
+            = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::PQ_TO_LINEAR);
+
+        ApplyFixedFunction(img.data(), outputFrame.data(), NumPixels, dataFwd, 5e-5f, __LINE__, false);
+
+        OCIO::ConstFixedFunctionOpDataRcPtr dataFInv
+            = std::make_shared<OCIO::FixedFunctionOpData>(OCIO::FixedFunctionOpData::LINEAR_TO_PQ);
+
+        img = outputFrame;
+        ApplyFixedFunction(&img[0], &inputFrame[0], NumPixels, dataFInv, 1e-5f, __LINE__, false);
+    }
+
 }
