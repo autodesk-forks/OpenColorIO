@@ -351,10 +351,18 @@ std::ostream& operator<< (std::ostream& os, const MatrixTransform& t) noexcept
     os << "direction=" << TransformDirectionToString(t.getDirection());
     os << ", fileindepth=" << BitDepthToString(t.getFileInputBitDepth());
     os << ", fileoutdepth=" << BitDepthToString(t.getFileOutputBitDepth());
-    os << ", matrix=" << matrix[0];
+    os << ", matrix[0]=" << matrix[0];
+    const int N_PER_LINE = 4;
     for (int i = 1; i < 16; ++i)
     {
-        os << " " << matrix[i];
+        if (i % N_PER_LINE == 0)
+        {
+            os << ", matrix[" << i / N_PER_LINE << "]=" << matrix[i];
+        }
+        else
+        {
+            os << " " << matrix[i];
+        }
     }
     os << ", offset=" << offset[0];
     for (int i = 1; i < 4; ++i)
