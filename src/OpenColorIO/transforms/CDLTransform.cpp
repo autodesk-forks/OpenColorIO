@@ -373,25 +373,25 @@ std::ostream & operator<< (std::ostream & os, const CDLTransform & t)
 
     os << "<CDLTransform";
     os << " direction=" << TransformDirectionToString(t.getDirection());
-    os << ", slope=";
+    os << ", slope=[";
     for (unsigned int i = 0; i < 3; ++i)
     {
-        if (i != 0) os << " ";
+        if (i != 0) os << ", ";
         os << sop[i];
     }
-    os << ", offset=";
+    os << "], offset=[";
     for (unsigned int i = 3; i < 6; ++i)
     {
-        if (i != 3) os << " ";
+        if (i != 3) os << ", ";
         os << sop[i];
     }
-    os << ", power=";
+    os << "], power=[";
     for (unsigned int i = 6; i < 9; ++i)
     {
-        if (i != 6) os << " ";
+        if (i != 6) os << ", ";
         os << sop[i];
     }
-    os << ", sat=" << t.getSat();
+    os << "], sat=" << t.getSat();
     os << ", style=" << CDLStyleToString(t.getStyle());
     os << ">";
     return os;
