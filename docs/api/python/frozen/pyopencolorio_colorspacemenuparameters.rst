@@ -142,6 +142,10 @@
 
       Include all named transforms (or not) to :ref:`ColorSpaceMenuHelper`. Default is not to include named transforms.
 
+   .. py:method:: ColorSpaceMenuParameters.setTreatNoCategoriesAsAny(self: PyOpenColorIO.ColorSpaceMenuParameters, includeNamedTransforms: bool = True) -> None
+      :module: PyOpenColorIO
+
+      When searching for color spaces using app or user categories, treat color spaces that have no categories as if they had any categories. Default is not to treat them this way.
 
    .. py:method:: ColorSpaceMenuParameters.setIncludeRoles(self: PyOpenColorIO.ColorSpaceMenuParameters, includeRoles: bool = True) -> None
       :module: PyOpenColorIO
