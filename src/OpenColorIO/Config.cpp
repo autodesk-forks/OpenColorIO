@@ -23,6 +23,7 @@
 #include "fileformats/FileFormatICC.h"
 #include "FileRules.h"
 #include "HashUtils.h"
+#include "List.h"
 #include "Logging.h"
 #include "LookParse.h"
 #include "MathUtils.h"
@@ -4016,10 +4017,28 @@ void Config::setActiveViews(const char * views)
     getImpl()->resetCacheIDs();
 }
 
+void Config::setActiveViewsList(const List& list)
+{
+    getImpl()->m_activeViews.clear();
+    getImpl()->m_activeViews = list.getImpl()->m_list;
+
+    getImpl()->m_displayCache.clear();
+
+    AutoMutex lock(getImpl()->m_cacheidMutex);
+    getImpl()->resetCacheIDs();
+}
+
 const char * Config::getActiveViews() const
 {
     getImpl()->m_activeViewsStr = JoinStringEnvStyle(getImpl()->m_activeViews);
     return getImpl()->m_activeViewsStr.c_str();
+}
+
+List Config::getActiveViewsList() const
+{
+    List list;
+    list.getImpl()->m_list = getImpl()->m_activeViews;
+    return list;
 }
 
 int Config::getNumDisplaysAll() const noexcept

@@ -292,6 +292,68 @@ extern OCIOEXPORT void ExtractOCIOZArchive(
 );
 
 /**
+ * \brief A list class used to share elements witb the OCIO library.
+ */
+class OCIOEXPORT List
+{
+public:
+    List();
+    ~List();
+    
+    /**
+     * \brief Add an element to the end of the list.
+     * 
+     * \param element An element to add to the end of the list.
+     * \return True if the operation succeeded
+     */
+    bool add(const char* element);
+
+    /**
+     * \brief Remove an element with the specified name from the list.
+     * 
+     * \param element The element to remove from the list.
+     * \return True if the operation succeeded
+     */
+    bool remove(const char* element);
+
+    /**
+     * \brief Clear all elements from the list.
+     */
+    void clear();
+
+    /**
+     * \brief Get the number of elements in the list.
+     * 
+     * \return The number of elements in the list.
+     */
+    int size() const;
+
+    /**
+     * \brief Get the element at the specified index.
+     * 
+     * \param index The index of the element to get.
+     * \return The element at the specified index.
+     */
+    const char* get(int index) const;
+
+    /**
+     * \brief Set the element at the specified index.
+     * 
+     * \param index The index of the element to set.
+     * \param str The element to set at the specified index.
+     * \return True if the operation succeeded
+     */
+    bool set(int index, const char* str);
+
+private:
+    friend class Config;
+    class Impl;
+    Impl * m_impl;
+    Impl * getImpl() { return m_impl; }
+    const Impl * getImpl() const { return m_impl; }
+};
+
+/**
  * \brief
  * A config defines all the color spaces to be available at runtime.
  *
@@ -1104,6 +1166,9 @@ public:
      */
     void setActiveViews(const char * views);
     const char * getActiveViews() const;
+
+    void setActiveViewsList(const List& views);
+    List getActiveViewsList() const;
 
     /// Get all displays in the config, ignoring the active_displays list.
     int getNumDisplaysAll() const noexcept;

@@ -68,6 +68,7 @@ set(SOURCES
     HashUtils.cpp
     ImageDesc.cpp
     ImagePacking.cpp
+    List.cpp
     Logging.cpp
     Look.cpp
     LookParse.cpp
