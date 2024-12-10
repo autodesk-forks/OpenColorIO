@@ -666,9 +666,13 @@ public:
 
     void setActiveDisplays(const char * displays);
     const char * getActiveDisplays() const;
+    int getNumActiveDisplays() const;
+    const char * getActiveDisplay(int index) const;
 
     void setActiveViews(const char * views);
     const char * getActiveViews() const;
+    int getNumActiveViews() const;
+    const char * getActiveView(int index) const;
 
     void setInactiveColorspaces(const char * colorspaces);
     const char * getInactiveColorSpaces() const;

@@ -1086,6 +1086,11 @@ public:
      */
     void setActiveDisplays(const char * displays);
     const char * getActiveDisplays() const;
+    void addActiveDisplay(const char * view);
+    void removeActiveDisplay(const char * view);
+    void clearActiveDisplays();
+    const char * getActiveDisplay(int index) const;
+    int getNumActiveDisplays() const;
 
     /**
      * \brief
@@ -1104,6 +1109,11 @@ public:
      */
     void setActiveViews(const char * views);
     const char * getActiveViews() const;
+    void addActiveView(const char * view);
+    void removeActiveView(const char * view);
+    void clearActiveViews();
+    const char * getActiveView(int index) const;
+    int getNumActiveViews() const;
 
     /// Get all displays in the config, ignoring the active_displays list.
     int getNumDisplaysAll() const noexcept;
