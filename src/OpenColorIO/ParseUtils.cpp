@@ -693,29 +693,29 @@ bool StrEqualsCaseIgnore(const std::string & a, const std::string & b)
 // Find the end of a name from a list contained in a string.
 // The element of the list are separeted by ":" or ",".
 // The name can be surrounded by quotes to enable name including theses symbols.
-static size_t findEndOfName(const std::string & s, size_t start)
+static int findEndOfName(const std::string & s, size_t start)
 {
-    size_t currentPos = start;
-    size_t nameEndPos = currentPos;
+    int currentPos = start;
+    int nameEndPos = currentPos;
     bool isEndFound = false;
     
     while( !isEndFound )
     {
         nameEndPos = s.find_first_of("\",:", currentPos);
-        if(nameEndPos == std::string::npos) 
+        if(nameEndPos == (int)std::string::npos) 
         {
             // We reached the end of the list
-            nameEndPos = s.size() - 1;
+            nameEndPos = s.size();
             isEndFound = true;
         } 
         else if( s[nameEndPos] == '"' )
         {
             // We found a quote, we need to find the next one
             nameEndPos = s.find_first_of("\"", nameEndPos + 1);
-            if(nameEndPos == std::string::npos)
+            if(nameEndPos == (int)std::string::npos)
             {
                 // We reached the end of the list instead
-                nameEndPos = s.size() - 1;
+                nameEndPos = s.size();
                 isEndFound = true;
             }
             else
@@ -729,7 +729,6 @@ static size_t findEndOfName(const std::string & s, size_t start)
                  s[nameEndPos] == ':' )
         {
             // We found a symbol separating the elements, we stop here
-            nameEndPos--;
             isEndFound = true;
         }
     }
@@ -739,17 +738,28 @@ static size_t findEndOfName(const std::string & s, size_t start)
 
 StringUtils::StringVec SplitStringEnvStyle(const std::string & str)
 {
-    StringUtils::StringVec outputvec;
     const std::string s = StringUtils::Trim(str);
-    size_t currentPos = 0;
-
-    
-    while( s.size() > 0 && 
-           currentPos < s.size() - 1 )
+    if( s.size() == 0 ) 
     {
-        size_t nameEndPos = findEndOfName(s, currentPos);
-        outputvec.push_back(s.substr(currentPos, nameEndPos - currentPos + 1));
-        currentPos = nameEndPos + 2;
+        return {};
+    }
+
+    StringUtils::StringVec outputvec;
+    int currentPos = 0;
+    while( s.size() > 0 && 
+           currentPos <= (int) s.size() )
+    {
+        int nameEndPos = findEndOfName(s, currentPos);
+        if(nameEndPos > currentPos)
+        {
+            outputvec.push_back(s.substr(currentPos, nameEndPos - currentPos));
+            currentPos = nameEndPos + 1;
+        }
+        else
+        {
+            outputvec.push_back("");
+            currentPos += 1;
+        }
     }
 
     for ( auto & val : outputvec )
@@ -775,15 +785,39 @@ StringUtils::StringVec SplitStringEnvStyle(const std::string & str)
 std::string JoinStringEnvStyle(const StringUtils::StringVec & outputvec)
 {
     std::string result;
-    for( const auto & val : outputvec )
+    const int nElement = static_cast<int>(outputvec.size());
+    if( nElement == 0 )
     {
-        if( val.find_first_of(',') != std::string::npos )
+        return "";
+    }
+
+    // We check if the value contains a symbol that could be interpreted as a separator
+    // and if it is not already surrounded by quotes
+    const std::string& firstValue = outputvec[0];
+    if( firstValue.find_first_of(",:") != std::string::npos &&
+        firstValue.size() > 1 &&
+        firstValue[0] != '"' &&
+        firstValue[firstValue.size() - 1] != '"' )
+    {
+        result += "\"" + firstValue + "\"";
+    }
+    else
+    {
+        result += firstValue;
+    }
+
+    for( int i = 1; i < nElement; ++i )
+    {
+        if( outputvec[i].find_first_of(",:") != std::string::npos &&
+            outputvec[i].size() > 1 &&
+            outputvec[i][0] != '"' &&
+            outputvec[i][outputvec[i].size() - 1] != '"' )
         {
-            result += "\"" + val + "\", ";
+            result += ", \"" + outputvec[i] + "\"";
         }
         else
         {
-            result += val + ", ";
+            result += ", " + outputvec[i];
         }
     }
 

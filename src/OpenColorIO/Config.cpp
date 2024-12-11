@@ -3411,7 +3411,7 @@ void Config::removeSharedView(const char * view)
     {
         std::ostringstream os;
         os << "Shared view could not be removed from config. A shared view named '"
-           << view << "' could be be found.";
+           << view << "' could not be found.";
         throw Exception(os.str().c_str());
     }
 }
@@ -4005,20 +4005,54 @@ const char * Config::getActiveDisplays() const
     return getImpl()->m_activeDisplaysStr.c_str();
 }
 
+void Config::addActiveDisplay(const char * view)
+{
+    if( !view || !view[0] )
+    {
+        throw Exception("Active display could not be added to config, display name has to be a "
+                        "non-empty name.");
+    }
+    
+    auto it = std::find(getImpl()->m_activeDisplays.begin(),
+                        getImpl()->m_activeDisplays.end(), view);
+
+    if( it != getImpl()->m_activeDisplays.end() )
+    {
+        std::ostringstream os;
+        os << "Active display could not be added to config. An active display named '"
+           << view << "' already exists.";
+        throw Exception(os.str().c_str());
+    }
+
+    getImpl()->m_activeDisplays.push_back(view);
+
+    getImpl()->m_displayCache.clear();
+
+    AutoMutex lock(getImpl()->m_cacheidMutex);
+    getImpl()->resetCacheIDs();
+}
+
 void Config::removeActiveDisplay(const char * display)
 {
     if( !display || !display[0] )
     {
-            throw Exception("Active display could not be removed from config, display name has to be a "
-                            "non-empty name.");
+        throw Exception("Active display could not be removed from config, display name has to be a "
+                        "non-empty name.");
     }
         
     auto it = std::find(getImpl()->m_activeDisplays.begin(),
                                    getImpl()->m_activeDisplays.end(), display);
 
-    if(it!=getImpl()->m_activeDisplays.end())
+    if( it != getImpl()->m_activeDisplays.end() )
     {
-            getImpl()->m_activeDisplays.erase(it);
+        getImpl()->m_activeDisplays.erase(it);
+    }
+    else
+    {
+        std::ostringstream os;
+        os << "Active display could not be removed from config. An active display named '"
+           << display << "' could not be found.";
+        throw Exception(os.str().c_str());
     }
 
     getImpl()->m_displayCache.clear();
@@ -4039,7 +4073,8 @@ void Config::clearActiveDisplays()
 
 const char * Config::getActiveDisplay( int index ) const
 {
-    if( index<0 || index >= static_cast<int>(getImpl()->m_activeDisplays.size()))
+    if( index<0 || 
+        index >= static_cast<int>(getImpl()->m_activeDisplays.size()))
     {
         return nullptr;
     }
@@ -4050,22 +4085,6 @@ const char * Config::getActiveDisplay( int index ) const
 int Config::getNumActiveDisplays() const
 {
     return static_cast<int>(getImpl()->m_activeDisplays.size());
-}
-
-void Config::addActiveDisplay(const char * view)
-{
-    if( !view || !view[0] )
-    {
-        throw Exception("Active view could not be added to config, view name has to be a "
-                        "non-empty name.");
-    }
-
-    getImpl()->m_activeDisplays.push_back(view);
-
-    getImpl()->m_displayCache.clear();
-
-    AutoMutex lock(getImpl()->m_cacheidMutex);
-    getImpl()->resetCacheIDs();
 }
 
 void Config::setActiveViews(const char * views)
@@ -4132,7 +4151,8 @@ void Config::clearActiveViews()
 
 const char * Config::getActiveView( int index ) const
 {
-    if( index<0 || index >= static_cast<int>(getImpl()->m_activeViews.size()))
+    if( index<0 || 
+        index >= static_cast<int>(getImpl()->m_activeViews.size()))
     {
         return nullptr;
     }
