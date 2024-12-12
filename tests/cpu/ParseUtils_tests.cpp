@@ -436,10 +436,9 @@ OCIO_ADD_TEST(ParseUtils, split_string_env_style)
     OCIO_CHECK_EQUAL("a", outputvec[1]);
     OCIO_CHECK_EQUAL("test", outputvec[2]);
 
-    outputvec = OCIO::SplitStringEnvStyle("   This  : is   \":   a:   test  ");
-    OCIO_CHECK_EQUAL(2, outputvec.size());
-    OCIO_CHECK_EQUAL("This", outputvec[0]);
-    OCIO_CHECK_EQUAL("is   \":   a:   test", outputvec[1]);
+    OCIO_CHECK_THROW_WHAT( OCIO::SplitStringEnvStyle("   This  : is   \":   a:   test  "),
+                           OCIO::Exception, 
+                           "The string 'This  : is   \":   a:   test' is not correctly formatted. It is missing a closing quote.");
 
     outputvec = OCIO::SplitStringEnvStyle("   This  : is   \":   a:   test  \"");
     OCIO_CHECK_EQUAL(2, outputvec.size());
@@ -464,22 +463,14 @@ OCIO_ADD_TEST(ParseUtils, split_string_env_style)
     OCIO_CHECK_EQUAL("a", outputvec[1]);
     OCIO_CHECK_EQUAL("test", outputvec[2]);
 
-    outputvec = OCIO::SplitStringEnvStyle("   This  : is   \":   a:   test  ");
-    OCIO_CHECK_EQUAL(2, outputvec.size());
-    OCIO_CHECK_EQUAL("This", outputvec[0]);
-    OCIO_CHECK_EQUAL("is   \":   a:   test", outputvec[1]);
-
     outputvec = OCIO::SplitStringEnvStyle("   This  : is   \":   a:   test  \"");
     OCIO_CHECK_EQUAL(2, outputvec.size());
     OCIO_CHECK_EQUAL("This", outputvec[0]);
     OCIO_CHECK_EQUAL("is   \":   a:   test  \"" , outputvec[1]);
 
-    outputvec = OCIO::SplitStringEnvStyle("   This  : is   :   a:   test  \"");
-    OCIO_CHECK_EQUAL(4, outputvec.size());
-    OCIO_CHECK_EQUAL("This", outputvec[0]);
-    OCIO_CHECK_EQUAL("is", outputvec[1]);
-    OCIO_CHECK_EQUAL("a", outputvec[2]);
-    OCIO_CHECK_EQUAL("test  \"", outputvec[3]);
+    OCIO_CHECK_THROW_WHAT( OCIO::SplitStringEnvStyle("   This  : is   :   a:   test  \""), 
+                           OCIO::Exception, 
+                           "The string 'This  : is   :   a:   test  \"' is not correctly formatted. It is missing a closing quote.");
 }
 
 OCIO_ADD_TEST(ParseUtils, join_string_env_style)

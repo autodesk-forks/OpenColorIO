@@ -4999,6 +4999,7 @@ inline void save(YAML::Emitter & out, const Config & config)
         active_displays.push_back(config.getActiveDisplay(i));
     }
 
+    // The YAML library will wrap names that use a comma in quotes.
     out << YAML::Value << YAML::Flow << active_displays;
 
 
@@ -5010,6 +5011,8 @@ inline void save(YAML::Emitter & out, const Config & config)
     {
         active_views.push_back(config.getActiveView(i));
     }
+    
+    // The YAML library will wrap names that use a comma in quotes.
     out << YAML::Value << YAML::Flow << active_views;
 
     const std::string inactiveCSs = config.getInactiveColorSpaces();

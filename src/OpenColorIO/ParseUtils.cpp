@@ -715,8 +715,9 @@ static int findEndOfName(const std::string & s, size_t start)
             if(nameEndPos == (int)std::string::npos)
             {
                 // We reached the end of the list instead
-                nameEndPos = s.size();
-                isEndFound = true;
+                std::ostringstream os;
+                os << "The string '" << s << "' is not correctly formatted. It is missing a closing quote.";
+                throw Exception(os.str().c_str());
             }
             else
             {

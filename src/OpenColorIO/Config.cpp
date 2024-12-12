@@ -4005,26 +4005,26 @@ const char * Config::getActiveDisplays() const
     return getImpl()->m_activeDisplaysStr.c_str();
 }
 
-void Config::addActiveDisplay(const char * view)
+void Config::addActiveDisplay(const char * display)
 {
-    if( !view || !view[0] )
+    if( !display || !display[0] )
     {
         throw Exception("Active display could not be added to config, display name has to be a "
                         "non-empty name.");
     }
     
     auto it = std::find(getImpl()->m_activeDisplays.begin(),
-                        getImpl()->m_activeDisplays.end(), view);
+                        getImpl()->m_activeDisplays.end(), display);
 
     if( it != getImpl()->m_activeDisplays.end() )
     {
         std::ostringstream os;
         os << "Active display could not be added to config. An active display named '"
-           << view << "' already exists.";
+           << display << "' already exists.";
         throw Exception(os.str().c_str());
     }
 
-    getImpl()->m_activeDisplays.push_back(view);
+    getImpl()->m_activeDisplays.push_back(display);
 
     getImpl()->m_displayCache.clear();
 
@@ -4040,8 +4040,8 @@ void Config::removeActiveDisplay(const char * display)
                         "non-empty name.");
     }
         
-    auto it = std::find(getImpl()->m_activeDisplays.begin(),
-                                   getImpl()->m_activeDisplays.end(), display);
+    auto it = std::find( getImpl()->m_activeDisplays.begin(),
+                         getImpl()->m_activeDisplays.end(), display );
 
     if( it != getImpl()->m_activeDisplays.end() )
     {
@@ -4056,7 +4056,6 @@ void Config::removeActiveDisplay(const char * display)
     }
 
     getImpl()->m_displayCache.clear();
-
     AutoMutex lock(getImpl()->m_cacheidMutex);
     getImpl()->resetCacheIDs();
 }
@@ -4112,6 +4111,17 @@ void Config::addActiveView(const char * view)
                         "non-empty name.");
     }
 
+    auto it = std::find(getImpl()->m_activeViews.begin(),
+                        getImpl()->m_activeViews.end(), view);
+
+    if( it != getImpl()->m_activeViews.end() )
+    {
+        std::ostringstream os;
+        os << "Active view could not be added to config. An active view named '"
+           << view << "' already exists.";
+        throw Exception(os.str().c_str());
+    }
+
     getImpl()->m_activeViews.push_back(view);
 
     getImpl()->m_displayCache.clear();
@@ -4123,16 +4133,23 @@ void Config::removeActiveView(const char * view)
 {
     if( !view || !view[0] )
     {
-            throw Exception("Active view could not be removed from config, view name has to be a "
-                            "non-empty name.");
+        throw Exception("Active view could not be removed from config, view name has to be a "
+                        "non-empty name.");
     }
         
-    auto it = std::find(getImpl()->m_activeViews.begin(),
-                                   getImpl()->m_activeViews.end(), view);
+    auto it = std::find( getImpl()->m_activeViews.begin(),
+                         getImpl()->m_activeViews.end(), view );
 
     if(it!=getImpl()->m_activeViews.end())
     {
             getImpl()->m_activeViews.erase(it);
+    }
+    else
+    {
+            std::ostringstream os;
+            os << "Active view could not be removed from config. An active view named '"
+               << view << "' could not be found.";
+            throw Exception(os.str().c_str());
     }
 
     getImpl()->m_displayCache.clear();
