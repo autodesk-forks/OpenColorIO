@@ -693,15 +693,18 @@ bool StrEqualsCaseIgnore(const std::string & a, const std::string & b)
 // Find the end of a name from a list contained in a string.
 // The element of the list are separeted by ":" or ",".
 // The name can be surrounded by quotes to enable name including theses symbols.
-static int findEndOfName(const std::string & s, size_t start)
+static int findEndOfName(const std::string & s, size_t start, char sep)
 {
     int currentPos = start;
     int nameEndPos = currentPos;
     bool isEndFound = false;
     
+    std::string symbols = "\"";
+    symbols += sep;
+
     while( !isEndFound )
     {
-        nameEndPos = s.find_first_of("\",:", currentPos);
+        nameEndPos = s.find_first_of(symbols, currentPos);
         if(nameEndPos == (int)std::string::npos) 
         {
             // We reached the end of the list
@@ -726,8 +729,7 @@ static int findEndOfName(const std::string & s, size_t start)
                 currentPos = nameEndPos + 1;
             }
         }
-        else if( s[nameEndPos] == ',' || 
-                 s[nameEndPos] == ':' )
+        else if( s[nameEndPos] == sep )
         {
             // We found a symbol separating the elements, we stop here
             isEndFound = true;
@@ -746,21 +748,36 @@ StringUtils::StringVec SplitStringEnvStyle(const std::string & str)
     }
 
     StringUtils::StringVec outputvec;
-    int currentPos = 0;
-    while( s.size() > 0 && 
-           currentPos <= (int) s.size() )
+    auto foundComma = s.find_first_of(",");
+    auto foundColon = s.find_first_of(":");
+
+    if( foundComma != std::string::npos || 
+        foundColon != std::string::npos )
     {
-        int nameEndPos = findEndOfName(s, currentPos);
-        if(nameEndPos > currentPos)
+        int currentPos = 0;
+        while( s.size() > 0 && 
+               currentPos <= (int) s.size() )
         {
-            outputvec.push_back(s.substr(currentPos, nameEndPos - currentPos));
-            currentPos = nameEndPos + 1;
+            int nameEndPos = findEndOfName( s, 
+                                            currentPos, 
+                                            foundComma != std::string::npos ? ',' : ':' );
+            if(nameEndPos > currentPos)
+            {
+                outputvec.push_back(s.substr(currentPos, nameEndPos - currentPos));
+                currentPos = nameEndPos + 1;
+            }
+            else
+            {
+                outputvec.push_back("");
+                currentPos += 1;
+            }
         }
-        else
-        {
-            outputvec.push_back("");
-            currentPos += 1;
-        }
+    }
+    else
+    {
+        // If there is no colon either, 
+        // we consider the string as a single element
+        outputvec.push_back(s);
     }
 
     for ( auto & val : outputvec )
