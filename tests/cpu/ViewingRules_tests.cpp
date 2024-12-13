@@ -488,6 +488,7 @@ colorspaces:
 
     std::stringstream os;
     os << *config.get();
+    OCIO_CHECK_EQUAL(0, config->getNumActiveDisplays());
     OCIO_CHECK_EQUAL(os.str(), SIMPLE_CONFIG);
 
     // Copy to set active views.

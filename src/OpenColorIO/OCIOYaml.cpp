@@ -5002,7 +5002,6 @@ inline void save(YAML::Emitter & out, const Config & config)
     // The YAML library will wrap names that use a comma in quotes.
     out << YAML::Value << YAML::Flow << active_displays;
 
-
     out << YAML::Key << "active_views";
     StringUtils::StringVec active_views;
     int nViews = config.getNumActiveViews();

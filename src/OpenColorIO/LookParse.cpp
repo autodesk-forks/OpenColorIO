@@ -84,12 +84,6 @@ const LookParseResult::Options & LookParseResult::parse(const std::string & look
             tokens.push_back(t);
         }
 
-        if( vec.size() == 0 )
-        {
-            LookParseResult::Token t;
-            tokens.push_back(t);
-        }
-
         m_options.push_back(tokens);
     }
 

@@ -744,7 +744,7 @@ StringUtils::StringVec SplitStringEnvStyle(const std::string & str)
     const std::string s = StringUtils::Trim(str);
     if( s.size() == 0 ) 
     {
-        return {};
+        return { "" };
     }
 
     StringUtils::StringVec outputvec;

@@ -389,7 +389,7 @@ OCIO_ADD_TEST(ParseUtils, split_string_env_style)
 {
     StringUtils::StringVec outputvec;
     outputvec = OCIO::SplitStringEnvStyle("");
-    OCIO_CHECK_EQUAL(0, outputvec.size());
+    OCIO_CHECK_EQUAL(1, outputvec.size());
     outputvec.clear();
 
     outputvec = OCIO::SplitStringEnvStyle("This:is:a:test");

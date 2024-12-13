@@ -4083,6 +4083,13 @@ const char * Config::getActiveDisplay( int index ) const
 
 int Config::getNumActiveDisplays() const
 {
+    const int numActiveDisplays = static_cast<int>(getImpl()->m_activeDisplays.size());
+    if( numActiveDisplays == 1 && 
+        getImpl()->m_activeDisplays[0].empty() )
+    {
+        return 0;
+    }
+    
     return static_cast<int>(getImpl()->m_activeDisplays.size());
 }
 
@@ -4179,6 +4186,13 @@ const char * Config::getActiveView( int index ) const
 
 int Config::getNumActiveViews() const
 {
+    const int numActiveViews = static_cast<int>(getImpl()->m_activeViews.size());
+    if( numActiveViews == 1 && 
+        getImpl()->m_activeViews[0].empty() )
+    {
+        return 0;
+    }
+    
     return static_cast<int>(getImpl()->m_activeViews.size());
 }
 
