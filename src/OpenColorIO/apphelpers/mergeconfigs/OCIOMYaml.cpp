@@ -548,15 +548,27 @@ inline void save(YAML::Emitter & out, const ConfigMerger & merger)
 
         out << YAML::Key << "active_displays";
         StringUtils::StringVec active_displays;
-        if (p->getActiveDisplays() != NULL && strlen(p->getActiveDisplays()) > 0)
-            active_displays = SplitStringEnvStyle(p->getActiveDisplays());
+        int nDisplays = p->getNumActiveDisplays();
+        active_displays.reserve( nDisplays );
+        for (int i = 0; i < nDisplays; i++)
+        {
+            active_displays.push_back(p->getActiveDisplay(i));
+        }
+
+        // The YAML library will wrap names that use a comma in quotes.
         out << YAML::Value << YAML::Flow << active_displays;
         out << YAML::Newline;
 
         out << YAML::Key << "active_views";
         StringUtils::StringVec active_views;
-        if (p->getActiveViews() != NULL && strlen(p->getActiveViews()) > 0)
-            active_views = SplitStringEnvStyle(p->getActiveViews());
+        int nViews = p->getNumActiveViews();
+        active_views.reserve( nViews );
+        for (int i = 0; i < nViews; i++)
+        {
+            active_views.push_back(p->getActiveView(i));
+        }
+
+        // The YAML library will wrap names that use a comma in quotes.
         out << YAML::Value << YAML::Flow << active_views;
 
         out << YAML::Key << "inactive_colorspaces";
