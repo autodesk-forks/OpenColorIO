@@ -695,7 +695,7 @@ bool StrEqualsCaseIgnore(const std::string & a, const std::string & b)
 // The name can be surrounded by quotes to enable name including theses symbols.
 static int findEndOfName(const std::string & s, size_t start, char sep)
 {
-    int currentPos = start;
+    int currentPos = static_cast<int>(start);
     int nameEndPos = currentPos;
     bool isEndFound = false;
     
@@ -704,17 +704,17 @@ static int findEndOfName(const std::string & s, size_t start, char sep)
 
     while( !isEndFound )
     {
-        nameEndPos = s.find_first_of(symbols, currentPos);
-        if(nameEndPos == (int)std::string::npos) 
+        nameEndPos =  static_cast<int>( s.find_first_of( symbols, currentPos ) );
+        if( nameEndPos == static_cast<int>(std::string::npos) )
         {
             // We reached the end of the list
-            nameEndPos = s.size();
+            nameEndPos =  static_cast<int>( s.size() );
             isEndFound = true;
         } 
         else if( s[nameEndPos] == '"' )
         {
             // We found a quote, we need to find the next one
-            nameEndPos = s.find_first_of("\"", nameEndPos + 1);
+            nameEndPos =  static_cast<int>( s.find_first_of("\"", nameEndPos + 1) );
             if(nameEndPos == (int)std::string::npos)
             {
                 // We reached the end of the list instead
