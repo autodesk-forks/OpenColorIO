@@ -449,6 +449,9 @@ OCIO_ADD_TEST(ParseUtils, split_string_env_style)
     OCIO_CHECK_EQUAL("a", outputvec[1]);
     OCIO_CHECK_EQUAL("test", outputvec[2]);
 
+    // If the string contains a comma, 
+    // it is chosen as the separator character rather than the colon 
+    // (even if it is within quotes and therefore not used as such).
     outputvec = OCIO::SplitStringEnvStyle("   \"This  , is   \":   a:   test  ");
     OCIO_CHECK_EQUAL(1, outputvec.size());
     OCIO_CHECK_EQUAL("\"This  , is   \":   a:   test", outputvec[0]);

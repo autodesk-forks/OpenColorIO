@@ -691,7 +691,7 @@ bool StrEqualsCaseIgnore(const std::string & a, const std::string & b)
 }
 
 // Find the end of a name from a list contained in a string.
-// The element of the list are separeted by ":" or ",".
+// The element of the list are separeted by a character defined by the sep parameter.
 // The name can be surrounded by quotes to enable name including theses symbols.
 static int findEndOfName(const std::string & s, size_t start, char sep)
 {
