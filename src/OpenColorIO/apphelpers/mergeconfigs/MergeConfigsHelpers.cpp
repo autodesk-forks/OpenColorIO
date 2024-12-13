@@ -153,6 +153,16 @@ const char * ConfigMergingParameters::getActiveDisplays() const
     return getImpl()->m_overrideCfg->getActiveDisplays();
 }
 
+int ConfigMergingParameters::getNumActiveDisplays() const
+{
+    return getImpl()->m_overrideCfg->getNumActiveDisplays();
+}
+
+const char * ConfigMergingParameters::getActiveDisplay(int index) const
+{
+    return getImpl()->m_overrideCfg->getActiveDisplay(index);
+}
+
 void ConfigMergingParameters::setActiveViews(const char * views)
 {
     getImpl()->m_overrideCfg->setActiveViews(views);
@@ -161,6 +171,16 @@ void ConfigMergingParameters::setActiveViews(const char * views)
 const char * ConfigMergingParameters::getActiveViews() const
 {
     return getImpl()->m_overrideCfg->getActiveViews();
+}
+
+int ConfigMergingParameters::getNumActiveViews() const
+{
+    return getImpl()->m_overrideCfg->getNumActiveViews();
+}
+
+const char * ConfigMergingParameters::getActiveView(int index) const
+{
+    return getImpl()->m_overrideCfg->getActiveView(index);
 }
 
 void ConfigMergingParameters::setInactiveColorspaces(const char * colorspaces)
