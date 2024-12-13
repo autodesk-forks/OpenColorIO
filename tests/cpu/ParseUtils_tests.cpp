@@ -400,7 +400,7 @@ OCIO_ADD_TEST(ParseUtils, split_string_env_style)
     OCIO_CHECK_EQUAL("test", outputvec[3]);
     outputvec.clear();
 
-    outputvec = OCIO::SplitStringEnvStyle("   This  : is   :   a:   test  ");
+    outputvec = OCIO::SplitStringEnvStyle("   \"This\"  : is   :   a:   test  ");
     OCIO_CHECK_EQUAL(4, outputvec.size());
     OCIO_CHECK_EQUAL("This", outputvec[0]);
     OCIO_CHECK_EQUAL("is", outputvec[1]);
@@ -493,7 +493,7 @@ OCIO_ADD_TEST(ParseUtils, join_string_env_style)
     outputvec = { "This", "is   \":   a:   test" };
     OCIO_CHECK_EQUAL( "This, \"is   \":   a:   test\"", OCIO::JoinStringEnvStyle(outputvec) );
 
-    outputvec = { "This, is, a, string", "this, one, too" };
+    outputvec = { "\"This, is, a, string\"", "this, one, too" };
     OCIO_CHECK_EQUAL( "\"This, is, a, string\", \"this, one, too\"" , OCIO::JoinStringEnvStyle(outputvec) );
 
     outputvec = { "This", "is: ", "\"a very good,\"", " fine, helpful, and useful ", "test" };
