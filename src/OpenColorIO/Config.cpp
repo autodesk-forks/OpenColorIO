@@ -1029,6 +1029,7 @@ public:
             oss << "Profile description: " << monitorDescription;
             cs->setDescription(oss.str().c_str());
             cs->setTransform(file, COLORSPACE_DIR_FROM_REFERENCE);
+            cs->setEncoding("sdr-video");
 
             // Note that it adds it or updates the existing one.
             m_allColorSpaces->addColorSpace(cs);
