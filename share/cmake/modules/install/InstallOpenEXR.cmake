@@ -79,6 +79,14 @@ if(NOT OpenEXR_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACK
 
     set(_OpenEXR_LIB_VER "${_OpenEXR_VERSION_MAJOR}_${_OpenEXR_VERSION_MINOR}")
 
+    # OpenJPH is introduced in OpenEXR 3.4.0
+    if( (_OpenEXR_VERSION_MAJOR GREATER 3)
+        OR ( _OpenEXR_VERSION_MAJOR EQUAL 3 AND _OpenEXR_VERSION_MINOR GREATER_EQUAL 4) )
+        set(_OpenEXR_SUPPORTS_OPENJPH TRUE)
+    else()
+        set(_OpenEXR_SUPPORTS_OPENJPH FALSE)
+    endif()
+
     # Specify which OpenJPH version to use as we need to know the library name
     # for the Windows library. OpenEXR 3.4.0 would install 0.22.0 by default,
     # here we request the latest version at release time including build fixes.
@@ -159,19 +167,26 @@ if(NOT OpenEXR_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACK
         # Hack to let imported target be built from ExternalProject_Add
         file(MAKE_DIRECTORY ${OpenEXR_INCLUDE_DIR})
 
+
+        # Build byproducts list (exclude openjph if not used).
+        set(_OpenEXR_BUILD_BYPRODUCTS
+            ${Iex_LIBRARY}
+            ${IlmThread_LIBRARY}
+            ${OpenEXR_LIBRARY}
+            ${OpenEXRCore_LIBRARY}
+            ${OpenEXRUtil_LIBRARY}
+        )
+        if(OCIO_OPENEXR_USE_OPENJPH)
+            list(APPEND _OpenEXR_BUILD_BYPRODUCTS ${openjph_LIBRARY})
+        endif()
+
         ExternalProject_Add(openexr_install
             GIT_REPOSITORY "https://github.com/AcademySoftwareFoundation/openexr.git"
             GIT_TAG "v${OpenEXR_VERSION}"
             GIT_CONFIG advice.detachedHead=false
             GIT_SHALLOW TRUE
             PREFIX "${_EXT_BUILD_ROOT}/openexr"
-            BUILD_BYPRODUCTS
-                ${openjph_LIBRARY}
-                ${Iex_LIBRARY}
-                ${IlmThread_LIBRARY}
-                ${OpenEXR_LIBRARY}
-                ${OpenEXRCore_LIBRARY}
-                ${OpenEXRUtil_LIBRARY}
+            BUILD_BYPRODUCTS ${_OpenEXR_BUILD_BYPRODUCTS}
             CMAKE_ARGS ${OpenEXR_CMAKE_ARGS}
             EXCLUDE_FROM_ALL TRUE
             BUILD_COMMAND ""
@@ -185,7 +200,9 @@ if(NOT OpenEXR_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACK
 
         # Additional targets. ALIAS to UNKNOWN imported target is only possible
         # from CMake 3.15, so we explicitly define targets as STATIC here.
-        add_library(OpenEXR::openjph STATIC IMPORTED GLOBAL)
+        if(OCIO_OPENEXR_USE_OPENJPH)
+            add_library(OpenEXR::openjph STATIC IMPORTED GLOBAL)
+        endif()
         add_library(OpenEXR::Iex STATIC IMPORTED GLOBAL)
         add_library(OpenEXR::IexConfig INTERFACE IMPORTED GLOBAL)
         add_library(OpenEXR::IlmThread STATIC IMPORTED GLOBAL)
@@ -215,13 +232,19 @@ endif()
 
 if(_OpenEXR_TARGET_CREATE)
     file(MAKE_DIRECTORY ${OpenEXR_INCLUDE_DIR}/OpenEXR)
-    file(MAKE_DIRECTORY ${OpenEXR_INCLUDE_DIR}/openjph)
 
-    set_target_properties(OpenEXR::openjph PROPERTIES
-        IMPORTED_LOCATION ${openjph_LIBRARY}
-        INTERFACE_COMPILE_DEFINITIONS "_FILE_OFFSET_BITS=64"
-        INTERFACE_INCLUDE_DIRECTORIES "${OpenEXR_INCLUDE_DIR}/openjph"
-    )
+    if(OCIO_OPENEXR_USE_OPENJPH)
+        file(MAKE_DIRECTORY ${OpenEXR_INCLUDE_DIR}/openjph)
+
+        set_target_properties(OpenEXR::openjph PROPERTIES
+            IMPORTED_LOCATION ${openjph_LIBRARY}
+            INTERFACE_COMPILE_DEFINITIONS "_FILE_OFFSET_BITS=64"
+            INTERFACE_INCLUDE_DIRECTORIES "${OpenEXR_INCLUDE_DIR}/openjph"
+        )
+        set(_OCIO_OPENEXRCORE_OPENJPH_LINK ";OpenEXR::openjph")
+    else()
+        set(_OCIO_OPENEXRCORE_OPENJPH_LINK "")
+    endif()
     set_target_properties(OpenEXR::Iex PROPERTIES
         IMPORTED_LOCATION ${Iex_LIBRARY}
         INTERFACE_INCLUDE_DIRECTORIES "${OpenEXR_INCLUDE_DIR}"
@@ -250,7 +273,7 @@ if(_OpenEXR_TARGET_CREATE)
     set_target_properties(OpenEXR::OpenEXRCore PROPERTIES
         IMPORTED_LOCATION ${OpenEXRCore_LIBRARY}
         INTERFACE_INCLUDE_DIRECTORIES "${OpenEXR_INCLUDE_DIR}"
-        INTERFACE_LINK_LIBRARIES "OpenEXR::OpenEXRConfig;Imath::Imath;OpenEXR::openjph"
+        INTERFACE_LINK_LIBRARIES "OpenEXR::OpenEXRConfig;Imath::Imath${_OCIO_OPENEXRCORE_OPENJPH_LINK}"
         STATIC_LIBRARY_OPTIONS "-no_warning_for_no_symbols"
     )
     set_target_properties(OpenEXR::OpenEXRUtil PROPERTIES
