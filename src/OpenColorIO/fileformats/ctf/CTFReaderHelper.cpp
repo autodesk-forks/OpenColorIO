@@ -60,8 +60,10 @@ void CTFReaderTransformElt::start(const char ** atts)
     bool isIdFound = false;
     bool isVersionFound = false;
     bool isCLFVersionFound = false;
+    bool isSMPTEVersionFound = false;
     CTFVersion requestedVersion(0, 0);
     CTFVersion requestedCLFVersion(0, 0);
+    CTFVersion requestedSMPTEVersion(0, 0);
 
     unsigned i = 0;
     while (atts[i])
@@ -70,11 +72,39 @@ void CTFReaderTransformElt::start(const char ** atts)
         {
             if (!atts[i + 1] || !*atts[i + 1])
             {
-                throwMessage("Required attribute 'id' does not have a value.");
+                throwMessage("Attribute 'id' does not have a value.");
             }
 
             m_transform->setID(atts[i + 1]);
             isIdFound = true;
+        }
+        else if (0 == Platform::Strcasecmp(ATTR_XMLNS, atts[i]))
+        {
+            if (!atts[i + 1] || !*atts[i + 1])
+            {
+                throwMessage("Attribute 'xmlns' does not have a value.");
+            }
+            if (isVersionFound)
+            {
+                throwMessage("SMPTE 'xmlns' version and 'Version' attribute cannot both be present.");
+            }
+
+            try
+            {
+                auto version = CTFVersion(atts[i + 1]);
+                
+                requestedVersion = CTF_PROCESS_LIST_VERSION_2_0;
+                requestedSMPTEVersion = version;
+                isVersionFound = true;
+                isSMPTEVersionFound = true;
+                m_isCLF = true;
+                m_isSMPTE = true;
+                // TODO: do we set the requestedCLFVersion? which value, ST2136-1:2024?
+            }
+            catch (Exception& /*e*/)
+            {
+                // Ignore the exception, as this may not be a version URI.
+            }
         }
         else if (0 == Platform::Strcasecmp(ATTR_NAME, atts[i]))
         {
@@ -100,6 +130,10 @@ void CTFReaderTransformElt::start(const char ** atts)
             {
                 throwMessage("'compCLFversion' and 'Version' cannot both be present.");
             }
+            if (isSMPTEVersionFound)
+            {
+                throwMessage("SMPTE 'xmlns' version and 'Version' attribute cannot both be present.");
+            }
             if (isVersionFound)
             {
                 throwMessage("'Version' can only be there once.");
@@ -114,7 +148,7 @@ void CTFReaderTransformElt::start(const char ** atts)
             try
             {
                 const std::string verString(pVer);
-                CTFVersion::ReadVersion(verString, requestedVersion);
+                requestedVersion = CTFVersion(verString);
             }
             catch (Exception& ce)
             {
@@ -134,6 +168,9 @@ void CTFReaderTransformElt::start(const char ** atts)
                 throwMessage("'compCLFversion' and 'Version' cannot be both present.");
             }
 
+            // TODO: do we allow both the SMPTE version and the compCLFversion?
+            // Do we expect and enforce the value to be "ST2136-1:2024" for example?
+
             const char* pVer = atts[i + 1];
             if (!pVer || !*pVer)
             {
@@ -143,7 +180,7 @@ void CTFReaderTransformElt::start(const char ** atts)
             try
             {
                 std::string verString(pVer);
-                CTFVersion::ReadVersion(verString, requestedCLFVersion);
+                requestedCLFVersion = CTFVersion(verString);
             }
             catch (Exception& ce)
             {
@@ -173,10 +210,10 @@ void CTFReaderTransformElt::start(const char ** atts)
             // Handle as CLF.
             m_isCLF = true;
         }
-        else if (0 == Platform::Strcasecmp("xmlns", atts[i]))
-        {
-            // Ignore.
-        }
+//         else if (0 == Platform::Strcasecmp("xmlns", atts[i]))
+//         {
+//             // Ignore.
+//         }
         else
         {
             logParameterWarning(atts[i]);
@@ -185,9 +222,10 @@ void CTFReaderTransformElt::start(const char ** atts)
         i += 2;
     }
 
-    // Check mandatory elements.
-    if (!isIdFound)
+    // Check mandatory id keyword for non-SMPTE variants.
+    if (!isIdFound && !m_isSMPTE)
     {
+        // FIXME: add handling of the SMPTE version tag
         throwMessage("Required attribute 'id' is missing.");
     }
 
@@ -195,16 +233,20 @@ void CTFReaderTransformElt::start(const char ** atts)
     // the CTF format is 1.2.
     if (!isVersionFound)
     {
-        if (m_isCLF && !isCLFVersionFound)
+        if (m_isCLF)
         {
-            throwMessage("Required attribute 'compCLFversion' is missing.");
+            throwMessage("Neither 'compCLFversion' nor 'xmlns' was found; one of them is required.");
         }
         setVersion(CTF_PROCESS_LIST_VERSION_1_2);
     }
     else
     {
-        setVersion(requestedVersion);
-        if (m_isCLF)
+        setVersion(requestedVersion);  // TODO: do we care about this when SMPTE?
+        if(m_isSMPTE) 
+        {
+            setCLFVersion(requestedSMPTEVersion);
+        } 
+        else if (m_isCLF)
         {
             setCLFVersion(requestedCLFVersion);
         }
@@ -229,6 +271,10 @@ const char * CTFReaderTransformElt::getTypeName() const
 {
     static const std::string n(TAG_PROCESS_LIST);
     return n.c_str();
+}
+void CTFReaderTransformElt::setID(const std::string& idStr)
+{
+    getTransform()->setID(idStr.c_str());
 }
 
 void CTFReaderTransformElt::setVersion(const CTFVersion & ver)

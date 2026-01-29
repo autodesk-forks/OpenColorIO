@@ -32,21 +32,23 @@
 
 /*
 
-This file format reader supports the Academy/ASC Common LUT Format (CLF) and
-the Autodesk Color Transform Format (CTF).
+This file format reader supports the Academy/ASC Common LUT Format (CLF), SMPTE
+Common LUT Format (also CLF) and the Autodesk Color Transform Format (CTF).
 
-The Academy/ASC Common LUT format was an initiative to bring vendors together
-to agree on a common LUT format for this industry.  Support for CLF is a
+The Academy/ASC Common LUT format was an initiative to bring vendors together to
+agree on a common LUT format for this industry.  Support for CLF is a
 requirement in order to obtain ACES Logo Certification from the Academy (in
 several product categories).  CLF files are expressed using XML.  The spec,
 AMPAS S-2014-006, is available from:
 <https://acescentral.com/t/aces-documentation/53>
 
+**** TODO: Text about the SMPTE CLF standard. ****
+
 The Autodesk CTF format is based on the Academy/ASC CLF format and adds several
-operators that allow higher quality results by avoiding the need to bake
-certain common functions into LUTs.  This ranges from simple power functions
-to more complicated operators needed to implement very accurate yet compact
-ACES Output Transforms.
+operators that allow higher quality results by avoiding the need to bake certain
+common functions into LUTs.  This ranges from simple power functions to more
+complicated operators needed to implement very accurate yet compact ACES Output
+Transforms.
 
 Autodesk CTF was also designed to be able to losslessly serialize any OCIO
 Processor to a self-contained XML file.  This opens up some useful workflow
@@ -56,41 +58,41 @@ sometimes also useful for trouble-shooting.)
 
 The CTF format is a superset of the CLF format, hence the use of a common
 parser.  Aside from the file extension, the two formats may be distinguished
-based on the version attribute in the root ProcessList element.  A CLF file
-uses the attribute "compCLFversion" whereas a CTF file uses "version".
+based on the version attribute in the root ProcessList element.  A CLF file uses
+the attribute "compCLFversion" whereas a CTF file uses "version".
 
 The parser has been carefully designed to assist users in trouble-shooting
-problems with files that won't load.  A detailed error message is printed,
-along with the line number (similar to a compiler).  There are also extensive
-unit tests to ensure robustness.
+problems with files that won't load.  A detailed error message is printed, along
+with the line number (similar to a compiler).  There are also extensive unit
+tests to ensure robustness.
 
 Note:  One frequent point of confusion regarding the CLF syntax relates to the
-inBitDepth and outBitDepth attributes in each process node.  These bit-depths
-DO NOT specify the processing precision, nor do they specify the bit-depth of
-the images that are input or output from the transform.  The only function of
-these bit-depth attributes is to interpret the scaling of the parameter values
-in a given process node.  This is helpful since, e.g., it avoids the need for
+inBitDepth and outBitDepth attributes in each process node.  These bit-depths DO
+NOT specify the processing precision, nor do they specify the bit-depth of the
+images that are input or output from the transform.  The only function of these
+bit-depth attributes is to interpret the scaling of the parameter values in a
+given process node.  This is helpful since, e.g., it avoids the need for
 heuristics to guess whether LUT values are scaled to 10 or 12 bits.  These
 attributes must always be present and must match at the interface between
 adjacent process nodes.  That said, in some cases, one or both may not actually
 affect the results if they are not required to interpret the scaling of the
-parameters.  For example, the ASC_CDL parameters are always stored in
-normalized form and hence the bit-depths, while required, do not affect their
-interpretation.  On the other hand, the interpretation of the parameters in
-a Matrix op is affected by both the in and out bit-depths.  It should be noted
+parameters.  For example, the ASC_CDL parameters are always stored in normalized
+form and hence the bit-depths, while required, do not affect their
+interpretation.  On the other hand, the interpretation of the parameters in a
+Matrix op is affected by both the in and out bit-depths.  It should be noted
 that although the bit-depths imply a certain scaling, they never impose a
 clamping or quantization, e.g. a LUT array with an outBitDepth of '10i' is free
 to contain values outside of [0,1023] and to use fractional values.
 
-For the OCIO implementation, we tried to avoid bringing the complexity of
-proper bit-depth handling into the design of the ops.  Therefore, the objects
-always store the values from LUTs, matrices, etc. in normalized form.  In other
-words, as if the CLF file had all its bit-depths set to "32f".  However we do
-provide FileBitDepth getters that will return the original scaling read from a
-CLF file, and setters that will control the scaling of values to be written to
-a CLF file.  These getters/setters are only provided for the transforms/ops
-(LUT1D, LUT3D, Matrix, and Range) where a CLF file is allowed to store the
-parameters in an unnormalized form.
+For the OCIO implementation, we tried to avoid bringing the complexity of proper
+bit-depth handling into the design of the ops.  Therefore, the objects always
+store the values from LUTs, matrices, etc. in normalized form.  In other words,
+as if the CLF file had all its bit-depths set to "32f".  However we do provide
+FileBitDepth getters that will return the original scaling read from a CLF file,
+and setters that will control the scaling of values to be written to a CLF file.
+These getters/setters are only provided for the transforms/ops (LUT1D, LUT3D,
+Matrix, and Range) where a CLF file is allowed to store the parameters in an
+unnormalized form.
 */
 
 namespace OCIO_NAMESPACE
@@ -146,27 +148,52 @@ public:
 
 void LocalFileFormat::getFormatInfo(FormatInfoVec & formatInfoVec) const
 {
-    FormatInfo info;
-    info.name = FILEFORMAT_CLF;
-    info.extension = "clf";
-    info.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
-                                              FORMAT_CAPABILITY_BAKE |
-                                              FORMAT_CAPABILITY_WRITE);
-    info.bake_capabilities = FormatBakeFlags(FORMAT_BAKE_CAPABILITY_3DLUT |
-                                             FORMAT_BAKE_CAPABILITY_1DLUT |
-                                             FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
-    formatInfoVec.push_back(info);
+    // CLF - Academy/ASC
+    {
+        FormatInfo info;
+        info.name = FILEFORMAT_CLF_ACADEMY;
+        info.extension = "clf";
+        info.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
+                                                  FORMAT_CAPABILITY_BAKE |
+                                                  FORMAT_CAPABILITY_WRITE);
+        
+        info.bake_capabilities = FormatBakeFlags( FORMAT_BAKE_CAPABILITY_3DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
+        formatInfoVec.push_back(info);
+    }
 
-    FormatInfo info2;
-    info2.name = FILEFORMAT_CTF;
-    info2.extension = "ctf";
-    info2.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
-                                               FORMAT_CAPABILITY_BAKE |
-                                               FORMAT_CAPABILITY_WRITE);
-    info.bake_capabilities = FormatBakeFlags(FORMAT_BAKE_CAPABILITY_3DLUT |
-                                             FORMAT_BAKE_CAPABILITY_1DLUT |
-                                             FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
-    formatInfoVec.push_back(info2);
+    // CLF - SMPTE
+    {
+        FormatInfo info;
+        info.name = FILEFORMAT_CLF_SMPTE;
+        info.extension = "clf";
+        info.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
+                                                  FORMAT_CAPABILITY_BAKE |
+                                                  FORMAT_CAPABILITY_WRITE);
+        
+        info.bake_capabilities = FormatBakeFlags( FORMAT_BAKE_CAPABILITY_3DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
+
+        formatInfoVec.push_back(info);
+    }
+
+    // CTF
+    {
+        FormatInfo info;
+        info.name = FILEFORMAT_CTF;
+        info.extension = "ctf";
+        info.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
+                                                  FORMAT_CAPABILITY_BAKE |
+                                                  FORMAT_CAPABILITY_WRITE);
+
+        info.bake_capabilities = FormatBakeFlags( FORMAT_BAKE_CAPABILITY_3DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
+
+        formatInfoVec.push_back(info);
+    }
 }
 
 class XMLParserHelper
@@ -717,6 +744,18 @@ private:
                             pImpl->getXmLineNumber(),
                             pImpl->getXmlFilename()));
                 }
+                else if (SupportedElement(name, pElt, TAG_ID, "", recognizedName)) 
+                {
+                    pImpl->m_elms.push_back(
+                        std::make_shared<CTFReaderIdElt>(
+                            name,
+                            pContainer,
+                            pImpl->getXmLineNumber(),
+                            pImpl->getXmlFilename()));
+                    // TODO: do we enforce the ID (tag for SMPTE or attribute otherwise)?
+                    // TODO: do we want to restrict Id tag to SMPTE only?
+                }
+
                 // Dynamic Property is valid under any operator parent. First
                 // test if the tag is supported to set the recognizedName 
                 // accordingly, without testing for parents. Test for the
@@ -1558,14 +1597,23 @@ void LocalFileFormat::write(const ConstConfigRcPtr & config,
                             const std::string & formatName,
                             std::ostream & ostream) const
 {
-    bool isCLF = false;
+    
+    TransformWriter::SubFormat subFormat{TransformWriter::SubFormat::eUNKNOWN};
+    
     if (Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CLF) == 0)
     {
-        isCLF = true;
-    }
-    else if (Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CTF) != 0)
+        subFormat = TransformWriter::SubFormat::eCLF_AMPAS;
+    } 
+    else if(Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CLF_SMPTE) == 0)
     {
-        // Neither a clf nor a ctf.
+        subFormat = TransformWriter::SubFormat::eCLF_SMPTE;
+    } 
+    else if (Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CTF) == 0) 
+    {
+        subFormat = TransformWriter::SubFormat::eCTF;
+    } 
+    else 
+    {
         std::ostringstream os;
         os << "Error: CLF/CTF writer does not also write format " << formatName << ".";
         throw Exception(os.str().c_str());
@@ -1587,7 +1635,7 @@ void LocalFileFormat::write(const ConstConfigRcPtr & config,
     ostream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
     XmlFormatter fmt(ostream);
 
-    TransformWriter writer(fmt, transform, isCLF);
+    TransformWriter writer(fmt, transform, subFormat);
     writer.write();
 }
 

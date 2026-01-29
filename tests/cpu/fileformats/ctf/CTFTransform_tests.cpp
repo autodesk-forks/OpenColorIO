@@ -47,58 +47,60 @@ OCIO_ADD_TEST(CTFVersion, read_version)
 
     OCIO::CTFVersion versionRead;
     {
-        OCIO_CHECK_NO_THROW(OCIO::CTFVersion::ReadVersion("1.2.3", versionRead));
+        OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion("1.2.3"));
         const OCIO::CTFVersion version(1, 2, 3);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
     {
-        OCIO_CHECK_NO_THROW(OCIO::CTFVersion::ReadVersion("1.2", versionRead));
+        OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion("1.2"));
         const OCIO::CTFVersion version(1, 2, 0);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
     {
-        OCIO_CHECK_NO_THROW(OCIO::CTFVersion::ReadVersion("1", versionRead));
+        OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion("1"));
         const OCIO::CTFVersion version(1, 0, 0);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
     {
-        OCIO_CHECK_NO_THROW(OCIO::CTFVersion::ReadVersion("1.10", versionRead));
+        OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion("1.10"));
         const OCIO::CTFVersion version(1, 10, 0);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
     {
-        OCIO_CHECK_NO_THROW(OCIO::CTFVersion::ReadVersion("1.1.0", versionRead));
+        OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion("1.1.0"));
         const OCIO::CTFVersion version(1, 1, 0);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
     {
-        OCIO_CHECK_NO_THROW(OCIO::CTFVersion::ReadVersion("1.01", versionRead));
+        OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion("1.01"));
         const OCIO::CTFVersion version(1, 1, 0);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
 
-    OCIO_CHECK_THROW_WHAT(OCIO::CTFVersion::ReadVersion("", versionRead),
+    // FIXME: add SMPTE version test when supported.
+
+    OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion(""),
         OCIO::Exception,
         "is not a valid version");
-    OCIO_CHECK_THROW_WHAT(OCIO::CTFVersion::ReadVersion("1 2", versionRead),
+    OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion("1 2"),
         OCIO::Exception,
         "is not a valid version");
-    OCIO_CHECK_THROW_WHAT(OCIO::CTFVersion::ReadVersion("1-2", versionRead),
+    OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion("1-2"),
         OCIO::Exception,
         "is not a valid version");
-    OCIO_CHECK_THROW_WHAT(OCIO::CTFVersion::ReadVersion("a", versionRead),
+    OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion("a"),
         OCIO::Exception,
         "is not a valid version");
-    OCIO_CHECK_THROW_WHAT(OCIO::CTFVersion::ReadVersion("1.", versionRead),
+    OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion("1."),
         OCIO::Exception,
         "is not a valid version");
-    OCIO_CHECK_THROW_WHAT(OCIO::CTFVersion::ReadVersion(".2", versionRead),
+    OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion(".2"),
         OCIO::Exception,
         "is not a valid version");
-    OCIO_CHECK_THROW_WHAT(OCIO::CTFVersion::ReadVersion("1.0 2", versionRead),
+    OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion("1.0 2"),
         OCIO::Exception,
         "is not a valid version");
-    OCIO_CHECK_THROW_WHAT(OCIO::CTFVersion::ReadVersion("-1", versionRead),
+    OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion("-1"),
         OCIO::Exception,
         "is not a valid version");
 }
@@ -141,6 +143,9 @@ OCIO_ADD_TEST(CTFVersion, version_write)
         ostream << version;
         OCIO_CHECK_EQUAL(ostream.str(), "0");
     }
+
+    // FIXME: add SMPTE version test when supported.
+
 }
 
 OCIO_ADD_TEST(CTFReaderTransform, accessors)

@@ -54,6 +54,9 @@ public:
 
     const char * getTypeName() const override;
 
+    // Sets the ID (if the ID tag is used).
+    void setID(const std::string& idStr);
+
     // Set the current transform CTF version.
     void setVersion(const CTFVersion & ver);
 
@@ -71,7 +74,54 @@ private:
     // The associated Transform.
     CTFReaderTransformPtr m_transform;
     // Is it a clf file? Or is a clf parser requested.
-    bool m_isCLF;
+    bool m_isCLF = false;
+    bool m_isSMPTE = false;
+};
+
+// Class for the Id element.
+class CTFReaderIdElt : public XmlReaderPlainElt
+{
+public:
+    CTFReaderIdElt() = delete;
+    CTFReaderIdElt(const std::string & name,
+                            ContainerEltRcPtr & pParent,
+                            unsigned int xmlLocation,
+                            const std::string & xmlFile)
+        : XmlReaderPlainElt(name, pParent, xmlLocation, xmlFile)
+        , m_changed(false)
+    {
+    }
+
+    ~CTFReaderIdElt()
+    {
+    }
+
+    void start(const char ** /* atts */) override
+    {
+        m_id.resize(0);
+        m_changed = false;
+    }
+
+    void end() override 
+    {
+        auto* pTransformnElt = dynamic_cast<CTFReaderTransformElt*>(getParent().get());
+        if (pTransformnElt)
+        {
+            pTransformnElt->setID(m_id);
+        }
+    }
+
+    void setRawData(const char * str, size_t len, unsigned int /* xmlLine */) override
+    {
+        // Keep adding to the string.
+        m_id += std::string(str, len);
+        m_changed = true;
+    }
+
+private:
+    std::string m_id;
+    bool m_changed;
+
 };
 
 typedef OCIO_SHARED_PTR<CTFReaderTransformElt> CTFReaderTransformEltRcPtr;

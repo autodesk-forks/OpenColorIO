@@ -39,6 +39,63 @@ OCIO_ADD_TEST(FileFormatCTF, missing_file)
                           "Error opening test file.");
 }
 
+OCIO_ADD_TEST(FileFormatCTF, smpte_clf_basic) 
+{
+    {
+        const std::string ctfFile("clf/smpte/st2136-1b.clf");
+        OCIO::LocalCachedFileRcPtr cachedFile;
+
+        OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+        OCIO_REQUIRE_ASSERT((bool)cachedFile);
+        OCIO_CHECK_EQUAL(cachedFile->m_transform->getName(), "");
+        OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "urn:uuid:3bae2da8-59c7-44c2-b6c9-76dc0f8cae8c");
+        StringUtils::StringVec desc = cachedFile->m_transform->getDescriptions();
+        OCIO_REQUIRE_EQUAL(desc.size(), 1);
+        OCIO_CHECK_EQUAL(desc[0], "CIE-XYZ D65 to CIELAB L*, a*, b* (scaled by 1/100, neutrals at         0.0 chroma)");
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        OCIO_REQUIRE_EQUAL(opList.size(), 3);
+        OCIO_CHECK_EQUAL(opList[0]->getType(), OCIO::OpData::MatrixType);
+        OCIO_CHECK_EQUAL(opList[0]->getName(), "");
+        OCIO_CHECK_EQUAL(opList[0]->getID(), "");
+
+        OCIO_CHECK_EQUAL(opList[1]->getType(), OCIO::OpData::GammaType);
+        OCIO_CHECK_EQUAL(opList[1]->getName(), "");
+        OCIO_CHECK_EQUAL(opList[1]->getID(), "");
+
+        OCIO_CHECK_EQUAL(opList[2]->getType(), OCIO::OpData::MatrixType);
+        OCIO_CHECK_EQUAL(opList[2]->getName(), "");
+        OCIO_CHECK_EQUAL(opList[2]->getID(), "");
+    }
+
+    {
+        const std::string ctfFile("clf/smpte/st2136-1c.clf");
+        OCIO::LocalCachedFileRcPtr cachedFile;
+
+        OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+        OCIO_REQUIRE_ASSERT((bool)cachedFile);
+        OCIO_CHECK_EQUAL(cachedFile->m_transform->getName(), "");
+        OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "urn:uuid:9d768121-0cf9-40a3-a8e3-7b49f79858a7");
+        StringUtils::StringVec desc = cachedFile->m_transform->getDescriptions();
+        OCIO_REQUIRE_EQUAL(desc.size(), 2);
+        OCIO_CHECK_EQUAL(desc[0], "Identity transform illustrating Array bit depth scaling");
+        OCIO_CHECK_EQUAL(desc[1], "Can be loaded by either SMPTE or CLF v3 parsers");
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        OCIO_REQUIRE_EQUAL(opList.size(), 3);
+        OCIO_CHECK_EQUAL(opList[0]->getType(), OCIO::OpData::MatrixType);
+        OCIO_CHECK_EQUAL(opList[0]->getName(), "");
+        OCIO_CHECK_EQUAL(opList[0]->getID(), "");
+
+        OCIO_CHECK_EQUAL(opList[1]->getType(), OCIO::OpData::Lut1DType);
+        OCIO_CHECK_EQUAL(opList[1]->getName(), "");
+        OCIO_CHECK_EQUAL(opList[1]->getID(), "");
+
+        OCIO_CHECK_EQUAL(opList[2]->getType(), OCIO::OpData::MatrixType);
+        OCIO_CHECK_EQUAL(opList[2]->getName(), "");
+        OCIO_CHECK_EQUAL(opList[2]->getID(), "");
+    }
+}
+
+
 OCIO_ADD_TEST(FileFormatCTF, clf_examples)
 {
     OCIO::LocalCachedFileRcPtr cachedFile;
@@ -1134,6 +1191,7 @@ OCIO_ADD_TEST(FileFormatCTF, tabluation_support)
     // series of numbers.
     const std::string ctfFile("clf/tabulation_support.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "e0a0ae4b-adc2-4c25-ad70-fa6f31ba219d");
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
@@ -1887,7 +1945,7 @@ OCIO_ADD_TEST(FileFormatCTF, transform_id_empty)
     const std::string ctfFile("clf/illegal/transform_id_empty.clf");
     OCIO_CHECK_THROW_WHAT(LoadCLFFile(ctfFile),
                           OCIO::Exception,
-                          "Required attribute 'id' does not have a value");
+                          "Attribute 'id' does not have a value");
 }
 
 OCIO_ADD_TEST(FileFormatCTF, transform_with_bitdepth_mismatch)

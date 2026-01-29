@@ -177,7 +177,9 @@ FileFormat * CreateFileFormatSpiMtx();
 FileFormat * CreateFileFormatTruelight();
 FileFormat * CreateFileFormatVF();
 
-static constexpr char FILEFORMAT_CLF[]                         = "Academy/ASC Common LUT Format";
+static constexpr char FILEFORMAT_CLF[]                         = "Academy/ASC Common LUT Format"; // Should we use a the default CTF name? Is this the correct one?
+static constexpr char FILEFORMAT_CLF_ACADEMY[]                 = "Academy/ASC Common LUT Format"; // Is this a good name?
+static constexpr char FILEFORMAT_CLF_SMPTE[]                   = "SMPTE Common LUT Format";
 static constexpr char FILEFORMAT_CTF[]                         = "Color Transform Format";
 static constexpr char FILEFORMAT_COLOR_CORRECTION[]            = "ColorCorrection";
 static constexpr char FILEFORMAT_COLOR_CORRECTION_COLLECTION[] = "ColorCorrectionCollection";
