@@ -44,9 +44,10 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_id_element)
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[1],
                         "Can be loaded by either SMPTE or CLF v3 parsers");
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
-    OCIO_REQUIRE_EQUAL(opList.size(), 3);
 
     // Check the ops.
+    OCIO_REQUIRE_EQUAL(opList.size(), 3);
+
     auto mat1 = OCIO::DynamicPtrCast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(mat1);
     OCIO_CHECK_EQUAL(mat1->getFileInputBitDepth(), OCIO::BIT_DEPTH_UINT8);
@@ -70,6 +71,15 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_id_element)
         OCIO::BIT_DEPTH_UINT16,
         OCIO::OPTIMIZATION_DEFAULT);
     OCIO_CHECK_ASSERT(procOpt->isIdentity());
+
+    // Check the Id element
+    OCIO::GroupTransformRcPtr group;
+    OCIO_CHECK_NO_THROW(group = processor->createGroupTransform());
+    auto& meta = group->getFormatMetadata();
+    OCIO_REQUIRE_ASSERT(meta.getNumChildrenElements() == 3);
+    auto& idElement = meta.getChildElement(0);
+    OCIO_CHECK_EQUAL(std::string(idElement.getElementName()), "Id");
+    OCIO_CHECK_EQUAL(std::string(idElement.getElementValue()), "urn:uuid:9d768121-0cf9-40a3-a8e3-7b49f79858a7");
 }
 
 OCIO_ADD_TEST(FileFormatCTF, non_smpte_xmlns)
