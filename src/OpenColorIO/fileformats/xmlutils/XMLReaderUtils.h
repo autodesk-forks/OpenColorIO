@@ -31,7 +31,6 @@ static constexpr char ATTR_XMLNS[] = "xmlns";
 static constexpr char CDL_TAG_COLOR_CORRECTION[] = "ColorCorrection";
 
 static constexpr char TAG_DESCRIPTION[] = "Description";
-static constexpr char TAG_ID[] = "Id"; // move to CTL?
 static constexpr char TAG_OFFSET[] = "Offset";
 static constexpr char TAG_POWER[] = "Power";
 static constexpr char TAG_SATNODE[] = "SatNode";

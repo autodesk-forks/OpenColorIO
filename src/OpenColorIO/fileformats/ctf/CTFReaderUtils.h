@@ -43,6 +43,7 @@ static constexpr char TAG_FIXED_FUNCTION[] = "FixedFunction";
 static constexpr char TAG_FUNCTION[] = "Function";
 static constexpr char TAG_GAMMA[] = "Gamma";
 static constexpr char TAG_GAMMA_PARAMS[] = "GammaParams";
+static constexpr char TAG_ID[] = "Id"; 
 static constexpr char TAG_INDEX_MAP[] = "IndexMap";
 static constexpr char TAG_INFO[] = "Info";
 static constexpr char TAG_INVLUT1D[] = "InverseLUT1D";

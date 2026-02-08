@@ -31,7 +31,7 @@ static int parse_end_args(int argc, const char * argv[])
     return 0;
 }
 
-void CreateOutputLutFile(const std::string & outLutFilepath, OCIO::ConstGroupTransformRcPtr transform, bool smpte)
+void CreateOutputLutFile(const std::string & outLutFilepath, OCIO::ConstGroupTransformRcPtr transform, bool generateId)
 {
     // Get the processor.
 
@@ -52,14 +52,17 @@ void CreateOutputLutFile(const std::string & outLutFilepath, OCIO::ConstGroupTra
     std::ofstream outfs(outLutFilepath, std::ios::out | std::ios::trunc);
     if (outfs.good())
     {
-        const char* formatName = smpte 
-            ? "SMPTE Common LUT Format" 
-            : "Academy/ASC Common LUT Format";
-        
         try
         {
             const auto group = optProcessor->createGroupTransform();
-            group->write(config, formatName, outfs); 
+
+            if(generateId)
+            {
+                const char * cacheID = group->getCacheID();
+                group->getFormatMetadata().addChildElement("Id", cacheID);
+            }
+
+            group->write(config, "Academy/ASC Common LUT Format", outfs); 
         }
         catch (const OCIO::Exception &)
         {
@@ -87,7 +90,7 @@ int main(int argc, const char ** argv)
     bool verbose = false;
     bool measure = false;
     bool listCSCColorSpaces = false;
-    std::string format{"smpte"};
+    bool generateId = false;
     std::string cscColorSpace;
 
     ArgParse ap;
@@ -104,7 +107,7 @@ int main(int argc, const char ** argv)
                "--measure",   &measure,            "Measure (in ms) the CLF write",
                "--list",      &listCSCColorSpaces, "List of the supported CSC color spaces",
                "--csc %s",    &cscColorSpace,      "The color space that the input LUT expects and produces",
-               "--format %s", &format,             "Output format, either 'smpte' or 'v3' (default: smpte)",
+               "--generateid",&generateId,         "Generates an id based on content and writes in SMPTE Id element format",
                nullptr);
 
     if (ap.parse(argc, argv) < 0)
@@ -118,28 +121,6 @@ int main(int argc, const char ** argv)
     {
         ap.usage();
         return 0;
-    }
-
-    // Check the format option value.
-    bool smpte = true;
-    {
-        const std::string fmt = StringUtils::Lower(format);
-        if (fmt == "smpte")
-        {
-            smpte = true;
-        }
-        else if (fmt == "v3")
-        {
-            smpte = false;
-        }
-        else
-        {
-            std::cerr << std::endl << 
-                "ERROR: The format '" << format << "' is not supported." << std::endl <<
-                "Supported formats are 'smpte' and 'v3'." << std::endl;
-            ap.usage();
-            return 1;
-        }
     }
 
     // The LMT must accept and produce ACES2065-1 so look for all built-in transforms that produce 
@@ -297,12 +278,12 @@ int main(int argc, const char ** argv)
             m.resume();
 
             // Create the CLF file.
-            CreateOutputLutFile(outLutFilepath, grp, smpte);
+            CreateOutputLutFile(outLutFilepath, grp, generateId);
         }
         else
         {
             // Create the CLF file.
-            CreateOutputLutFile(outLutFilepath, grp, smpte);
+            CreateOutputLutFile(outLutFilepath, grp, generateId);
         }
     }
     catch (OCIO::Exception & ex)

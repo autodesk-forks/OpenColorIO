@@ -30,25 +30,24 @@
 #include "utils/StringUtils.h"
 
 
+// TODO: Add explanation of the SMPTE variant as well?
 /*
 
-This file format reader supports the Academy/ASC Common LUT Format (CLF), SMPTE
-Common LUT Format (also CLF) and the Autodesk Color Transform Format (CTF).
+This file format reader supports the Academy/ASC Common LUT Format (CLF) and
+the Autodesk Color Transform Format (CTF).
 
-The Academy/ASC Common LUT format was an initiative to bring vendors together to
-agree on a common LUT format for this industry.  Support for CLF is a
+The Academy/ASC Common LUT format was an initiative to bring vendors together
+to agree on a common LUT format for this industry.  Support for CLF is a
 requirement in order to obtain ACES Logo Certification from the Academy (in
 several product categories).  CLF files are expressed using XML.  The spec,
 AMPAS S-2014-006, is available from:
 <https://acescentral.com/t/aces-documentation/53>
 
-**** TODO: Text about the SMPTE CLF standard. ****
-
 The Autodesk CTF format is based on the Academy/ASC CLF format and adds several
-operators that allow higher quality results by avoiding the need to bake certain
-common functions into LUTs.  This ranges from simple power functions to more
-complicated operators needed to implement very accurate yet compact ACES Output
-Transforms.
+operators that allow higher quality results by avoiding the need to bake
+certain common functions into LUTs.  This ranges from simple power functions
+to more complicated operators needed to implement very accurate yet compact
+ACES Output Transforms.
 
 Autodesk CTF was also designed to be able to losslessly serialize any OCIO
 Processor to a self-contained XML file.  This opens up some useful workflow
@@ -58,41 +57,41 @@ sometimes also useful for trouble-shooting.)
 
 The CTF format is a superset of the CLF format, hence the use of a common
 parser.  Aside from the file extension, the two formats may be distinguished
-based on the version attribute in the root ProcessList element.  A CLF file uses
-the attribute "compCLFversion" whereas a CTF file uses "version".
+based on the version attribute in the root ProcessList element.  A CLF file
+uses the attribute "compCLFversion" whereas a CTF file uses "version".
 
 The parser has been carefully designed to assist users in trouble-shooting
-problems with files that won't load.  A detailed error message is printed, along
-with the line number (similar to a compiler).  There are also extensive unit
-tests to ensure robustness.
+problems with files that won't load.  A detailed error message is printed,
+along with the line number (similar to a compiler).  There are also extensive
+unit tests to ensure robustness.
 
 Note:  One frequent point of confusion regarding the CLF syntax relates to the
-inBitDepth and outBitDepth attributes in each process node.  These bit-depths DO
-NOT specify the processing precision, nor do they specify the bit-depth of the
-images that are input or output from the transform.  The only function of these
-bit-depth attributes is to interpret the scaling of the parameter values in a
-given process node.  This is helpful since, e.g., it avoids the need for
+inBitDepth and outBitDepth attributes in each process node.  These bit-depths
+DO NOT specify the processing precision, nor do they specify the bit-depth of
+the images that are input or output from the transform.  The only function of
+these bit-depth attributes is to interpret the scaling of the parameter values
+in a given process node.  This is helpful since, e.g., it avoids the need for
 heuristics to guess whether LUT values are scaled to 10 or 12 bits.  These
 attributes must always be present and must match at the interface between
 adjacent process nodes.  That said, in some cases, one or both may not actually
 affect the results if they are not required to interpret the scaling of the
-parameters.  For example, the ASC_CDL parameters are always stored in normalized
-form and hence the bit-depths, while required, do not affect their
-interpretation.  On the other hand, the interpretation of the parameters in a
-Matrix op is affected by both the in and out bit-depths.  It should be noted
+parameters.  For example, the ASC_CDL parameters are always stored in
+normalized form and hence the bit-depths, while required, do not affect their
+interpretation.  On the other hand, the interpretation of the parameters in
+a Matrix op is affected by both the in and out bit-depths.  It should be noted
 that although the bit-depths imply a certain scaling, they never impose a
 clamping or quantization, e.g. a LUT array with an outBitDepth of '10i' is free
 to contain values outside of [0,1023] and to use fractional values.
 
-For the OCIO implementation, we tried to avoid bringing the complexity of proper
-bit-depth handling into the design of the ops.  Therefore, the objects always
-store the values from LUTs, matrices, etc. in normalized form.  In other words,
-as if the CLF file had all its bit-depths set to "32f".  However we do provide
-FileBitDepth getters that will return the original scaling read from a CLF file,
-and setters that will control the scaling of values to be written to a CLF file.
-These getters/setters are only provided for the transforms/ops (LUT1D, LUT3D,
-Matrix, and Range) where a CLF file is allowed to store the parameters in an
-unnormalized form.
+For the OCIO implementation, we tried to avoid bringing the complexity of
+proper bit-depth handling into the design of the ops.  Therefore, the objects
+always store the values from LUTs, matrices, etc. in normalized form.  In other
+words, as if the CLF file had all its bit-depths set to "32f".  However we do
+provide FileBitDepth getters that will return the original scaling read from a
+CLF file, and setters that will control the scaling of values to be written to
+a CLF file.  These getters/setters are only provided for the transforms/ops
+(LUT1D, LUT3D, Matrix, and Range) where a CLF file is allowed to store the
+parameters in an unnormalized form.
 */
 
 namespace OCIO_NAMESPACE
@@ -100,6 +99,11 @@ namespace OCIO_NAMESPACE
 
 namespace
 {
+
+// Control variables 
+// This is used to strip the name spaces from the element names when parsing.
+// This allows our parser to handle elements with name space prefixes.
+constexpr const bool STRIP_NAMESPACES = true;
 
 class LocalCachedFile : public CachedFile
 {
@@ -431,7 +435,7 @@ private:
 
     // Start the parsing of one element.
     static void StartElementHandler(void * userData,
-                                    const XML_Char * name,
+                                    const XML_Char * name_full,
                                     const XML_Char ** atts)
     {
         static const std::vector<const char *> rangeSubElements = {
@@ -489,7 +493,7 @@ private:
 
         XMLParserHelper * pImpl = (XMLParserHelper*)userData;
 
-        if (!pImpl || !name || !*name)
+        if (!pImpl || !name_full || !*name_full)
         {
             if (!pImpl)
             {
@@ -501,6 +505,14 @@ private:
             }
         }
 
+        // Strip the name spaces
+        const char *name = name_full;
+        if (STRIP_NAMESPACES) 
+        {
+            name = strrchr(name_full, ':');
+            name = name ? (name+1) : name_full;        
+        }
+        
         if (!pImpl->m_elms.empty())
         {
             // Check if we are still processing a metadata structure.
@@ -736,8 +748,6 @@ private:
                             pContainer,
                             pImpl->getXmLineNumber(),
                             pImpl->getXmlFilename()));
-                    // TODO: do we enforce the ID (tag for SMPTE or attribute otherwise)?
-                    // TODO: do we want to restrict Id tag to SMPTE only?
                 }
 
                 // Dynamic Property is valid under any operator parent. First
@@ -1015,12 +1025,20 @@ private:
 
     // End the parsing of one element.
     static void EndElementHandler(void * userData,
-                                  const XML_Char * name)
+                                  const XML_Char * name_full)
     {
         XMLParserHelper * pImpl = (XMLParserHelper*)userData;
-        if (!pImpl || !name || !*name)
+        if (!pImpl || !name_full || !*name_full)
         {
             throw Exception("CTF/CLF internal parsing error.");
+        }
+
+        // Strip the name spaces
+        const char *name = name_full;
+        if (STRIP_NAMESPACES) 
+        {
+            name = strrchr(name_full, ':');
+            name = name ? (name+1) : name_full;
         }
 
         // Is the expected element present?
@@ -1191,7 +1209,8 @@ bool isLoadableCTF(std::istream & istream)
     std::streampos curPos = istream.tellg();
 
     const unsigned limit(5 * 1024); // 5 kilobytes.
-    const char *pattern = "<ProcessList";
+    const char *pattern1 = "<ProcessList";
+    const char *pattern2 = ":ProcessList";
     bool foundPattern = false;
     unsigned sizeProcessed(0);
     char line[limit + 1];
@@ -1203,7 +1222,14 @@ bool isLoadableCTF(std::istream & istream)
         while (istream.good() && !foundPattern && (sizeProcessed < limit))
         {
             istream.getline(line, limit);
-            if (strstr(line, pattern)) foundPattern = true;
+            if (strstr(line, pattern1)) 
+            {
+                foundPattern = true;
+            }
+            else if(STRIP_NAMESPACES && strstr(line, pattern2)) 
+            {
+                foundPattern = true;
+            }
             sizeProcessed += (unsigned)strlen(line);
         }
     }

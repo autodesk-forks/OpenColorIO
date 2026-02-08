@@ -46,16 +46,16 @@ CTFVersion::CTFVersion(const std::string & versionString, StringFormat acceptedF
     // Parse the version string to see if that matches the SMPTE
     // namespace/version patterns. If so store the version string and consider
     // equivalent to v3.0.
-    if(acceptedFormat & ( StringFormat::eSMPTE_Long | StringFormat::eSMPTE_Short))
+    if(acceptedFormat & ( eSMPTE_Long | eSMPTE_Short))
     {
         bool res = false;
-        if(acceptedFormat & StringFormat::eSMPTE_Long) 
+        if(acceptedFormat & eSMPTE_Long) 
         {
             res = (0 == Platform::Strcasecmp(versionString.c_str(), 
                 "http://www.smpte-ra.org/ns/2136-1/2024"));
         }
 
-        if(!res && acceptedFormat & StringFormat::eSMPTE_Short) 
+        if(!res && acceptedFormat & eSMPTE_Short) 
         {
             res = (0 == Platform::Strcasecmp(versionString.c_str(), 
                 "ST2136-1:2024"));
@@ -102,8 +102,12 @@ CTFVersion::CTFVersion(const std::string & versionString, StringFormat acceptedF
         std::ostringstream os;
         os << "'";
         os << versionString;
-        os << "' is not a valid version. ";
-        os << "Expecting MAJOR[.MINOR[.REVISION]] ";
+        os << "' is not a valid version. Expecting ";
+        if(acceptedFormat & eSMPTE_Short)
+            os << "'ST2136-1:2024' or ";
+        if(acceptedFormat & eSMPTE_Long)
+            os << "'http://www.smpte-ra.org/ns/2136-1/2024' or ";
+        os << "MAJOR[.MINOR[.REVISION]] ";
         throw Exception(os.str().c_str());
     }
 
@@ -478,6 +482,9 @@ void CTFReaderTransform::fromMetadata(const FormatMetadataImpl & metadata)
     m_id = metadata.getAttributeValueString(METADATA_ID);
     m_inverseOfId = metadata.getAttributeValueString(ATTR_INVERSE_OF);
 
+
+    // Elements
+    m_id_element = GetFirstElementValue(metadata.getChildrenElements(), METADATA_ID_ELEMENT);
     // Preserve first InputDescriptor, last OutputDescriptor, and all Descriptions.
     m_inDescriptor = GetFirstElementValue(metadata.getChildrenElements(), METADATA_INPUT_DESCRIPTOR);
     m_outDescriptor = GetLastElementValue(metadata.getChildrenElements(), METADATA_OUTPUT_DESCRIPTOR);
@@ -2596,11 +2603,11 @@ void TransformWriter::write() const
           break;
     }
   
-    // Id attribute
+    // Id attribute. Generate if not provided.
     std::string id = m_transform->getID();
     if (id.empty())
     {
-        id = generateID(false); // use the SMPTE format for the Id attribute too?
+        id = generateID();
     }
     attributes.push_back(XmlFormatter::Attribute(ATTR_ID, id));
     
@@ -2620,11 +2627,8 @@ void TransformWriter::write() const
     {
         XmlScopeIndent scopeIndent(m_formatter);
         
-        // Id element 
-        
-        // TODO: We won't create an Id element value if it's missing. Should we
-        // give users helper function to generate SMPTE complaint Id? If so,
-        // where?
+        // Id element, won't generate if not provided but the format is
+        // enforced.
         std::string idEl = m_transform->getIDElement();
         if(m_subFormat == SubFormat::eCLF && !idEl.empty())
         {
@@ -2693,7 +2697,7 @@ void TransformWriter::writeProcessListMetadata(const FormatMetadataImpl& m) cons
     }
 }
 
-std::string TransformWriter::generateID(bool isSMPTEFormat) const
+std::string TransformWriter::generateID() const
 {
     std::string id;
     auto & ops = m_transform->getOps();
@@ -2702,17 +2706,7 @@ std::string TransformWriter::generateID(bool isSMPTEFormat) const
         id += op->getCacheID();
     }
 
-    // If this is smpte, format the id to match the requirements Otherwise use
-    // the original cache ID for backward compatibility.
-    if(isSMPTEFormat)
-    {
-        id = "urn:uuid:" + CacheIDHashUUID(id.c_str(), id.size());
-    }
-    else
-    {
-        id = CacheIDHash(id.c_str(), id.size());
-    }
-
+    id = "urn:uuid:" + CacheIDHashUUID(id.c_str(), id.size());
     return id;
 }
 

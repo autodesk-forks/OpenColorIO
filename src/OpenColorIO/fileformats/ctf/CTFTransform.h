@@ -19,8 +19,7 @@
 namespace OCIO_NAMESPACE
 {
 
-// TODO: We need to modify this class to hold URI versions for ST variant (or
-// hold it somewhere else).
+
 class CTFVersion
 {
 public:
@@ -96,7 +95,7 @@ private:
     unsigned int m_minor = 0;
     unsigned int m_revision = 0;
 
-    // SMPTE standard uses string version (xml namespace).
+    // SMPTE standard uses non-numeric version system.
     std::string m_version_string; 
 };
 
@@ -265,7 +264,7 @@ public:
 
 private:
     std::string m_id;         // id attribute
-    std::string m_id_element; // id tag value
+    std::string m_id_element; // id element
     std::string m_name;
     std::string m_inverseOfId;
     std::string m_inDescriptor;
@@ -316,7 +315,7 @@ private:
     void writeProcessListMetadata(const FormatMetadataImpl & m) const;
     void writeOpMetadata(const FormatMetadataImpl & m) const;
     void writeOps(const CTFVersion & version) const;
-    std::string generateID(bool isSMPTEFormat) const;
+    std::string generateID() const;
 
 private:
     ConstCTFReaderTransformPtr  m_transform;
