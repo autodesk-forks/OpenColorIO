@@ -19,19 +19,24 @@
 namespace OCIO_NAMESPACE
 {
 
+
 class CTFVersion
 {
 public:
+    enum StringFormat
+    {
+        eNumericOnly   = 0,     // Numeric version is always accepted.
+        eSMPTE_Long    = 1 << 1,
+        eSMPTE_Short   = 1 << 2
+    };
+    
     // Will throw if versionString is not formatted like a version.
-    static void ReadVersion(const std::string & versionString,
-                            CTFVersion & versionOut);
+    explicit CTFVersion(const std::string & versionString, StringFormat acceptedFormat = eNumericOnly);
 
     CTFVersion()
-        : m_major(0)
-        , m_minor(0)
-        , m_revision(0)
     {
     }
+
     CTFVersion(unsigned int major, unsigned int minor, unsigned int revision)
         : m_major(major)
         , m_minor(minor)
@@ -41,7 +46,6 @@ public:
     CTFVersion(unsigned int major, unsigned int minor)
         : m_major(major)
         , m_minor(minor)
-        , m_revision(0)
     {
     }
 
@@ -49,6 +53,7 @@ public:
         : m_major(otherVersion.m_major)
         , m_minor(otherVersion.m_minor)
         , m_revision(otherVersion.m_revision)
+        , m_version_string(otherVersion.m_version_string)
     {
     }
 
@@ -65,22 +70,33 @@ public:
     friend std::ostream & operator<< (std::ostream & stream,
                                       const CTFVersion & rhs)
     {
-        stream << rhs.m_major;
-        if (rhs.m_minor != 0 || rhs.m_revision != 0)
+        if (!rhs.m_version_string.empty())
         {
-            stream << "." << rhs.m_minor;
-            if (rhs.m_revision != 0)
+            stream << rhs.m_version_string;
+        } 
+        else
+        {
+            stream << rhs.m_major;
+            if (rhs.m_minor != 0 || rhs.m_revision != 0)
             {
-                stream << "." << rhs.m_revision;
+                stream << "." << rhs.m_minor;
+                if (rhs.m_revision != 0)
+                {
+                    stream << "." << rhs.m_revision;
+                }
             }
         }
         return stream;
     }
 
 private:
-    unsigned int m_major;
-    unsigned int m_minor;
-    unsigned int m_revision;
+    // CTF and CLF uses the numeric version system.
+    unsigned int m_major = 0;
+    unsigned int m_minor = 0;
+    unsigned int m_revision = 0;
+
+    // SMPTE standard uses non-numeric version system.
+    std::string m_version_string; 
 };
 
 //
@@ -156,6 +172,14 @@ public:
     void setID(const char * id)
     {
         m_id = id;
+    }
+    const std::string & getIDElement() const
+    {
+        return m_id_element;
+    }
+    void setIDElement(const char * id)
+    {
+        m_id_element = id;
     }
     const std::string & getName() const
     {
@@ -239,7 +263,8 @@ public:
     }
 
 private:
-    std::string m_id;
+    std::string m_id;         // id attribute
+    std::string m_id_element; // id element
     std::string m_name;
     std::string m_inverseOfId;
     std::string m_inDescriptor;
@@ -265,14 +290,22 @@ typedef OCIO_SHARED_PTR<const CTFReaderTransform> ConstCTFReaderTransformPtr;
 
 class TransformWriter : public XmlElementWriter
 {
-public:
+ public:
+     enum class SubFormat : uint8_t
+     {
+         eUNKNOWN,
+         eCLF, 
+         eCTF
+     };
+
+ public:
     TransformWriter() = delete;
     TransformWriter(const TransformWriter &) = delete;
     TransformWriter& operator=(const TransformWriter &) = delete;
 
     TransformWriter(XmlFormatter & formatter,
                     ConstCTFReaderTransformPtr transform,
-                    bool isCLF);
+                    SubFormat SubFormat);
 
     virtual ~TransformWriter();
 
@@ -282,10 +315,11 @@ private:
     void writeProcessListMetadata(const FormatMetadataImpl & m) const;
     void writeOpMetadata(const FormatMetadataImpl & m) const;
     void writeOps(const CTFVersion & version) const;
+    std::string generateID() const;
 
 private:
-    ConstCTFReaderTransformPtr m_transform;
-    bool                       m_isCLF;
+    ConstCTFReaderTransformPtr  m_transform;
+    SubFormat                   m_subFormat = SubFormat::eUNKNOWN;
 };
 
 

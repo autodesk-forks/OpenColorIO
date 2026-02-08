@@ -1535,6 +1535,16 @@ public:
     virtual const FormatMetadata & getFormatMetadata() const noexcept = 0;
     virtual FormatMetadata & getFormatMetadata() noexcept = 0;
 
+    /// Generates a cacheID string, in URN format, based on hashing the cacheIDs
+    /// of the ops in the GroupTransform. The string will begin with "urn:uuid:"
+    /// followed by a string of hex digits and dashes, making it suitable for
+    /// use as an "Id" element in a CLF file. The ID may vary over time or
+    /// between platforms for an identical transform. Ideally, the argument will
+    /// be a result of calling createGroupTransform on a Processor to first
+    /// resolve any FileTransforms, ColorSpaceTransforms, etc. into the actual
+    /// ops.
+    virtual const char * getCacheID() = 0;
+
     /// Throws if index is not allowed.
     virtual ConstTransformRcPtr getTransform(int index) const = 0;
 

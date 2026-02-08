@@ -25,6 +25,8 @@ namespace OCIO_NAMESPACE
 
 static constexpr char ATTR_ID[] = "id";
 static constexpr char ATTR_NAME[] = "name";
+static constexpr char ATTR_XMLNS[] = "xmlns";
+
 
 static constexpr char CDL_TAG_COLOR_CORRECTION[] = "ColorCorrection";
 

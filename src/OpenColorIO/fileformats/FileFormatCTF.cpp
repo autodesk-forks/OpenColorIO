@@ -30,6 +30,7 @@
 #include "utils/StringUtils.h"
 
 
+// TODO: Add explanation of the SMPTE variant as well?
 /*
 
 This file format reader supports the Academy/ASC Common LUT Format (CLF) and
@@ -99,6 +100,11 @@ namespace OCIO_NAMESPACE
 namespace
 {
 
+// Control variables 
+// This is used to strip the name spaces from the element names when parsing.
+// This allows our parser to handle elements with name space prefixes.
+constexpr const bool STRIP_NAMESPACES = true;
+
 class LocalCachedFile : public CachedFile
 {
 public:
@@ -146,27 +152,36 @@ public:
 
 void LocalFileFormat::getFormatInfo(FormatInfoVec & formatInfoVec) const
 {
-    FormatInfo info;
-    info.name = FILEFORMAT_CLF;
-    info.extension = "clf";
-    info.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
-                                              FORMAT_CAPABILITY_BAKE |
-                                              FORMAT_CAPABILITY_WRITE);
-    info.bake_capabilities = FormatBakeFlags(FORMAT_BAKE_CAPABILITY_3DLUT |
-                                             FORMAT_BAKE_CAPABILITY_1DLUT |
-                                             FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
-    formatInfoVec.push_back(info);
+    // CLF - Academy/ASC & SMPTE uses the same format
+    {
+        FormatInfo info;
+        info.name = FILEFORMAT_CLF;
+        info.extension = "clf";
+        info.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
+                                                  FORMAT_CAPABILITY_BAKE |
+                                                  FORMAT_CAPABILITY_WRITE);
+        
+        info.bake_capabilities = FormatBakeFlags( FORMAT_BAKE_CAPABILITY_3DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
+        formatInfoVec.push_back(info);
+    }
 
-    FormatInfo info2;
-    info2.name = FILEFORMAT_CTF;
-    info2.extension = "ctf";
-    info2.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
-                                               FORMAT_CAPABILITY_BAKE |
-                                               FORMAT_CAPABILITY_WRITE);
-    info.bake_capabilities = FormatBakeFlags(FORMAT_BAKE_CAPABILITY_3DLUT |
-                                             FORMAT_BAKE_CAPABILITY_1DLUT |
-                                             FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
-    formatInfoVec.push_back(info2);
+    // CTF
+    {
+        FormatInfo info;
+        info.name = FILEFORMAT_CTF;
+        info.extension = "ctf";
+        info.capabilities = FormatCapabilityFlags(FORMAT_CAPABILITY_READ |
+                                                  FORMAT_CAPABILITY_BAKE |
+                                                  FORMAT_CAPABILITY_WRITE);
+
+        info.bake_capabilities = FormatBakeFlags( FORMAT_BAKE_CAPABILITY_3DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1DLUT |
+                                                  FORMAT_BAKE_CAPABILITY_1D_3D_LUT);
+
+        formatInfoVec.push_back(info);
+    }
 }
 
 class XMLParserHelper
@@ -420,7 +435,7 @@ private:
 
     // Start the parsing of one element.
     static void StartElementHandler(void * userData,
-                                    const XML_Char * name,
+                                    const XML_Char * name_full,
                                     const XML_Char ** atts)
     {
         static const std::vector<const char *> rangeSubElements = {
@@ -478,7 +493,7 @@ private:
 
         XMLParserHelper * pImpl = (XMLParserHelper*)userData;
 
-        if (!pImpl || !name || !*name)
+        if (!pImpl || !name_full || !*name_full)
         {
             if (!pImpl)
             {
@@ -490,6 +505,14 @@ private:
             }
         }
 
+        // Strip the name spaces
+        const char *name = name_full;
+        if (STRIP_NAMESPACES) 
+        {
+            name = strrchr(name_full, ':');
+            name = name ? (name+1) : name_full;        
+        }
+        
         if (!pImpl->m_elms.empty())
         {
             // Check if we are still processing a metadata structure.
@@ -717,6 +740,16 @@ private:
                             pImpl->getXmLineNumber(),
                             pImpl->getXmlFilename()));
                 }
+                else if (SupportedElement(name, pElt, TAG_ID, "", recognizedName)) 
+                {
+                    pImpl->m_elms.push_back(
+                        std::make_shared<CTFReaderIdElt>(
+                            name,
+                            pContainer,
+                            pImpl->getXmLineNumber(),
+                            pImpl->getXmlFilename()));
+                }
+
                 // Dynamic Property is valid under any operator parent. First
                 // test if the tag is supported to set the recognizedName 
                 // accordingly, without testing for parents. Test for the
@@ -992,12 +1025,20 @@ private:
 
     // End the parsing of one element.
     static void EndElementHandler(void * userData,
-                                  const XML_Char * name)
+                                  const XML_Char * name_full)
     {
         XMLParserHelper * pImpl = (XMLParserHelper*)userData;
-        if (!pImpl || !name || !*name)
+        if (!pImpl || !name_full || !*name_full)
         {
             throw Exception("CTF/CLF internal parsing error.");
+        }
+
+        // Strip the name spaces
+        const char *name = name_full;
+        if (STRIP_NAMESPACES) 
+        {
+            name = strrchr(name_full, ':');
+            name = name ? (name+1) : name_full;
         }
 
         // Is the expected element present?
@@ -1167,8 +1208,10 @@ bool isLoadableCTF(std::istream & istream)
 {
     std::streampos curPos = istream.tellg();
 
-    const unsigned limit(5 * 1024); // 5 kilobytes.
-    const char *pattern = "<ProcessList";
+    constexpr unsigned limit(5 * 1024); // 5 kilobytes.
+    constexpr const char *pattern1 = "<ProcessList";
+    constexpr const char *pattern2 = ":ProcessList";
+
     bool foundPattern = false;
     unsigned sizeProcessed(0);
     char line[limit + 1];
@@ -1180,7 +1223,14 @@ bool isLoadableCTF(std::istream & istream)
         while (istream.good() && !foundPattern && (sizeProcessed < limit))
         {
             istream.getline(line, limit);
-            if (strstr(line, pattern)) foundPattern = true;
+            if (strstr(line, pattern1)) 
+            {
+                foundPattern = true;
+            }
+            else if(STRIP_NAMESPACES && strstr(line, pattern2)) 
+            {
+                foundPattern = true;
+            }
             sizeProcessed += (unsigned)strlen(line);
         }
     }
@@ -1558,14 +1608,19 @@ void LocalFileFormat::write(const ConstConfigRcPtr & config,
                             const std::string & formatName,
                             std::ostream & ostream) const
 {
-    bool isCLF = false;
+    
+    TransformWriter::SubFormat subFormat{TransformWriter::SubFormat::eUNKNOWN};
+    
     if (Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CLF) == 0)
     {
-        isCLF = true;
-    }
-    else if (Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CTF) != 0)
+        subFormat = TransformWriter::SubFormat::eCLF;
+    } 
+    else if (Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CTF) == 0) 
     {
-        // Neither a clf nor a ctf.
+        subFormat = TransformWriter::SubFormat::eCTF;
+    } 
+    else 
+    {
         std::ostringstream os;
         os << "Error: CLF/CTF writer does not also write format " << formatName << ".";
         throw Exception(os.str().c_str());
@@ -1587,7 +1642,7 @@ void LocalFileFormat::write(const ConstConfigRcPtr & config,
     ostream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
     XmlFormatter fmt(ostream);
 
-    TransformWriter writer(fmt, transform, isCLF);
+    TransformWriter writer(fmt, transform, subFormat);
     writer.write();
 }
 

@@ -2,6 +2,7 @@
 // Copyright Contributors to the OpenColorIO Project.
 
 #include <sstream>
+#include <regex>
 
 #include "BitDepthUtils.h"
 #include "fileformats/ctf/CTFReaderUtils.h"
@@ -39,8 +40,36 @@ namespace OCIO_NAMESPACE
 static constexpr unsigned DOUBLE_PRECISION = 15;
 
 
-void CTFVersion::ReadVersion(const std::string & versionString, CTFVersion & versionOut)
+CTFVersion::CTFVersion(const std::string & versionString, StringFormat acceptedFormat) 
+    : m_major(0), m_minor(0), m_revision(0) 
 {
+    // Parse the version string to see if that matches the SMPTE
+    // namespace/version patterns. If so store the version string and consider
+    // equivalent to v3.0.
+    if(acceptedFormat & ( eSMPTE_Long | eSMPTE_Short))
+    {
+        bool res = false;
+        if(acceptedFormat & eSMPTE_Long) 
+        {
+            res = (0 == Platform::Strcasecmp(versionString.c_str(), 
+                "http://www.smpte-ra.org/ns/2136-1/2024"));
+        }
+
+        if(!res && acceptedFormat & eSMPTE_Short) 
+        {
+            res = (0 == Platform::Strcasecmp(versionString.c_str(), 
+                "ST2136-1:2024"));
+        }
+
+        if (res)
+        {
+            m_version_string = versionString;
+            m_major = 3;
+            return;
+        }
+    }
+
+    // For non-SMPTE namespace versions, parse as MAJOR[.MINOR[.REVISION]]
     unsigned int numDot = 0;
     unsigned int numInt = 0;
     bool canBeDot = false;
@@ -73,19 +102,23 @@ void CTFVersion::ReadVersion(const std::string & versionString, CTFVersion & ver
         std::ostringstream os;
         os << "'";
         os << versionString;
-        os << "' is not a valid version. ";
-        os << "Expecting MAJOR[.MINOR[.REVISION]] ";
+        os << "' is not a valid version. Expecting ";
+        if(acceptedFormat & eSMPTE_Short)
+            os << "'ST2136-1:2024' or ";
+        if(acceptedFormat & eSMPTE_Long)
+            os << "'http://www.smpte-ra.org/ns/2136-1/2024' or ";
+        os << "MAJOR[.MINOR[.REVISION]] ";
         throw Exception(os.str().c_str());
     }
 
-    versionOut.m_major = 0;
-    versionOut.m_minor = 0;
-    versionOut.m_revision = 0;
+    m_major = 0;
+    m_minor = 0;
+    m_revision = 0;
 
     sscanf(versionString.c_str(), "%d.%d.%d",
-           &versionOut.m_major,
-           &versionOut.m_minor,
-           &versionOut.m_revision);
+           &m_major,
+           &m_minor,
+           &m_revision);
 }
 
 CTFVersion & CTFVersion::operator=(const CTFVersion & rhs)
@@ -95,6 +128,7 @@ CTFVersion & CTFVersion::operator=(const CTFVersion & rhs)
         m_major = rhs.m_major;
         m_minor = rhs.m_minor;
         m_revision = rhs.m_revision;
+        m_version_string = rhs.m_version_string;
     }
     return *this;
 }
@@ -448,6 +482,9 @@ void CTFReaderTransform::fromMetadata(const FormatMetadataImpl & metadata)
     m_id = metadata.getAttributeValueString(METADATA_ID);
     m_inverseOfId = metadata.getAttributeValueString(ATTR_INVERSE_OF);
 
+
+    // Elements
+    m_id_element = GetFirstElementValue(metadata.getChildrenElements(), METADATA_ID_ELEMENT);
     // Preserve first InputDescriptor, last OutputDescriptor, and all Descriptions.
     m_inDescriptor = GetFirstElementValue(metadata.getChildrenElements(), METADATA_INPUT_DESCRIPTOR);
     m_outDescriptor = GetLastElementValue(metadata.getChildrenElements(), METADATA_OUTPUT_DESCRIPTOR);
@@ -485,10 +522,14 @@ void AddNonEmptyAttribute(FormatMetadataImpl & metadata, const char * name, cons
 void CTFReaderTransform::toMetadata(FormatMetadataImpl & metadata) const
 {
     // Put CTF processList information into the FormatMetadata.
+
+    // Attributes
     AddNonEmptyAttribute(metadata, METADATA_NAME, getName());
     AddNonEmptyAttribute(metadata, METADATA_ID, getID());
     AddNonEmptyAttribute(metadata, ATTR_INVERSE_OF, getInverseOfId());
 
+    // Child Elements
+    AddNonEmptyElement(metadata, METADATA_ID_ELEMENT, getIDElement());
     AddNonEmptyElement(metadata, METADATA_INPUT_DESCRIPTOR, getInputDescriptor());
     AddNonEmptyElement(metadata, METADATA_OUTPUT_DESCRIPTOR, getOutputDescriptor());
     for (auto & desc : m_descriptions)
@@ -2517,10 +2558,10 @@ void RangeWriter::writeContent() const
 
 TransformWriter::TransformWriter(XmlFormatter & formatter,
                                  ConstCTFReaderTransformPtr transform,
-                                 bool isCLF)
+                                 SubFormat subFormat)
     : XmlElementWriter(formatter)
     , m_transform(transform)
-    , m_isCLF(isCLF)
+    , m_subFormat(subFormat)
 {
 }
 
@@ -2534,40 +2575,42 @@ void TransformWriter::write() const
 
     XmlFormatter::Attributes attributes;
 
-    CTFVersion writeVersion{ CTF_PROCESS_LIST_VERSION_2_0 };
-    
-    std::ostringstream fversion;
-    if (m_isCLF)
+    CTFVersion writeVersion; // This controls the available ops
+    switch(m_subFormat) 
     {
-        // Save with CLF version 3.
-        fversion << 3;
-        attributes.push_back(XmlFormatter::Attribute(ATTR_COMP_CLF_VERSION,
-                                                     fversion.str()));
+        case SubFormat::eUNKNOWN:
+            throw Exception("Cannot write transform with unknown sub-format.");
+            break;
 
+        case SubFormat::eCLF:
+            // For CLF, we're writing versions per both the Academy and SMPTE
+            // requirements.
+            writeVersion = CTF_PROCESS_LIST_VERSION_2_0;
+            attributes.push_back(XmlFormatter::Attribute(
+                ATTR_COMP_CLF_VERSION, "3"));
+            attributes.push_back(XmlFormatter::Attribute(
+                ATTR_XMLNS, "http://www.smpte-ra.org/ns/2136-1/2024"));
+            break;
+
+        case SubFormat::eCTF:
+            writeVersion = GetMinimumVersion(m_transform);
+
+            std::ostringstream fversion;
+            fversion << writeVersion;
+
+            attributes.push_back(XmlFormatter::Attribute(
+                ATTR_VERSION, fversion.str()));
+          break;
     }
-    else
-    {
-        writeVersion = GetMinimumVersion(m_transform);
-        fversion << writeVersion;
-
-        attributes.push_back(XmlFormatter::Attribute(ATTR_VERSION,
-                                                     fversion.str()));
-
-    }
-
+  
+    // Id attribute. Generate if not provided.
     std::string id = m_transform->getID();
     if (id.empty())
     {
-        auto & ops = m_transform->getOps();
-        for (auto op : ops)
-        {
-            id += op->getCacheID();
-        }
-
-        id = CacheIDHash(id.c_str(), id.size());
+        id = generateID();
     }
     attributes.push_back(XmlFormatter::Attribute(ATTR_ID, id));
-
+    
     const std::string& name = m_transform->getName();
     if (!name.empty())
     {
@@ -2583,6 +2626,20 @@ void TransformWriter::write() const
     m_formatter.writeStartTag(processListTag, attributes);
     {
         XmlScopeIndent scopeIndent(m_formatter);
+        
+        // Id element, won't generate if not provided but the format is
+        // enforced.
+        std::string idEl = m_transform->getIDElement();
+        if(m_subFormat == SubFormat::eCLF && !idEl.empty())
+        {
+            if(m_subFormat == SubFormat::eCLF && !ValidateSMPTEId(idEl))
+            {
+                std::ostringstream ss;
+                ss << "'" << idEl << "' is not a ST2136-1:2024 compliant Id value.";
+                throw Exception(ss.str().c_str());
+            }
+            m_formatter.writeContentTag(TAG_ID, idEl);
+        }
 
         WriteDescriptions(m_formatter, TAG_DESCRIPTION, m_transform->getDescriptions());
 
@@ -2638,6 +2695,19 @@ void TransformWriter::writeProcessListMetadata(const FormatMetadataImpl& m) cons
 
         m_formatter.writeEndTag(m.getElementName());
     }
+}
+
+std::string TransformWriter::generateID() const
+{
+    std::string id;
+    auto & ops = m_transform->getOps();
+    for (auto op : ops)
+    {
+        id += op->getCacheID();
+    }
+
+    id = "urn:uuid:" + CacheIDHashUUID(id.c_str(), id.size());
+    return id;
 }
 
 namespace
@@ -2699,7 +2769,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
     // values on write. Otherwise, default to 32f.
     BitDepth inBD = BIT_DEPTH_F32;
     BitDepth outBD = BIT_DEPTH_F32;
-
+    bool isCLF = m_subFormat == SubFormat::eCLF;
     auto & ops = m_transform->getOps();
     size_t numOps = ops.size();
     size_t numSavedOps = 0;
@@ -2762,7 +2832,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
                                                     paramR, paramG, paramB, paramA);
                 gammaData->getFormatMetadata() = exp->getFormatMetadata();
                 
-                if (m_isCLF && !gammaData->isAlphaComponentIdentity())
+                if (isCLF && !gammaData->isAlphaComponentIdentity())
                 {
                     ThrowWriteOp("Exponent with alpha");
                 }
@@ -2775,7 +2845,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             }
             case OpData::ExposureContrastType:
             {
-                if (m_isCLF)
+                if (isCLF)
                 {
                     ThrowWriteOp("ExposureContrast");
                 }
@@ -2789,7 +2859,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             }
             case OpData::FixedFunctionType:
             {
-                if (m_isCLF)
+                if (isCLF)
                 {
                     ThrowWriteOp("FixedFunction");
                 }
@@ -2804,7 +2874,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             case OpData::GammaType:
             {
                 auto gamma = OCIO_DYNAMIC_POINTER_CAST<const GammaOpData>(op);
-                if (m_isCLF)
+                if (isCLF)
                 {
                     if (!gamma->isAlphaComponentIdentity())
                     {
@@ -2820,7 +2890,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             }
             case OpData::GradingPrimaryType:
             {
-                if (m_isCLF)
+                if (isCLF)
                 {
                     ThrowWriteOp("GradingPrimary");
                 }
@@ -2834,7 +2904,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             }
             case OpData::GradingRGBCurveType:
             {
-                if (m_isCLF)
+                if (isCLF)
                 {
                     ThrowWriteOp("GradingRGBCurve");
                 }
@@ -2848,7 +2918,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             }
             case OpData::GradingHueCurveType:
             {
-                if (m_isCLF)
+                if (isCLF)
                 {
                     ThrowWriteOp("GradingHueCurve");
                 }
@@ -2862,7 +2932,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             }
             case OpData::GradingToneType:
             {
-                if (m_isCLF)
+                if (isCLF)
                 {
                     ThrowWriteOp("GradingTone");
                 }
@@ -2886,7 +2956,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             case OpData::Lut1DType:
             {
                 auto lut = OCIO_DYNAMIC_POINTER_CAST<const Lut1DOpData>(op);
-                if (m_isCLF)
+                if (isCLF)
                 {
                     if (lut->getDirection() != TRANSFORM_DIR_FORWARD)
                     {
@@ -2910,7 +2980,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             case OpData::Lut3DType:
             {
                 auto lut = OCIO_DYNAMIC_POINTER_CAST<const Lut3DOpData>(op);
-                if (m_isCLF)
+                if (isCLF)
                 {
                     if (lut->getDirection() != TRANSFORM_DIR_FORWARD)
                     {
@@ -2935,7 +3005,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
             {
                 auto matSrc = OCIO_DYNAMIC_POINTER_CAST<const MatrixOpData>(op);
 
-                if (m_isCLF)
+                if (isCLF)
                 {
                     if (matSrc->hasAlpha())
                     {

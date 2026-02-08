@@ -977,6 +977,9 @@ extern OCIOEXPORT const char * METADATA_NAME;
  */
 extern OCIOEXPORT const char * METADATA_ID;
 
+// FIXME: Add Comment.
+extern OCIOEXPORT const char * METADATA_ID_ELEMENT;
+
 /*!rst::
 Caches
 ******

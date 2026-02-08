@@ -54,6 +54,9 @@ public:
 
     const char * getTypeName() const override;
 
+    // Set the ID element (when SMPTE id tag is used)
+    void setIDElement(const std::string& idStr);
+
     // Set the current transform CTF version.
     void setVersion(const CTFVersion & ver);
 
@@ -71,11 +74,52 @@ private:
     // The associated Transform.
     CTFReaderTransformPtr m_transform;
     // Is it a clf file? Or is a clf parser requested.
-    bool m_isCLF;
+    bool m_isCLF = false;
+};
+
+// Class for the Id element.
+class CTFReaderIdElt : public XmlReaderPlainElt
+{
+public:
+    CTFReaderIdElt() = delete;
+    CTFReaderIdElt(const std::string & name,
+                            ContainerEltRcPtr & pParent,
+                            unsigned int xmlLocation,
+                            const std::string & xmlFile)
+        : XmlReaderPlainElt(name, pParent, xmlLocation, xmlFile)
+        , m_changed(false)
+    {
+    }
+
+    ~CTFReaderIdElt()
+    {
+    }
+
+    void start(const char ** /* atts */) override
+    {
+        m_id.resize(0);
+        m_changed = false;
+    }
+
+    void end() override;
+
+    void setRawData(const char * str, size_t len, unsigned int /* xmlLine */) override
+    {
+        // Keep adding to the string.
+        m_id += std::string(str, len);
+        m_changed = true;
+    }
+
+private:
+    std::string m_id;
+    bool m_changed;
+
 };
 
 typedef OCIO_SHARED_PTR<CTFReaderTransformElt> CTFReaderTransformEltRcPtr;
 
+// Note: This class is used only for adding metadata to other info metadata
+// elements, not to the transform.
 class CTFReaderMetadataElt : public XmlReaderComplexElt
 {
 public:

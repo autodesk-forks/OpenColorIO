@@ -60,6 +60,7 @@ void CTFReaderTransformElt::start(const char ** atts)
     bool isIdFound = false;
     bool isVersionFound = false;
     bool isCLFVersionFound = false;
+    bool isSMPTEVersionFound = false;
     CTFVersion requestedVersion(0, 0);
     CTFVersion requestedCLFVersion(0, 0);
 
@@ -70,11 +71,41 @@ void CTFReaderTransformElt::start(const char ** atts)
         {
             if (!atts[i + 1] || !*atts[i + 1])
             {
-                throwMessage("Required attribute 'id' does not have a value.");
+                throwMessage("Attribute 'id' does not have a value.");
             }
 
             m_transform->setID(atts[i + 1]);
             isIdFound = true;
+        }
+        else if (0 == Platform::Strcasecmp(ATTR_XMLNS, atts[i]))
+        {
+            if (!atts[i + 1] || !*atts[i + 1])
+            {
+                throwMessage("Attribute 'xmlns' does not have a value.");
+            }
+
+            // Check if xmlns atrribute holds a SMPTE version string.
+            try
+            {
+                auto version = CTFVersion(atts[i + 1], CTFVersion::StringFormat::eSMPTE_Long);
+                
+                if (isVersionFound)
+                {
+                    throwMessage("SMPTE 'xmlns' version and 'Version' attribute cannot both be present.");
+                }
+
+                // Note that compCLFversion can appear together with xmlns for
+                // SMPTE CLF
+
+                requestedVersion = CTF_PROCESS_LIST_VERSION_2_0;
+                requestedCLFVersion = version;
+                isSMPTEVersionFound = true;
+                m_isCLF = true;
+            }
+            catch (Exception& /*e*/)
+            {
+                // Ignore the exception, as this may not be a version URI.
+            }
         }
         else if (0 == Platform::Strcasecmp(ATTR_NAME, atts[i]))
         {
@@ -100,6 +131,10 @@ void CTFReaderTransformElt::start(const char ** atts)
             {
                 throwMessage("'compCLFversion' and 'Version' cannot both be present.");
             }
+            if (isSMPTEVersionFound)
+            {
+                throwMessage("SMPTE 'xmlns' version and 'Version' attribute cannot both be present.");
+            }
             if (isVersionFound)
             {
                 throwMessage("'Version' can only be there once.");
@@ -114,7 +149,7 @@ void CTFReaderTransformElt::start(const char ** atts)
             try
             {
                 const std::string verString(pVer);
-                CTFVersion::ReadVersion(verString, requestedVersion);
+                requestedVersion = CTFVersion(verString);
             }
             catch (Exception& ce)
             {
@@ -134,6 +169,9 @@ void CTFReaderTransformElt::start(const char ** atts)
                 throwMessage("'compCLFversion' and 'Version' cannot be both present.");
             }
 
+            // Note: compCLFversion can appear together with xmlns for SMPTE CLF
+            // files.
+
             const char* pVer = atts[i + 1];
             if (!pVer || !*pVer)
             {
@@ -143,7 +181,7 @@ void CTFReaderTransformElt::start(const char ** atts)
             try
             {
                 std::string verString(pVer);
-                CTFVersion::ReadVersion(verString, requestedCLFVersion);
+                requestedCLFVersion = CTFVersion(verString, CTFVersion::StringFormat::eSMPTE_Short);
             }
             catch (Exception& ce)
             {
@@ -168,15 +206,14 @@ void CTFReaderTransformElt::start(const char ** atts)
                 requestedVersion = CTF_PROCESS_LIST_VERSION_2_0;
             }
 
-            isVersionFound = true;
             isCLFVersionFound = true;
             // Handle as CLF.
             m_isCLF = true;
         }
-        else if (0 == Platform::Strcasecmp("xmlns", atts[i]))
-        {
-            // Ignore.
-        }
+//         else if (0 == Platform::Strcasecmp("xmlns", atts[i]))
+//         {
+//             // Ignore.
+//         }
         else
         {
             logParameterWarning(atts[i]);
@@ -185,29 +222,28 @@ void CTFReaderTransformElt::start(const char ** atts)
         i += 2;
     }
 
-    // Check mandatory elements.
-    if (!isIdFound)
+    // Check mandatory id keyword for non-SMPTE variants.
+    if (!isIdFound && !isSMPTEVersionFound)
     {
+        // FIXME: add handling of the SMPTE version tag
         throwMessage("Required attribute 'id' is missing.");
     }
 
     // Transform file format with no version means that
     // the CTF format is 1.2.
-    if (!isVersionFound)
+    if (!(isVersionFound || isCLFVersionFound || isSMPTEVersionFound ))
     {
-        if (m_isCLF && !isCLFVersionFound)
+        if (m_isCLF)
         {
-            throwMessage("Required attribute 'compCLFversion' is missing.");
+            throwMessage("None of the 'version', 'compCLFversion', or 'xmlns' attributes were found;"
+                "at least one of them is required.");
         }
         setVersion(CTF_PROCESS_LIST_VERSION_1_2);
     }
     else
     {
-        setVersion(requestedVersion);
-        if (m_isCLF)
-        {
-            setCLFVersion(requestedCLFVersion);
-        }
+        setVersion(requestedVersion);  // TODO: do we care about this when SMPTE?
+        setCLFVersion(requestedCLFVersion);
     }
 }
 
@@ -229,6 +265,10 @@ const char * CTFReaderTransformElt::getTypeName() const
 {
     static const std::string n(TAG_PROCESS_LIST);
     return n.c_str();
+}
+void CTFReaderTransformElt::setIDElement(const std::string& idStr)
+{
+    getTransform()->setIDElement(idStr.c_str());
 }
 
 void CTFReaderTransformElt::setVersion(const CTFVersion & ver)
@@ -258,6 +298,23 @@ const CTFVersion & CTFReaderTransformElt::getCLFVersion() const
 bool CTFReaderTransformElt::isCLF() const
 {
     return getTransform()->isCLF();
+}
+
+//////////////////////////////////////////////////////////
+void CTFReaderIdElt::end() 
+{
+    if(!ValidateSMPTEId(m_id))
+    {
+        std::ostringstream ss;
+        ss << "'" << m_id << "' is not a ST2136-1:2024 complaint Id value.";
+        throwMessage(ss.str());
+    }
+
+    auto* pTransformnElt = dynamic_cast<CTFReaderTransformElt*>(getParent().get());
+    if (pTransformnElt)
+    {
+        pTransformnElt->setIDElement(m_id);
+    }
 }
 
 //////////////////////////////////////////////////////////

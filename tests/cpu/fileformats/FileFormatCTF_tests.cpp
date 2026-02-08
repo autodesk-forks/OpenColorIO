@@ -29,6 +29,115 @@ OCIO::LocalCachedFileRcPtr LoadCLFFile(const std::string & fileName)
 }
 }
 
+// **************** NEW TESTS, MAY NEED MOVING AROUND **************
+
+OCIO_ADD_TEST(FileFormatCTF, smpte_id_element)
+{
+    const std::string ctfFile("clf/bit_depth_identity.clf");
+    OCIO::LocalCachedFileRcPtr cachedFile;
+    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT((bool)cachedFile);
+    OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "urn:uuid:9d768121-0cf9-40a3-a8e3-7b49f79858a7");
+    OCIO_REQUIRE_EQUAL(cachedFile->m_transform->getDescriptions().size(), 2);
+    OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[0],
+                        "Identity transform illustrating Array bit depth scaling");
+    OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[1],
+                        "Can be loaded by either SMPTE or CLF v3 parsers");
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+
+    // Check the ops.
+    OCIO_REQUIRE_EQUAL(opList.size(), 3);
+
+    auto mat1 = OCIO::DynamicPtrCast<const OCIO::MatrixOpData>(opList[0]);
+    OCIO_REQUIRE_ASSERT(mat1);
+    OCIO_CHECK_EQUAL(mat1->getFileInputBitDepth(), OCIO::BIT_DEPTH_UINT8);
+    OCIO_CHECK_EQUAL(mat1->getFileOutputBitDepth(), OCIO::BIT_DEPTH_UINT16);
+
+    auto lut = OCIO::DynamicPtrCast<const OCIO::Lut1DOpData>(opList[1]);
+    OCIO_REQUIRE_ASSERT(lut);
+    OCIO_CHECK_EQUAL(lut->getFileOutputBitDepth(), OCIO::BIT_DEPTH_UINT16);
+        
+    auto mat2 = OCIO::DynamicPtrCast<const OCIO::MatrixOpData>(opList[2]);
+    OCIO_REQUIRE_ASSERT(mat2);
+    OCIO_CHECK_EQUAL(mat2->getFileInputBitDepth(), OCIO::BIT_DEPTH_UINT16);
+    OCIO_CHECK_EQUAL(mat2->getFileOutputBitDepth(), OCIO::BIT_DEPTH_UINT16);
+
+    // Check identity.
+    OCIO::ConstProcessorRcPtr processor;
+    OCIO_CHECK_NO_THROW(processor = OCIO::GetFileTransformProcessor(ctfFile));
+    OCIO_REQUIRE_ASSERT(processor);
+    auto procOpt = processor->getOptimizedCPUProcessor(
+        OCIO::BIT_DEPTH_UINT8, 
+        OCIO::BIT_DEPTH_UINT16,
+        OCIO::OPTIMIZATION_DEFAULT);
+    OCIO_CHECK_ASSERT(procOpt->isIdentity());
+
+    // Check the Id element
+    OCIO::GroupTransformRcPtr group;
+    OCIO_CHECK_NO_THROW(group = processor->createGroupTransform());
+    auto& meta = group->getFormatMetadata();
+    OCIO_REQUIRE_ASSERT(meta.getNumChildrenElements() == 3);
+    auto& idElement = meta.getChildElement(0);
+    OCIO_CHECK_EQUAL(std::string(idElement.getElementName()), "Id");
+    OCIO_CHECK_EQUAL(std::string(idElement.getElementValue()), "urn:uuid:9d768121-0cf9-40a3-a8e3-7b49f79858a7");
+}
+
+OCIO_ADD_TEST(FileFormatCTF, non_smpte_xmlns)
+{
+    const std::string ctfFile("clf/pre-smpte_only/process_list_v3_namespace.clf");
+    OCIO::LocalCachedFileRcPtr cachedFile;
+    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+
+    // TODO: Extend?
+}
+
+OCIO_ADD_TEST(FileFormatCTF, smpte_all_metadata)
+{
+    const std::string ctfFile("clf/smpte_only/broadcast_profile_lut33.clf");
+    OCIO::LocalCachedFileRcPtr cachedFile;
+    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+
+    // This passes with a single "Unrecognized element" warning for xmlns:clfbp
+    // TODO: Should we try to ignore it silently?
+    // TODO: Extend?
+}
+
+OCIO_ADD_TEST(FileFormatCTF, smpte_namespaces)
+{
+    const std::string ctfFile("clf/smpte_only/namespaces.clf");
+    OCIO::LocalCachedFileRcPtr cachedFile;
+
+    // TODO: If the CTFTrasform is compiled with STRIP_NAMESPACES set to true
+    // this will load with few warnings. Is that good enough?
+    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+
+}
+
+OCIO_ADD_TEST(FileFormatCTF, smpte_signature)
+{
+    const std::string ctfFile("clf/smpte_only/signature.clf");
+    OCIO::LocalCachedFileRcPtr cachedFile;
+    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+
+    // This passes with many "Unrecognized element" warnings
+    // TODO: Try to ignore the name-spaced elements?
+    // TODO: Extend?
+}
+
+OCIO_ADD_TEST(FileFormatCTF, smpte_id_bad_value)
+{
+    const std::string ctfFile("clf/smpte_only/illegal/id_bad_value.clf");
+    OCIO::LocalCachedFileRcPtr cachedFile;
+    OCIO_CHECK_THROW_WHAT(cachedFile = LoadCLFFile(ctfFile), 
+                          OCIO::Exception,
+                          "'3bae2da8' is not a ST2136-1:2024 complaint Id value.");
+}
+
+// *****************************************************************
+
+
+
+
 OCIO_ADD_TEST(FileFormatCTF, missing_file)
 {
     // Test LoadCLFFile helper function with missing file.
@@ -66,6 +175,11 @@ OCIO_ADD_TEST(FileFormatCTF, clf_examples)
         OCIO_REQUIRE_EQUAL(desc.size(), 2);
         OCIO_CHECK_EQUAL(desc[0], "Note that the bit-depth does not constrain the legal range of values.");
         OCIO_CHECK_EQUAL(desc[1], "Formula: flipud(1.25 - 1.5 * x^2.2)");
+
+        auto info = cachedFile->m_transform->getInfoMetadata();
+        auto elements = info.getChildrenElements();
+
+
     }
 
     {
@@ -534,6 +648,7 @@ void CheckIdentity(std::istringstream & ctfStream, unsigned line)
     OCIO::CachedFileRcPtr file;
     OCIO_CHECK_NO_THROW_FROM(file = tester.read(ctfStream, emptyString, OCIO::INTERP_DEFAULT), line);
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const auto & fileOps = cachedFile->m_transform->getOps();
 
     OCIO_REQUIRE_EQUAL_FROM(fileOps.size(), 1, line);
@@ -1134,6 +1249,7 @@ OCIO_ADD_TEST(FileFormatCTF, tabluation_support)
     // series of numbers.
     const std::string ctfFile("clf/tabulation_support.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "e0a0ae4b-adc2-4c25-ad70-fa6f31ba219d");
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
@@ -1179,6 +1295,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_windows_eol)
     // with the ?xml header.
     const std::string ctfFile("clf/matrix_windows.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "42");
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
@@ -1192,6 +1309,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_no_newlines)
     OCIO::LocalCachedFileRcPtr cachedFile;
     const std::string ctfFile("clf/matrix_no_newlines.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     OCIO_CHECK_EQUAL(opList[0]->getType(), OCIO::OpData::MatrixType);
@@ -1345,7 +1463,7 @@ OCIO_ADD_TEST(FileFormatCTF, difficult_syntax)
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
     const OCIO::CTFVersion clfVersion = cachedFile->m_transform->getCLFVersion();
-    const OCIO::CTFVersion ver(3, 0, 0);
+    const OCIO::CTFVersion ver("http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::eSMPTE_Long);
     OCIO_CHECK_EQUAL(clfVersion, ver);
 
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "id1");
@@ -1673,7 +1791,7 @@ OCIO_ADD_TEST(FileFormatCTF, process_list_invalid_version)
 
 OCIO_ADD_TEST(FileFormatCTF, clf_process_list_bad_version)
 {
-    std::string fileName("clf/illegal/process_list_bad_version.clf");
+    std::string fileName("clf/pre-smpte_only/illegal/process_list_bad_version.clf");
     OCIO_CHECK_THROW_WHAT(LoadCLFFile(fileName), 
                           OCIO::Exception,
                           "is not a valid version");
@@ -1684,6 +1802,7 @@ OCIO_ADD_TEST(FileFormatCTF, process_list_valid_version)
     OCIO::LocalCachedFileRcPtr cachedFile;
     const std::string ctfFile("process_list_valid_version.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     
     const OCIO::CTFVersion ctfVersion =
         cachedFile->m_transform->getCTFVersion();
@@ -1700,7 +1819,7 @@ OCIO_ADD_TEST(FileFormatCTF, process_list_higher_version)
 
 OCIO_ADD_TEST(FileFormatCTF, clf_process_list_higher_version)
 {
-    const std::string ctfFile("clf/illegal/process_list_higher_version.clf");
+    const std::string ctfFile("clf/pre-smpte_only/illegal/process_list_higher_version.clf");
     OCIO_CHECK_THROW_WHAT(LoadCLFFile(ctfFile),
                           OCIO::Exception,
                           "Unsupported transform file version");
@@ -1711,6 +1830,7 @@ OCIO_ADD_TEST(FileFormatCTF, process_list_version_revision)
     OCIO::LocalCachedFileRcPtr cachedFile;
     const std::string ctfFile("process_list_version_revision.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT(cachedFile);
 
     const OCIO::CTFVersion ctfVersion =
         cachedFile->m_transform->getCTFVersion();
@@ -1725,6 +1845,7 @@ OCIO_ADD_TEST(FileFormatCTF, process_list_no_version)
     OCIO::LocalCachedFileRcPtr cachedFile;
     const std::string ctfFile("process_list_no_version.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT(cachedFile);
 
     const OCIO::CTFVersion ctfVersion =
         cachedFile->m_transform->getCTFVersion();
@@ -1788,7 +1909,7 @@ OCIO_ADD_TEST(FileFormatCTF, transform_element_end_missing)
 
 OCIO_ADD_TEST(FileFormatCTF, transform_missing_id)
 {
-    const std::string ctfFile("clf/illegal/transform_missing_id.clf");
+    const std::string ctfFile("clf/pre-smpte_only/illegal/transform_missing_id.clf");
     OCIO_CHECK_THROW_WHAT(LoadCLFFile(ctfFile),
                           OCIO::Exception,
                           "Required attribute 'id'");
@@ -1884,10 +2005,10 @@ OCIO_ADD_TEST(FileFormatCTF, transform_empty)
 
 OCIO_ADD_TEST(FileFormatCTF, transform_id_empty)
 {
-    const std::string ctfFile("clf/illegal/transform_id_empty.clf");
+    const std::string ctfFile("clf/pre-smpte_only/illegal/transform_id_empty.clf");
     OCIO_CHECK_THROW_WHAT(LoadCLFFile(ctfFile),
                           OCIO::Exception,
-                          "Required attribute 'id' does not have a value");
+                          "Attribute 'id' does not have a value");
 }
 
 OCIO_ADD_TEST(FileFormatCTF, transform_with_bitdepth_mismatch)
@@ -2517,6 +2638,7 @@ OCIO_ADD_TEST(FileFormatCTF, exponent_all_styles)
     OCIO::LocalCachedFileRcPtr cachedFile;
     const std::string fileName("clf/exponent_all_styles.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
     OCIO_REQUIRE_EQUAL(opList.size(), 12);
 
@@ -2927,6 +3049,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_all_styles)
     OCIO::LocalCachedFileRcPtr cachedFile;
     const std::string fileName("clf/log_all_styles.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
     OCIO_REQUIRE_EQUAL(opList.size(), 11);
     double error = 1e-9;
@@ -3098,6 +3221,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_logtolin)
     OCIO::LocalCachedFileRcPtr cachedFile;
     std::string fileName("log_logtolin.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     auto op = fileOps[0];
@@ -3125,6 +3249,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_logtolinv2)
     OCIO::LocalCachedFileRcPtr cachedFile;
     std::string fileName("log_logtolinv2.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     auto op = fileOps[0];
@@ -3151,6 +3276,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_lintolog_3chan)
     OCIO::LocalCachedFileRcPtr cachedFile;
     std::string fileName("log_lintolog_3chan.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     auto op = fileOps[0];
@@ -3194,7 +3320,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_bad_style)
 
 OCIO_ADD_TEST(FileFormatCTF, log_bad_version)
 {
-    std::string fileName("clf/illegal/log_bad_version.clf");
+    std::string fileName("clf/pre-smpte_only/illegal/log_bad_version.clf");
     OCIO_CHECK_THROW_WHAT(LoadCLFFile(fileName), OCIO::Exception,
                           "CLF file version '2' does not support operator 'Log'");
 }
@@ -3280,6 +3406,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_default_params)
 
     OCIO::LocalCachedFileRcPtr cachedFile;
     OCIO_CHECK_NO_THROW(cachedFile = ParseString(strebuf.str()));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 2);
@@ -3314,6 +3441,7 @@ OCIO_ADD_TEST(FileFormatCTF, multiple_ops)
     OCIO::LocalCachedFileRcPtr cachedFile;
     const std::string ctfFile("clf/multiple_ops.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
     OCIO_REQUIRE_EQUAL(opList.size(), 9);
 
@@ -3427,6 +3555,7 @@ OCIO_ADD_TEST(FileFormatCTF, reference_load_alias)
     OCIO::LocalCachedFileRcPtr cachedFile;
     std::string fileName("reference_alias.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
@@ -3446,6 +3575,7 @@ OCIO_ADD_TEST(FileFormatCTF, reference_load_path)
     OCIO::LocalCachedFileRcPtr cachedFile;
     std::string fileName("reference_path_missing_file.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
     
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
@@ -3464,6 +3594,7 @@ OCIO_ADD_TEST(FileFormatCTF, reference_load_multiple)
     // File contains 2 references, 1 range and 1 reference.
     std::string fileName("references_some_inverted.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
     
     OCIO_REQUIRE_EQUAL(fileOps.size(), 4);
@@ -3500,6 +3631,7 @@ OCIO_ADD_TEST(FileFormatCTF, reference_load_path_utf8)
     OCIO::LocalCachedFileRcPtr cachedFile;
     std::string fileName("reference_utf8.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
@@ -3718,6 +3850,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_deprecated_ops_file)
     OCIO::LocalCachedFileRcPtr cachedFile;
     std::string fileName("deprecated_ops.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 3);
@@ -3761,6 +3894,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_fixed_function_file)
     OCIO::LocalCachedFileRcPtr cachedFile;
     std::string fileName("fixed_function.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
+    OCIO_REQUIRE_ASSERT(cachedFile);
     const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 2);
@@ -3829,6 +3963,7 @@ void ValidateFixedFunctionStyle(OCIO::FixedFunctionOpData::Style style,
     // Test parsing.
     OCIO::LocalCachedFileRcPtr cachedFile;
     OCIO_CHECK_NO_THROW_FROM(cachedFile = ParseString(strebuf.str()), lineNo);
+    OCIO_REQUIRE_ASSERT(cachedFile);
     OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
 
     OCIO_REQUIRE_EQUAL_FROM(fileOps.size(), 1, lineNo);
@@ -4937,7 +5072,7 @@ OCIO_ADD_TEST(CTFTransform, load_grading_tone_errors)
 
 OCIO_ADD_TEST(CTFTransform, load_edit_save_matrix)
 {
-    const std::string ctfFile("clf/matrix_example.clf");
+    const std::string ctfFile("clf/pre-smpte_only/matrix_example.clf");
     OCIO::ConstProcessorRcPtr processor;
     OCIO_CHECK_NO_THROW(processor = OCIO::GetFileTransformProcessor(ctfFile));
     OCIO_REQUIRE_ASSERT(processor);
@@ -4979,7 +5114,7 @@ OCIO_ADD_TEST(CTFTransform, load_edit_save_matrix)
 
     // Output matrix array as '3 4 3'.
     const std::string expectedCTF{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList version="1.3" id="b5cc7aed-d405-4d8b-b64b-382b2341a378" name="matrix example" inverseOf="added inverseOf">
+<ProcessList version="1.3" id="b5cc7aed-d405-4d8b-b64b-382b2341a378" name="old array dims example" inverseOf="added inverseOf">
     <Description>Basic matrix example using CLF v2 dim syntax</Description>
     <InputDescriptor>RGB</InputDescriptor>
     <OutputDescriptor>XYZ</OutputDescriptor>
@@ -5522,7 +5657,7 @@ OCIO_ADD_TEST(CTFTransform, save_group)
 
 OCIO_ADD_TEST(CTFTransform, load_save_matrix)
 {
-    const std::string ctfFile("clf/matrix_example.clf");
+    const std::string ctfFile("clf/pre-smpte_only/matrix_example.clf");
     OCIO::ConstProcessorRcPtr processor;
     OCIO_CHECK_NO_THROW(processor = OCIO::GetFileTransformProcessor(ctfFile));
     OCIO_REQUIRE_ASSERT(processor);
@@ -5533,7 +5668,7 @@ OCIO_ADD_TEST(CTFTransform, load_save_matrix)
 
     // Output matrix array as '3 3 3'.
     const std::string expected{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList version="1.3" id="b5cc7aed-d405-4d8b-b64b-382b2341a378" name="matrix example">
+<ProcessList version="1.3" id="b5cc7aed-d405-4d8b-b64b-382b2341a378" name="old array dims example">
     <Description>Basic matrix example using CLF v2 dim syntax</Description>
     <InputDescriptor>RGB</InputDescriptor>
     <OutputDescriptor>XYZ</OutputDescriptor>
@@ -5580,7 +5715,7 @@ OCIO_ADD_TEST(CTFTransform, save_matrix_444)
 
 OCIO_ADD_TEST(CTFTransform, load_edit_save_matrix_clf)
 {
-    const std::string ctfFile("clf/matrix_example.clf");
+    const std::string ctfFile("clf/pre-smpte_only/matrix_example.clf");
     OCIO::ConstProcessorRcPtr processor;
     OCIO_CHECK_NO_THROW(processor = OCIO::GetFileTransformProcessor(ctfFile));
     OCIO_REQUIRE_ASSERT(processor);
@@ -5595,12 +5730,14 @@ OCIO_ADD_TEST(CTFTransform, load_edit_save_matrix_clf)
     const double offset[] = { 0.1, 1.2, 2.3, 0.0 };
     matTrans->setOffset(offset);
 
-    std::ostringstream outputTransform;
-    OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransform));
+    // CLF Academy
+    {
+        std::ostringstream outputTransform;
+        OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransform));
 
-    const std::string expectedCLF{
-R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="b5cc7aed-d405-4d8b-b64b-382b2341a378" name="matrix example">
+        const std::string expectedCLF_Academy{
+            R"(<?xml version="1.0" encoding="UTF-8"?>
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="b5cc7aed-d405-4d8b-b64b-382b2341a378" name="old array dims example">
     <Description>Basic matrix example using CLF v2 dim syntax</Description>
     <InputDescriptor>RGB</InputDescriptor>
     <OutputDescriptor>XYZ</OutputDescriptor>
@@ -5615,20 +5752,23 @@ R"(<?xml version="1.0" encoding="UTF-8"?>
         </Array>
     </Matrix>
 </ProcessList>
-)" };
+)"};
 
-    OCIO_CHECK_EQUAL(expectedCLF.size(), outputTransform.str().size());
-    OCIO_CHECK_EQUAL(expectedCLF, outputTransform.str());
+        OCIO_CHECK_EQUAL(expectedCLF_Academy.size(), outputTransform.str().size());
+        OCIO_CHECK_EQUAL(expectedCLF_Academy, outputTransform.str());
+    }
 
-    const double offsetAlpha[] = { 0.1, 1.2, 2.3, 0.9 };
-    matTrans->setOffset(offsetAlpha);
+    // CTF
+    {
+        const double offsetAlpha[] = { 0.1, 1.2, 2.3, 0.9 };
+        matTrans->setOffset(offsetAlpha);
 
-    std::ostringstream outputTransformCTF;
-    OCIO_CHECK_NO_THROW(WriteGroupCTF(group, outputTransformCTF));
+        std::ostringstream outputTransformCTF;
+        OCIO_CHECK_NO_THROW(WriteGroupCTF(group, outputTransformCTF));
 
-    const std::string expectedCTF{
-R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList version="1.3" id="b5cc7aed-d405-4d8b-b64b-382b2341a378" name="matrix example">
+        const std::string expectedCTF{
+            R"(<?xml version="1.0" encoding="UTF-8"?>
+<ProcessList version="1.3" id="b5cc7aed-d405-4d8b-b64b-382b2341a378" name="old array dims example">
     <Description>Basic matrix example using CLF v2 dim syntax</Description>
     <InputDescriptor>RGB</InputDescriptor>
     <OutputDescriptor>XYZ</OutputDescriptor>
@@ -5644,10 +5784,13 @@ R"(<?xml version="1.0" encoding="UTF-8"?>
         </Array>
     </Matrix>
 </ProcessList>
-)" };
+)"};
 
-    OCIO_CHECK_EQUAL(expectedCTF.size(), outputTransformCTF.str().size());
-    OCIO_CHECK_EQUAL(expectedCTF, outputTransformCTF.str());
+        OCIO_CHECK_EQUAL(expectedCTF.size(), outputTransformCTF.str().size());
+        OCIO_CHECK_EQUAL(expectedCTF, outputTransformCTF.str());
+    }
+
+
 }
 
 OCIO_ADD_TEST(CTFTransform, matrix3x3_clf)
@@ -5671,7 +5814,7 @@ OCIO_ADD_TEST(CTFTransform, matrix3x3_clf)
 
     // In/out bit-depth equal, matrix not scaled.
     const std::string expected{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <Matrix inBitDepth="10i" outBitDepth="10i">
         <Array dim="3 3">
   0.333333333333333    3.33333333333333    33.3333333333333
@@ -5919,7 +6062,7 @@ OCIO_ADD_TEST(CTFTransform, cdl_clf)
     OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransform));
 
     const std::string expected{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="cdl1">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="cdl1">
     <Description>ProcessList description</Description>
     <Description>=======================</Description>
     <Info>
@@ -6084,7 +6227,7 @@ OCIO_ADD_TEST(CTFTransform, range1_clf)
 
     const std::string expected{
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<ProcessList compCLFversion=\"3\" id=\"UID42\">\n"
+        "<ProcessList compCLFversion=\"3\" xmlns=\"http://www.smpte-ra.org/ns/2136-1/2024\" id=\"UID42\">\n"
         "    <InputDescriptor>Input descriptor</InputDescriptor>\n"
         "    <OutputDescriptor>Output descriptor</OutputDescriptor>\n"
         "    <Range id=\"Range42\" name=\"TestRange\" inBitDepth=\"8i\" outBitDepth=\"32f\">\n"
@@ -6119,7 +6262,7 @@ OCIO_ADD_TEST(CTFTransform, range2_clf)
 
     const std::string expected{
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<ProcessList compCLFversion=\"3\" id=\"UID42\">\n"
+        "<ProcessList compCLFversion=\"3\" xmlns=\"http://www.smpte-ra.org/ns/2136-1/2024\" id=\"UID42\">\n"
         "    <Range id=\"Range42\" inBitDepth=\"10i\" outBitDepth=\"8i\">\n"
         "        <minInValue> 102.3 </minInValue>\n"
         "        <minOutValue> 25.5 </minOutValue>\n"
@@ -6150,7 +6293,7 @@ OCIO_ADD_TEST(CTFTransform, range3_clf)
     OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransform));
 
     const std::string expected{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <Range id="Range42" inBitDepth="16f" outBitDepth="12i">
         <minInValue> 0 </minInValue>
         <minOutValue> 0 </minOutValue>
@@ -6185,7 +6328,7 @@ OCIO_ADD_TEST(CTFTransform, range4_clf)
 
     // Range is saved in the forward direction.
     const std::string expected{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <Range id="Range42" inBitDepth="12i" outBitDepth="16f">
         <minInValue> 2047.5 </minInValue>
         <maxInValue> 4095 </maxInValue>
@@ -6259,7 +6402,7 @@ OCIO_ADD_TEST(CTFTransform, gamma1_ctf)
     OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransformCLF));
 
     const std::string expectedCLF{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <Exponent inBitDepth="32f" outBitDepth="32f" style="basicRev">
         <ExponentParams exponent="2.6" />
     </Exponent>
@@ -6302,7 +6445,7 @@ OCIO_ADD_TEST(CTFTransform, gamma1_mirror_ctf)
     OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransformCLF));
 
     const std::string expectedCLF{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <Exponent inBitDepth="32f" outBitDepth="32f" style="basicMirrorRev">
         <ExponentParams exponent="2.6" />
     </Exponent>
@@ -6345,7 +6488,7 @@ OCIO_ADD_TEST(CTFTransform, gamma1_pass_thru_ctf)
     OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransformCLF));
 
     const std::string expectedCLF{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <Exponent inBitDepth="32f" outBitDepth="32f" style="basicPassThruRev">
         <ExponentParams exponent="2.6" />
     </Exponent>
@@ -6430,7 +6573,7 @@ OCIO_ADD_TEST(CTFTransform, gamma3_ctf)
     OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransformCLF));
 
     const std::string expectedCLF{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <Exponent inBitDepth="32f" outBitDepth="32f" style="monCurveFwd">
         <ExponentParams exponent="2.42" offset="0.099" />
     </Exponent>
@@ -7680,7 +7823,7 @@ OCIO_ADD_TEST(CTFTransform, lut1d_clf)
     OCIO_CHECK_NO_THROW(WriteGroupCLF(group, outputTransform));
 
     const std::string expected{ R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UIDLUT42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UIDLUT42">
     <LUT1D inBitDepth="32f" outBitDepth="32f" interpolation="linear">
         <Array dim="2 1">
           0
@@ -8455,7 +8598,7 @@ OCIO_ADD_TEST(FileFormatCTF, bake_1d)
 
     const std::string expectedCLF{
 R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <LUT1D inBitDepth="32f" outBitDepth="32f">
         <Array dim="2 1">
           0
@@ -8644,7 +8787,7 @@ OCIO_ADD_TEST(FileFormatCTF, bake_3d)
 
     const std::string expectedCLF{
 R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="TestID">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="TestID">
     <Description>OpenColorIO Test Line 1</Description>
     <Description>OpenColorIO Test Line 2</Description>
     <InputDescriptor>Input descriptor</InputDescriptor>
@@ -8776,7 +8919,7 @@ OCIO_ADD_TEST(FileFormatCTF, bake_1d_3d)
 
     const std::string expectedCLF{
 R"(<?xml version="1.0" encoding="UTF-8"?>
-<ProcessList compCLFversion="3" id="UID42">
+<ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="UID42">
     <Range inBitDepth="32f" outBitDepth="32f">
         <minInValue> -0.125 </minInValue>
         <maxInValue> 1.125 </maxInValue>
