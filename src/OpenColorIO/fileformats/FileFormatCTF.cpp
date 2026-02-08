@@ -1208,9 +1208,10 @@ bool isLoadableCTF(std::istream & istream)
 {
     std::streampos curPos = istream.tellg();
 
-    const unsigned limit(5 * 1024); // 5 kilobytes.
-    const char *pattern1 = "<ProcessList";
-    const char *pattern2 = ":ProcessList";
+    constexpr unsigned limit(5 * 1024); // 5 kilobytes.
+    constexpr const char *pattern1 = "<ProcessList";
+    constexpr const char *pattern2 = ":ProcessList";
+
     bool foundPattern = false;
     unsigned sizeProcessed(0);
     char line[limit + 1];

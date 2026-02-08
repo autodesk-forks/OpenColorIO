@@ -106,11 +106,11 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_namespaces)
 {
     const std::string ctfFile("clf/smpte_only/namespaces.clf");
     OCIO::LocalCachedFileRcPtr cachedFile;
-    OCIO_CHECK_THROW_WHAT(cachedFile = LoadCLFFile(ctfFile),
-                          OCIO::Exception,
-                          "is not a CTF/CLF file.");
 
-    // TODO: Should we try to make this pass?
+    // TODO: If the CTFTrasform is compiled with STRIP_NAMESPACES set to true
+    // this will load with few warnings. Is that good enough?
+    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+
 }
 
 OCIO_ADD_TEST(FileFormatCTF, smpte_signature)
