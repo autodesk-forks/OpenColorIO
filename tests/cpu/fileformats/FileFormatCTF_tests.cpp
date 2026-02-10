@@ -140,7 +140,7 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_id_bad_value)
     OCIO::LocalCachedFileRcPtr cachedFile;
     OCIO_CHECK_THROW_WHAT(cachedFile = LoadCLFFile(ctfFile), 
                           OCIO::Exception,
-                          "'3bae2da8' is not a ST2136-1:2024 complaint Id value.");
+                          "'3bae2da8' is not a SMPTE ST 2136-1 compliant Id value.");
 }
 
 // *****************************************************************
@@ -1468,7 +1468,7 @@ OCIO_ADD_TEST(FileFormatCTF, difficult_syntax)
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
     const OCIO::CTFVersion clfVersion = cachedFile->m_transform->getCLFVersion();
-    const OCIO::CTFVersion ver("http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::eSMPTE_Long);
+    const OCIO::CTFVersion ver("http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::VERSION_SMPTE_XMLNS);
     OCIO_CHECK_EQUAL(clfVersion, ver);
 
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "id1");

@@ -41,21 +41,20 @@ static constexpr unsigned DOUBLE_PRECISION = 15;
 
 
 CTFVersion::CTFVersion(const std::string & versionString, StringFormat acceptedFormat) 
-    : m_major(0), m_minor(0), m_revision(0) 
 {
     // Parse the version string to see if that matches the SMPTE
     // namespace/version patterns. If so store the version string and consider
     // equivalent to v3.0.
-    if(acceptedFormat & ( eSMPTE_Long | eSMPTE_Short))
+    if (acceptedFormat & ( VERSION_SMPTE_XMLNS | VERSION_SMPTE_CLF))
     {
         bool res = false;
-        if(acceptedFormat & eSMPTE_Long) 
+        if (acceptedFormat & VERSION_SMPTE_XMLNS) 
         {
             res = (0 == Platform::Strcasecmp(versionString.c_str(), 
                 "http://www.smpte-ra.org/ns/2136-1/2024"));
         }
 
-        if(!res && acceptedFormat & eSMPTE_Short) 
+        if (!res && acceptedFormat & VERSION_SMPTE_CLF) 
         {
             res = (0 == Platform::Strcasecmp(versionString.c_str(), 
                 "ST2136-1:2024"));
@@ -103,17 +102,13 @@ CTFVersion::CTFVersion(const std::string & versionString, StringFormat acceptedF
         os << "'";
         os << versionString;
         os << "' is not a valid version. Expecting ";
-        if(acceptedFormat & eSMPTE_Short)
+        if (acceptedFormat & VERSION_SMPTE_CLF)
             os << "'ST2136-1:2024' or ";
-        if(acceptedFormat & eSMPTE_Long)
+        if (acceptedFormat & VERSION_SMPTE_XMLNS)
             os << "'http://www.smpte-ra.org/ns/2136-1/2024' or ";
         os << "MAJOR[.MINOR[.REVISION]] ";
         throw Exception(os.str().c_str());
     }
-
-    m_major = 0;
-    m_minor = 0;
-    m_revision = 0;
 
     sscanf(versionString.c_str(), "%d.%d.%d",
            &m_major,
@@ -467,6 +462,8 @@ const char * GetLastElementValue(const FormatMetadataImpl::Elements & elements, 
 // note that any metadata in the individual process nodes are stored separately
 // in their opData.  Here is what is preserved:
 // -- ProcessList attributes "name", "id", and "inverseOf". Other attributes are ignored.
+// -- ProcessList sub-element "Id". If more than one is found, the contents are
+//    concatenated into one element.
 // -- ProcessList sub-elements "InputDescriptor" and "OutputDescriptor". The value
 //    of these elements is preserved but no additional attributes or sub-elements.
 //    Only the first InputDescriptor and last OutputDescriptor in the metadata is preserved.
@@ -2578,11 +2575,11 @@ void TransformWriter::write() const
     CTFVersion writeVersion; // This controls the available ops
     switch(m_subFormat) 
     {
-        case SubFormat::eUNKNOWN:
+        case SubFormat::FORMAT_UNKNOWN:
             throw Exception("Cannot write transform with unknown sub-format.");
             break;
 
-        case SubFormat::eCLF:
+        case SubFormat::FORMAT_CLF:
             // For CLF, we're writing versions per both the Academy and SMPTE
             // requirements.
             writeVersion = CTF_PROCESS_LIST_VERSION_2_0;
@@ -2592,7 +2589,7 @@ void TransformWriter::write() const
                 ATTR_XMLNS, "http://www.smpte-ra.org/ns/2136-1/2024"));
             break;
 
-        case SubFormat::eCTF:
+        case SubFormat::FORMAT_CTF:
             writeVersion = GetMinimumVersion(m_transform);
 
             std::ostringstream fversion;
@@ -2631,12 +2628,12 @@ void TransformWriter::write() const
         // Id element, won't generate if not provided but the format is
         // enforced.
         std::string idEl = m_transform->getIDElement();
-        if(m_subFormat == SubFormat::eCLF && !idEl.empty())
+        if (!idEl.empty())
         {
-            if(m_subFormat == SubFormat::eCLF && !ValidateSMPTEId(idEl))
+            if (m_subFormat == SubFormat::FORMAT_CLF && !ValidateSMPTEId(idEl))
             {
                 std::ostringstream ss;
-                ss << "'" << idEl << "' is not a ST2136-1:2024 compliant Id value.";
+                ss << "'" << idEl << "' is not a SMPTE ST 2136-1 compliant Id value.";
                 throw Exception(ss.str().c_str());
             }
             m_formatter.writeContentTag(TAG_ID, idEl);
@@ -2757,7 +2754,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
     // values on write. Otherwise, default to 32f.
     BitDepth inBD = BIT_DEPTH_F32;
     BitDepth outBD = BIT_DEPTH_F32;
-    bool isCLF = m_subFormat == SubFormat::eCLF;
+    bool isCLF = m_subFormat == SubFormat::FORMAT_CLF;
     auto & ops = m_transform->getOpDataVec();
     size_t numOps = ops.size();
     size_t numSavedOps = 0;

@@ -43,7 +43,14 @@ to agree on a common LUT format for this industry.  Support for CLF is a
 requirement in order to obtain ACES Logo Certification from the Academy (in
 several product categories).  CLF files are expressed using XML.  The spec,
 AMPAS S-2014-006, is available from:
-<https://acescentral.com/t/aces-documentation/53>
+<https://docs.acescentral.com/clf/introduction/>
+
+In 2026, SMPTE will publish ST 2136-1 to standardize the Academy/ASC format. 
+The main change is how versions are declared. The SMPTE spec sets the xmlns
+attribute of the ProcessList to a specific value rather than using the
+compCLFversion attribute. Since the differences are so minimal, OCIO writes 
+both the xmlns and compCLFversion in order to maximize compatibility with 
+different readers.
 
 The Autodesk CTF format is based on the Academy/ASC CLF format and adds several
 operators that allow higher quality results by avoiding the need to bake
@@ -1611,15 +1618,15 @@ void LocalFileFormat::write(const ConstConfigRcPtr & config,
                             std::ostream & ostream) const
 {
     
-    TransformWriter::SubFormat subFormat{TransformWriter::SubFormat::eUNKNOWN};
+    TransformWriter::SubFormat subFormat{TransformWriter::SubFormat::FORMAT_UNKNOWN};
     
     if (Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CLF) == 0)
     {
-        subFormat = TransformWriter::SubFormat::eCLF;
+        subFormat = TransformWriter::SubFormat::FORMAT_CLF;
     } 
     else if (Platform::Strcasecmp(formatName.c_str(), FILEFORMAT_CTF) == 0) 
     {
-        subFormat = TransformWriter::SubFormat::eCTF;
+        subFormat = TransformWriter::SubFormat::FORMAT_CTF;
     } 
     else 
     {

@@ -87,16 +87,7 @@ void CTFReaderTransformElt::start(const char ** atts)
             // Check if xmlns atrribute holds a SMPTE version string.
             try
             {
-                auto version = CTFVersion(atts[i + 1], CTFVersion::StringFormat::eSMPTE_Long);
-                
-                if (isVersionFound)
-                {
-                    throwMessage("SMPTE 'xmlns' version and 'Version' attribute cannot both be present.");
-                }
-
-                // Note that compCLFversion can appear together with xmlns for
-                // SMPTE CLF
-
+                auto version = CTFVersion(atts[i + 1], CTFVersion::StringFormat::VERSION_SMPTE_XMLNS);
                 requestedVersion = CTF_PROCESS_LIST_VERSION_2_0;
                 requestedCLFVersion = version;
                 isSMPTEVersionFound = true;
@@ -104,7 +95,14 @@ void CTFReaderTransformElt::start(const char ** atts)
             }
             catch (Exception& /*e*/)
             {
-                // Ignore the exception, as this may not be a version URI.
+                // Ignore other xmlns attribute strings.
+            }
+                
+            // Disallow Version and version-holding xmlns appering togather.
+            // Note that compCLFversion can appear together with xmlns.
+            if (isVersionFound && isSMPTEVersionFound)
+            {
+                throwMessage("SMPTE 'xmlns' version and 'Version' attribute cannot both be present.");
             }
         }
         else if (0 == Platform::Strcasecmp(ATTR_NAME, atts[i]))
@@ -181,7 +179,7 @@ void CTFReaderTransformElt::start(const char ** atts)
             try
             {
                 std::string verString(pVer);
-                requestedCLFVersion = CTFVersion(verString, CTFVersion::StringFormat::eSMPTE_Short);
+                requestedCLFVersion = CTFVersion(verString, CTFVersion::StringFormat::VERSION_SMPTE_CLF);
             }
             catch (Exception& ce)
             {
@@ -225,7 +223,6 @@ void CTFReaderTransformElt::start(const char ** atts)
     // Check mandatory id keyword for non-SMPTE variants.
     if (!isIdFound && !isSMPTEVersionFound)
     {
-        // FIXME: add handling of the SMPTE version tag
         throwMessage("Required attribute 'id' is missing.");
     }
 
@@ -306,7 +303,7 @@ void CTFReaderIdElt::end()
     if(!ValidateSMPTEId(m_id))
     {
         std::ostringstream ss;
-        ss << "'" << m_id << "' is not a ST2136-1:2024 complaint Id value.";
+        ss << "'" << m_id << "' is not a SMPTE ST 2136-1 compliant Id value.";
         throwMessage(ss.str());
     }
 

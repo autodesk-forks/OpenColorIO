@@ -25,13 +25,13 @@ class CTFVersion
 public:
     enum StringFormat
     {
-        eNumericOnly   = 0,     // Numeric version is always accepted.
-        eSMPTE_Long    = 1 << 1,
-        eSMPTE_Short   = 1 << 2
+        VERSION_NUMERIC     = 0,     // Numeric version is always accepted.
+        VERSION_SMPTE_XMLNS = 1 << 1,
+        VERSION_SMPTE_CLF   = 1 << 2
     };
     
     // Will throw if versionString is not formatted like a version.
-    explicit CTFVersion(const std::string & versionString, StringFormat acceptedFormat = eNumericOnly);
+    explicit CTFVersion(const std::string & versionString, StringFormat acceptedFormat = VERSION_NUMERIC);
 
     CTFVersion()
     {
@@ -293,9 +293,9 @@ class TransformWriter : public XmlElementWriter
  public:
      enum class SubFormat : uint8_t
      {
-         eUNKNOWN,
-         eCLF, 
-         eCTF
+         FORMAT_UNKNOWN,
+         FORMAT_CLF, 
+         FORMAT_CTF
      };
 
  public:
@@ -318,7 +318,7 @@ private:
 
 private:
     ConstCTFReaderTransformPtr  m_transform;
-    SubFormat                   m_subFormat = SubFormat::eUNKNOWN;
+    SubFormat                   m_subFormat = SubFormat::FORMAT_UNKNOWN;
 };
 
 

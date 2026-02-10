@@ -79,7 +79,7 @@ OCIO_ADD_TEST(CTFVersion, read_version)
 
     {
         // Numeric format is always accepted.
-        OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion("2.0.0", OCIO::CTFVersion::eSMPTE_Short));
+        OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion("2.0.0", OCIO::CTFVersion::VERSION_SMPTE_CLF));
         const OCIO::CTFVersion version(2, 0, 0);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
@@ -103,7 +103,7 @@ OCIO_ADD_TEST(CTFVersion, read_version)
     {
         // SMPTE version is regarded as v3.0.0.
         OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion(
-            "ST2136-1:2024", OCIO::CTFVersion::eSMPTE_Short));
+            "ST2136-1:2024", OCIO::CTFVersion::VERSION_SMPTE_CLF));
         const OCIO::CTFVersion version(3, 0, 0);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
@@ -111,16 +111,16 @@ OCIO_ADD_TEST(CTFVersion, read_version)
     {
         // Short SMPTE string is not allowed when only the long format is accepted.
         OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion(
-            "ST2136-1:2024", OCIO::CTFVersion::eSMPTE_Long),
+            "ST2136-1:2024", OCIO::CTFVersion::VERSION_SMPTE_XMLNS),
             OCIO::Exception,
             "is not a valid version. Expecting 'http://www.smpte-ra.org/ns/2136-1/2024' or MAJOR[.MINOR[.REVISION]]");
     }
 
     {
-        // Long SMPTE should be accepted only when the the format is allowed ans
+        // Long SMPTE should be accepted only when the the format is allowed and
         // should be regarded as v3.0.0.
         OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion(
-            "http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::eSMPTE_Long));
+            "http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::VERSION_SMPTE_XMLNS));
         const OCIO::CTFVersion version(3, 0, 0);
         OCIO_CHECK_EQUAL(version, versionRead);
     }
@@ -128,7 +128,7 @@ OCIO_ADD_TEST(CTFVersion, read_version)
     {
         // Long SMPTE string is not allowed when only the short format is accepted.
         OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion(
-            "http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::eSMPTE_Short),
+            "http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::VERSION_SMPTE_CLF),
             OCIO::Exception,
             "is not a valid version. Expecting 'ST2136-1:2024' or MAJOR[.MINOR[.REVISION]]");
     }
@@ -200,7 +200,7 @@ OCIO_ADD_TEST(CTFVersion, version_write)
     {
         const OCIO::CTFVersion version(
             "ST2136-1:2024", 
-            OCIO::CTFVersion::eSMPTE_Short);
+            OCIO::CTFVersion::VERSION_SMPTE_CLF);
         std::ostringstream ostream;
         ostream << version;
         OCIO_CHECK_EQUAL(ostream.str(), "ST2136-1:2024");
@@ -208,7 +208,7 @@ OCIO_ADD_TEST(CTFVersion, version_write)
     {
         const OCIO::CTFVersion version(
             "http://www.smpte-ra.org/ns/2136-1/2024", 
-            OCIO::CTFVersion::eSMPTE_Long);
+            OCIO::CTFVersion::VERSION_SMPTE_XMLNS);
         std::ostringstream ostream;
         ostream << version;
         OCIO_CHECK_EQUAL(ostream.str(), "http://www.smpte-ra.org/ns/2136-1/2024");
