@@ -901,7 +901,7 @@ void CTFReaderOpElt::start(const char ** atts)
     // Add a pointer to an empty op of the appropriate child class to the
     // end of the opvec.  No data is copied since the parameters of the op
     // have not been filled in yet.
-    m_transform->getOps().push_back(getOp());
+    m_transform->getOpDataVec().push_back(getOp());
 
     enum BitDepthFlags
     {
@@ -4420,9 +4420,9 @@ void CTFReaderLut1DElt_1_7::end()
         // This code assumes that the current LUT is at the end of the opList.
         // In other words, that this LUT's end() method will be called before
         // any other Op's start().
-        const size_t len = m_transform->getOps().size();
+        const size_t len = m_transform->getOpDataVec().size();
         const size_t pos = len - 1;
-        m_transform->getOps().insert(m_transform->getOps().begin() + pos, pRng);
+        m_transform->getOpDataVec().insert(m_transform->getOpDataVec().begin() + pos, pRng);
     }
 }
 
@@ -4587,9 +4587,9 @@ void CTFReaderLut3DElt_1_7::end()
         // This code assumes that the current LUT is at the end of the opList.
         // In other words, that this LUT's end() method will be called before
         // any other Op's start().
-        const unsigned long len = (unsigned long)m_transform->getOps().size();
+        const unsigned long len = (unsigned long)m_transform->getOpDataVec().size();
         const unsigned long pos = len - 1;
-        m_transform->getOps().insert(m_transform->getOps().begin() + pos, pRng);
+        m_transform->getOpDataVec().insert(m_transform->getOpDataVec().begin() + pos, pRng);
     }
 }
 
@@ -4965,12 +4965,12 @@ void CTFReaderRangeElt_1_7::end()
         // This code assumes that the current Range is at the end of the opList.
         // In other words, that this Op's end() method will be called before
         // any other Op's start().
-        const size_t len = m_transform->getOps().size();
+        const size_t len = m_transform->getOpDataVec().size();
         const size_t pos = len - 1;
 
         // Replace the range appended to m_transform in OpElt::start
         // with the matrix.
-        m_transform->getOps()[pos].swap(pMtx);
+        m_transform->getOpDataVec()[pos].swap(pMtx);
     }
 }
 

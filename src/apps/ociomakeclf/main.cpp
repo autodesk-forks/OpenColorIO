@@ -58,8 +58,9 @@ void CreateOutputLutFile(const std::string & outLutFilepath, OCIO::ConstGroupTra
 
             if(generateId)
             {
-                const char * cacheID = group->getCacheID();
-                group->getFormatMetadata().addChildElement("Id", cacheID);
+                std::ostringstream ss;
+                ss << "urn:uuid:" << optProcessor->getCacheID();
+                group->getFormatMetadata().addChildElement("Id", ss.str().c_str());
             }
 
             group->write(config, "Academy/ASC Common LUT Format", outfs); 

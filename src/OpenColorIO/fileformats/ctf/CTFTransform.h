@@ -205,11 +205,11 @@ public:
     {
         return m_infoMetadata;
     }
-    const ConstOpDataVec & getOps() const
+    const ConstOpDataVec & getOpDataVec() const
     {
         return m_ops;
     }
-    ConstOpDataVec & getOps()
+    ConstOpDataVec & getOpDataVec()
     {
         return m_ops;
     }
@@ -315,7 +315,6 @@ private:
     void writeProcessListMetadata(const FormatMetadataImpl & m) const;
     void writeOpMetadata(const FormatMetadataImpl & m) const;
     void writeOps(const CTFVersion & version) const;
-    std::string generateID() const;
 
 private:
     ConstCTFReaderTransformPtr  m_transform;

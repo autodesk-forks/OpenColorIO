@@ -8,7 +8,7 @@
 #include "fileformats/ctf/CTFReaderUtils.h"
 #include "fileformats/ctf/CTFTransform.h"
 #include "fileformats/xmlutils/XMLReaderUtils.h"
-#include "HashUtils.h"
+//#include "HashUtils.h"
 #include "ops/cdl/CDLOpData.h"
 #include "ops/exponent/ExponentOp.h"
 #include "ops/exposurecontrast/ExposureContrastOpData.h"
@@ -419,7 +419,7 @@ CTFVersion GetOpMinimumVersion(const ConstOpDataRcPtr & op)
 
 CTFVersion GetMinimumVersion(const ConstCTFReaderTransformPtr & transform)
 {
-    auto & opList = transform->getOps();
+    auto & opList = transform->getOpDataVec();
 
     // Need to specify the minimum version here.  Some test transforms have no ops.
     CTFVersion minimumVersion = CTF_PROCESS_LIST_VERSION_1_3;
@@ -2603,12 +2603,13 @@ void TransformWriter::write() const
           break;
     }
   
-    // Id attribute. Generate if not provided.
+    // Id attribute
     std::string id = m_transform->getID();
     if (id.empty())
     {
-        id = generateID();
+        throw Exception("Internal error; at this point the transform should have an id");
     }
+
     attributes.push_back(XmlFormatter::Attribute(ATTR_ID, id));
     
     const std::string& name = m_transform->getName();
@@ -2697,19 +2698,6 @@ void TransformWriter::writeProcessListMetadata(const FormatMetadataImpl& m) cons
     }
 }
 
-std::string TransformWriter::generateID() const
-{
-    std::string id;
-    auto & ops = m_transform->getOps();
-    for (auto op : ops)
-    {
-        id += op->getCacheID();
-    }
-
-    id = "urn:uuid:" + CacheIDHashUUID(id.c_str(), id.size());
-    return id;
-}
-
 namespace
 {
 void ThrowWriteOp(const std::string & type)
@@ -2770,7 +2758,7 @@ void TransformWriter::writeOps(const CTFVersion & version) const
     BitDepth inBD = BIT_DEPTH_F32;
     BitDepth outBD = BIT_DEPTH_F32;
     bool isCLF = m_subFormat == SubFormat::eCLF;
-    auto & ops = m_transform->getOps();
+    auto & ops = m_transform->getOpDataVec();
     size_t numOps = ops.size();
     size_t numSavedOps = 0;
     if (numOps)

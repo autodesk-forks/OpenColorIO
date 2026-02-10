@@ -73,31 +73,6 @@ void GroupTransformImpl::validate() const
     }
 }
 
-const char * GroupTransformImpl::getCacheID()
-{
-    if(!m_cacheID.empty())
-        return m_cacheID.c_str();
-
-    ConstConfigRcPtr config = Config::CreateRaw();
-    OpRcPtrVec ops;
-    BuildGroupOps(ops, *config, config->getCurrentContext(), *this, TRANSFORM_DIR_FORWARD);
-
-    ops.finalize();
-
-    // Call optimize to remove no-op types (e.g., allocation, file no-ops)
-    ops.optimize(OPTIMIZATION_NONE);
-
-    std::string id;
-    for (ConstOpRcPtr op : ops)
-    {
-        id += op->data()->getCacheID();
-    }
-
-    m_cacheID = "urn:uuid:" + CacheIDHashUUID(id.c_str(), id.size());
-    return m_cacheID.c_str();
-}
-
-
 int GroupTransformImpl::getNumTransforms() const noexcept
 {
     return static_cast<int>(m_vec.size());

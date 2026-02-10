@@ -43,9 +43,9 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_id_element)
                         "Identity transform illustrating Array bit depth scaling");
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[1],
                         "Can be loaded by either SMPTE or CLF v3 parsers");
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
 
     // Check the ops.
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 3);
 
     auto mat1 = OCIO::DynamicPtrCast<const OCIO::MatrixOpData>(opList[0]);
@@ -62,13 +62,16 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_id_element)
     OCIO_CHECK_EQUAL(mat2->getFileInputBitDepth(), OCIO::BIT_DEPTH_UINT16);
     OCIO_CHECK_EQUAL(mat2->getFileOutputBitDepth(), OCIO::BIT_DEPTH_UINT16);
 
-    // Check identity.
+    // Check identity.  
+    // Using float bit-depths returns a Range clamping at [0,1], due to the
+    // LUT1D. Thus setting arbitrary integer in and out depths to avoid the
+    // Range and allow isIdentity to be true.
     OCIO::ConstProcessorRcPtr processor;
     OCIO_CHECK_NO_THROW(processor = OCIO::GetFileTransformProcessor(ctfFile));
     OCIO_REQUIRE_ASSERT(processor);
     auto procOpt = processor->getOptimizedCPUProcessor(
-        OCIO::BIT_DEPTH_UINT8, 
-        OCIO::BIT_DEPTH_UINT16,
+        OCIO::BIT_DEPTH_UINT10, 
+        OCIO::BIT_DEPTH_UINT12,
         OCIO::OPTIMIZATION_DEFAULT);
     OCIO_CHECK_ASSERT(procOpt->isIdentity());
 
@@ -88,7 +91,14 @@ OCIO_ADD_TEST(FileFormatCTF, non_smpte_xmlns)
     OCIO::LocalCachedFileRcPtr cachedFile;
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
 
-    // TODO: Extend?
+    // Check the op.
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
+    OCIO_REQUIRE_EQUAL(opList.size(), 1);
+
+    auto mat = OCIO::DynamicPtrCast<const OCIO::MatrixOpData>(opList[0]);
+    OCIO_REQUIRE_ASSERT(mat);
+    OCIO_CHECK_EQUAL(mat->getFileInputBitDepth(), OCIO::BIT_DEPTH_F32);
+    OCIO_CHECK_EQUAL(mat->getFileOutputBitDepth(), OCIO::BIT_DEPTH_F32);
 }
 
 OCIO_ADD_TEST(FileFormatCTF, smpte_all_metadata)
@@ -161,7 +171,7 @@ OCIO_ADD_TEST(FileFormatCTF, clf_examples)
         OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions().size(), 1);
         OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[0],
                          "1D LUT with legal out of range values");
-        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 1);
         OCIO_CHECK_EQUAL(opList[0]->getType(), OCIO::OpData::Lut1DType);
         OCIO_CHECK_EQUAL(opList[0]->getName(), "65valueLut");
@@ -175,11 +185,6 @@ OCIO_ADD_TEST(FileFormatCTF, clf_examples)
         OCIO_REQUIRE_EQUAL(desc.size(), 2);
         OCIO_CHECK_EQUAL(desc[0], "Note that the bit-depth does not constrain the legal range of values.");
         OCIO_CHECK_EQUAL(desc[1], "Formula: flipud(1.25 - 1.5 * x^2.2)");
-
-        auto info = cachedFile->m_transform->getInfoMetadata();
-        auto elements = info.getChildrenElements();
-
-
     }
 
     {
@@ -192,7 +197,7 @@ OCIO_ADD_TEST(FileFormatCTF, clf_examples)
         OCIO_REQUIRE_EQUAL(cachedFile->m_transform->getDescriptions().size(), 1);
         OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[0],
                          " 3D LUT example ");
-        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 1);
         OCIO_CHECK_EQUAL(opList[0]->getName(), "identity");
         OCIO_CHECK_EQUAL(opList[0]->getID(), "lut-24");
@@ -219,7 +224,7 @@ OCIO_ADD_TEST(FileFormatCTF, clf_examples)
                          " Matrix example ");
         OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[1],
                          " Used by unit tests ");
-        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 1);
         OCIO_CHECK_EQUAL(opList[0]->getName(), "colorspace conversion");
         OCIO_CHECK_EQUAL(opList[0]->getID(), "mat-25");
@@ -284,7 +289,7 @@ OCIO_ADD_TEST(FileFormatCTF, clf_examples)
         OCIO_REQUIRE_EQUAL(cachedFile->m_transform->getDescriptions().size(), 1);
         OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[0],
                          " IndexMap LUT example from spec ");
-        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 2);
         auto pR = std::dynamic_pointer_cast<const OCIO::RangeOpData>(opList[0]);
         OCIO_REQUIRE_ASSERT(pR);
@@ -319,7 +324,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix4x4)
         cachedFile->m_transform->getCTFVersion();
     OCIO_CHECK_ASSERT(OCIO::CTF_PROCESS_LIST_VERSION_1_2 == ctfVersion);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
@@ -380,7 +385,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_with_offset)
         cachedFile->m_transform->getCTFVersion();
     OCIO_CHECK_EQUAL(OCIO::CTF_PROCESS_LIST_VERSION_1_2, ctfVersion);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
@@ -438,7 +443,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_1_3_3x3)
         cachedFile->m_transform->getCTFVersion();
     OCIO_CHECK_ASSERT(OCIO::CTF_PROCESS_LIST_VERSION_1_3 == ctfVersion);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
@@ -496,7 +501,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_1_3_4x4)
         cachedFile->m_transform->getCTFVersion();
     OCIO_CHECK_ASSERT(OCIO::CTF_PROCESS_LIST_VERSION_1_3 == ctfVersion);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
@@ -548,7 +553,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_1_3_offsets)
         cachedFile->m_transform->getCTFVersion();
     OCIO_CHECK_ASSERT(OCIO::CTF_PROCESS_LIST_VERSION_1_3 == ctfVersion);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
@@ -599,7 +604,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_1_3_alpha_offsets)
         cachedFile->m_transform->getCTFVersion();
     OCIO_CHECK_ASSERT(OCIO::CTF_PROCESS_LIST_VERSION_1_3 == ctfVersion);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
@@ -649,7 +654,7 @@ void CheckIdentity(std::istringstream & ctfStream, unsigned line)
     OCIO_CHECK_NO_THROW_FROM(file = tester.read(ctfStream, emptyString, OCIO::INTERP_DEFAULT), line);
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL_FROM(fileOps.size(), 1, line);
     const auto op = fileOps[0];
@@ -759,7 +764,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut_1d)
                          "Apply a 1/2.2 gamma.");
         OCIO_CHECK_EQUAL(cachedFile->m_transform->getInputDescriptor(), "RGB");
         OCIO_CHECK_EQUAL(cachedFile->m_transform->getOutputDescriptor(), "RGB");
-        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
         auto pLut = std::dynamic_pointer_cast<const OCIO::Lut1DOpData>(opList[0]);
@@ -810,7 +815,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut_1d)
         OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
         OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 1);
         auto pLut = std::dynamic_pointer_cast<const OCIO::Lut1DOpData>(opList[0]);
         OCIO_REQUIRE_ASSERT(pLut);
@@ -832,7 +837,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut_3by1d_with_nan_infinity)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pLut1d = std::dynamic_pointer_cast<const OCIO::Lut1DOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pLut1d);
@@ -884,7 +889,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut1d_half_domain_raw_half_set)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pLut1d = std::dynamic_pointer_cast<const OCIO::Lut1DOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pLut1d);
@@ -921,7 +926,7 @@ OCIO_ADD_TEST(FileFormatCTF, 3by1d_lut)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 3);
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
@@ -990,7 +995,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut1d_long_lut)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pLut = std::dynamic_pointer_cast<const OCIO::Lut1DOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pLut);
@@ -1010,7 +1015,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut1d_inv)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
 
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
@@ -1081,7 +1086,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut1d_inv_scaling)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
     auto pLut = std::dynamic_pointer_cast<const OCIO::Lut1DOpData>(opList[0]);
@@ -1160,7 +1165,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut3d)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
     auto pLut = std::dynamic_pointer_cast<const OCIO::Lut3DOpData>(opList[0]);
@@ -1201,7 +1206,7 @@ OCIO_ADD_TEST(FileFormatCTF, lut3d_inv)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
     auto pLut = std::dynamic_pointer_cast<const OCIO::Lut3DOpData>(opList[0]);
@@ -1250,7 +1255,7 @@ OCIO_ADD_TEST(FileFormatCTF, tabluation_support)
     const std::string ctfFile("clf/tabulation_support.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "e0a0ae4b-adc2-4c25-ad70-fa6f31ba219d");
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
@@ -1296,7 +1301,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_windows_eol)
     const std::string ctfFile("clf/matrix_windows.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getID(), "42");
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     OCIO_CHECK_EQUAL(opList[0]->getType(), OCIO::OpData::MatrixType);
@@ -1310,7 +1315,7 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_no_newlines)
     const std::string ctfFile("clf/matrix_no_newlines.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     OCIO_CHECK_EQUAL(opList[0]->getType(), OCIO::OpData::MatrixType);
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
@@ -1347,7 +1352,7 @@ OCIO_ADD_TEST(FileFormatCTF, check_utf8)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     StringUtils::StringVec descList;
     GetElementsValues(opList[0]->getFormatMetadata().getChildrenElements(),
@@ -1381,7 +1386,7 @@ OCIO_ADD_TEST(FileFormatCTF, info_example)
                      "output desc");
 
     // Ensure ops were not affected by metadata parsing.
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
     auto pMatrix =
@@ -1482,7 +1487,7 @@ OCIO_ADD_TEST(FileFormatCTF, difficult_syntax)
     OCIO_CHECK_EQUAL(std::string(items[0].getElementValue()),
                      "This is a \"difficult\" but 'legal' color transform file.");
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
     {
         auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
@@ -1598,7 +1603,7 @@ OCIO_ADD_TEST(FileFormatCTF, difficult_xml_unknown_elements)
     const OCIO::CTFVersion ctfVersion = cachedFile->m_transform->getCTFVersion();
     OCIO_CHECK_ASSERT(OCIO::CTF_PROCESS_LIST_VERSION_1_2 == ctfVersion);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
 
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
@@ -1682,7 +1687,7 @@ OCIO_ADD_TEST(FileFormatCTF, unknown_elements)
         }
     }
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 4);
 
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
@@ -2041,7 +2046,7 @@ OCIO_ADD_TEST(FileFormatCTF, range_default)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pR = std::dynamic_pointer_cast<const OCIO::RangeOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pR);
@@ -2066,7 +2071,7 @@ OCIO_ADD_TEST(FileFormatCTF, range_test1_clamp)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pR = std::dynamic_pointer_cast<const OCIO::RangeOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pR);
@@ -2091,7 +2096,7 @@ OCIO_ADD_TEST(FileFormatCTF, range_test1_noclamp)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
     // Check that the noClamp style Range became a Matrix.
@@ -2139,7 +2144,7 @@ OCIO_ADD_TEST(FileFormatCTF, range_test2)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pR = std::dynamic_pointer_cast<const OCIO::RangeOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pR);
@@ -2195,7 +2200,7 @@ OCIO_ADD_TEST(FileFormatCTF, indexMap_test1_clfv2)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
     auto pR = std::dynamic_pointer_cast<const OCIO::RangeOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pR);
@@ -2222,7 +2227,7 @@ OCIO_ADD_TEST(FileFormatCTF, indexMap_test2_clfv2)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
     auto pR = std::dynamic_pointer_cast<const OCIO::RangeOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pR);
@@ -2283,7 +2288,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_test1)
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions().size(), 1);
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[0], "2.4 gamma");
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2312,7 +2317,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_test2)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2343,7 +2348,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_test3)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2373,7 +2378,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_test4)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2420,7 +2425,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_test6)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2442,7 +2447,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_alpha_test1)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2473,7 +2478,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_alpha_test2)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2509,7 +2514,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_alpha_test3)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2541,7 +2546,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_alpha_test4)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2582,7 +2587,7 @@ OCIO_ADD_TEST(FileFormatCTF, gamma_alpha_test5)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pG = std::dynamic_pointer_cast<const OCIO::GammaOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pG);
@@ -2639,7 +2644,7 @@ OCIO_ADD_TEST(FileFormatCTF, exponent_all_styles)
     const std::string fileName("clf/exponent_all_styles.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 12);
 
     {   // Op 0 == basicFwd.
@@ -2825,7 +2830,7 @@ OCIO_ADD_TEST(FileFormatCTF, cdl_clamp_fwd)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getInputDescriptor(),
                      "inputDesc");
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getOutputDescriptor(),
@@ -2864,7 +2869,7 @@ OCIO_ADD_TEST(FileFormatCTF, cdl_missing_style)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pCDL = std::dynamic_pointer_cast<const OCIO::CDLOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pCDL);
@@ -2888,7 +2893,7 @@ OCIO_ADD_TEST(FileFormatCTF, cdl_all_styles)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 4);
 
     auto pCDL = std::dynamic_pointer_cast<const OCIO::CDLOpData>(opList[0]);
@@ -2964,7 +2969,7 @@ OCIO_ADD_TEST(FileFormatCTF, cdl_missing_sop)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pCDL = std::dynamic_pointer_cast<const OCIO::CDLOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pCDL);
@@ -2985,7 +2990,7 @@ OCIO_ADD_TEST(FileFormatCTF, cdl_missing_sat)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pCDL = std::dynamic_pointer_cast<const OCIO::CDLOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pCDL);
@@ -3008,7 +3013,7 @@ OCIO_ADD_TEST(FileFormatCTF, cdl_various_in_ctf)
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 8);
 
     auto pCDL = std::dynamic_pointer_cast<const OCIO::CDLOpData>(opList[0]);
@@ -3050,7 +3055,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_all_styles)
     const std::string fileName("clf/log_all_styles.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 11);
     double error = 1e-9;
 
@@ -3222,7 +3227,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_logtolin)
     std::string fileName("log_logtolin.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     auto op = fileOps[0];
     auto log = std::dynamic_pointer_cast<const OCIO::LogOpData>(op);
@@ -3250,7 +3255,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_logtolinv2)
     std::string fileName("log_logtolinv2.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     auto op = fileOps[0];
     auto log = std::dynamic_pointer_cast<const OCIO::LogOpData>(op);
@@ -3277,7 +3282,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_lintolog_3chan)
     std::string fileName("log_lintolog_3chan.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     auto op = fileOps[0];
     auto log = std::dynamic_pointer_cast<const OCIO::LogOpData>(op);
@@ -3353,7 +3358,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_ocio_params_channels)
     strebuf << "</ProcessList>\n";
 
     OCIO::LocalCachedFileRcPtr cachedFile = ParseString(strebuf.str());
-    OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     auto op = fileOps[0];
@@ -3407,7 +3412,7 @@ OCIO_ADD_TEST(FileFormatCTF, log_default_params)
     OCIO::LocalCachedFileRcPtr cachedFile;
     OCIO_CHECK_NO_THROW(cachedFile = ParseString(strebuf.str()));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 2);
     auto op = fileOps[0];
@@ -3442,7 +3447,7 @@ OCIO_ADD_TEST(FileFormatCTF, multiple_ops)
     const std::string ctfFile("clf/multiple_ops.clf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 9);
 
     {   // Op 0 == CDL.
@@ -3556,7 +3561,7 @@ OCIO_ADD_TEST(FileFormatCTF, reference_load_alias)
     std::string fileName("reference_alias.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
@@ -3576,7 +3581,7 @@ OCIO_ADD_TEST(FileFormatCTF, reference_load_path)
     std::string fileName("reference_path_missing_file.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
@@ -3595,7 +3600,7 @@ OCIO_ADD_TEST(FileFormatCTF, reference_load_multiple)
     std::string fileName("references_some_inverted.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     
     OCIO_REQUIRE_EQUAL(fileOps.size(), 4);
     OCIO::ConstOpDataRcPtr op0 = fileOps[0];
@@ -3632,7 +3637,7 @@ OCIO_ADD_TEST(FileFormatCTF, reference_load_path_utf8)
     std::string fileName("reference_utf8.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstReferenceOpDataRcPtr ref = std::dynamic_pointer_cast<const OCIO::ReferenceOpData>(op);
@@ -3656,7 +3661,7 @@ OCIO_ADD_TEST(FileFormatCTF, exposure_contrast_video)
     const std::string ctfFile("exposure_contrast_video.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
 
@@ -3689,7 +3694,7 @@ OCIO_ADD_TEST(FileFormatCTF, exposure_contrast_log)
     const std::string ctfFile("exposure_contrast_log.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
 
@@ -3726,7 +3731,7 @@ OCIO_ADD_TEST(FileFormatCTF, exposure_contrast_linear)
     const std::string ctfFile("exposure_contrast_linear.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
 
@@ -3763,7 +3768,7 @@ OCIO_ADD_TEST(FileFormatCTF, exposure_contrast_no_gamma)
     const std::string ctfFile("exposure_contrast_no_gamma.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
@@ -3835,7 +3840,7 @@ OCIO_ADD_TEST(FileFormatCTF, attribute_float_parse_leading_spaces)
     OCIO::CachedFileRcPtr file;
     OCIO_CHECK_NO_THROW(file = tester.read(ctf, emptyString, OCIO::INTERP_DEFAULT));
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     const auto op = fileOps[0];
@@ -3851,7 +3856,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_deprecated_ops_file)
     std::string fileName("deprecated_ops.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 3);
 
@@ -3895,7 +3900,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_fixed_function_file)
     std::string fileName("fixed_function.ctf");
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(fileName));
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 2);
 
@@ -3964,7 +3969,7 @@ void ValidateFixedFunctionStyle(OCIO::FixedFunctionOpData::Style style,
     OCIO::LocalCachedFileRcPtr cachedFile;
     OCIO_CHECK_NO_THROW_FROM(cachedFile = ParseString(strebuf.str()), lineNo);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL_FROM(fileOps.size(), 1, lineNo);
     auto opData = fileOps[0];
@@ -4185,7 +4190,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_grading_primary_log)
     OCIO_CHECK_NO_THROW(file = tester.read(ctfLog, emptyString, OCIO::INTERP_DEFAULT));
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 4);
     const auto op0 = fileOps[0];
@@ -4289,7 +4294,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_grading_primary_lin)
     OCIO_CHECK_NO_THROW(file = tester.read(ctfLin, emptyString, OCIO::INTERP_DEFAULT));
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 4);
     const auto op0 = fileOps[0];
@@ -4390,7 +4395,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_grading_primary_video)
     OCIO_CHECK_NO_THROW(file = tester.read(ctfVideo, emptyString, OCIO::INTERP_DEFAULT));
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 4);
     const auto op0 = fileOps[0];
@@ -4589,7 +4594,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_grading_rgbcurves_lin)
     OCIO_CHECK_NO_THROW(file = tester.read(ctfLin, emptyString, OCIO::INTERP_DEFAULT));
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 3);
     const auto op0 = fileOps[0];
@@ -4677,7 +4682,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_grading_rgbcurves_log)
     OCIO_CHECK_NO_THROW(file = tester.read(ctfLog, emptyString, OCIO::INTERP_DEFAULT));
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     const auto op0 = fileOps[0];
@@ -4775,7 +4780,7 @@ OCIO_ADD_TEST(FileFormatCTF, load_grading_huecurves_log)
     OCIO_CHECK_NO_THROW(file = tester.read(ctfLog, emptyString, OCIO::INTERP_DEFAULT));
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     const auto op0 = fileOps[0];
@@ -4983,7 +4988,7 @@ OCIO_ADD_TEST(CTFTransform, load_grading_tone)
     OCIO_CHECK_NO_THROW(file = tester.read(ctfLog, emptyString, OCIO::INTERP_DEFAULT));
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO_DYNAMIC_POINTER_CAST<OCIO::LocalCachedFile>(file);
     OCIO_REQUIRE_ASSERT(cachedFile);
-    const auto & fileOps = cachedFile->m_transform->getOps();
+    const auto & fileOps = cachedFile->m_transform->getOpDataVec();
 
     OCIO_REQUIRE_EQUAL(fileOps.size(), 6);
 
@@ -5148,7 +5153,7 @@ OCIO_ADD_TEST(CTFTransform, load_edit_save_matrix)
     OCIO::CachedFileRcPtr file = tester.read(inputTransform, emptyString, OCIO::INTERP_DEFAULT);
     OCIO::LocalCachedFileRcPtr cachedFile = OCIO::DynamicPtrCast<OCIO::LocalCachedFile>(file);
 
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstMatrixOpDataRcPtr mat = OCIO::DynamicPtrCast<const OCIO::MatrixOpData>(op);
@@ -5198,7 +5203,7 @@ OCIO_ADD_TEST(CTFTransform, save_matrix)
     matTransform->setDirection(OCIO::TRANSFORM_DIR_FORWARD);
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(matTransform);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstMatrixOpDataRcPtr mat = OCIO::DynamicPtrCast<const OCIO::MatrixOpData>(op);
@@ -5232,7 +5237,7 @@ OCIO_ADD_TEST(CTFTransform, save_cdl)
     cdlTransform->getFormatMetadata().addChildElement(OCIO::METADATA_SAT_DESCRIPTION, "Sat description 2");
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(cdlTransform);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstCDLOpDataRcPtr cdl = OCIO::DynamicPtrCast<const OCIO::CDLOpData>(op);
@@ -5280,7 +5285,7 @@ void TestSaveLog(double base, unsigned line)
     logT->setBase(base);
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(logT);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL_FROM(fileOps.size(), 1, line);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstLogOpDataRcPtr log = OCIO::DynamicPtrCast<const OCIO::LogOpData>(op);
@@ -5305,7 +5310,7 @@ OCIO_ADD_TEST(CTFTransform, save_log_affine)
     logT->setLinSideSlopeValue(vals);
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(logT);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstLogOpDataRcPtr log = OCIO::DynamicPtrCast<const OCIO::LogOpData>(op);
@@ -5328,7 +5333,7 @@ OCIO_ADD_TEST(CTFTransform, save_log_camera)
     logT->setLinearSlopeValue(vals_ls);
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(logT);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstLogOpDataRcPtr log = OCIO::DynamicPtrCast<const OCIO::LogOpData>(op);
@@ -5408,7 +5413,7 @@ OCIO_ADD_TEST(CTFTransform, save_lut1d_halfdomain)
     }
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(lutT);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstLut1DOpDataRcPtr lut = OCIO::DynamicPtrCast<const OCIO::Lut1DOpData>(op);
@@ -5457,7 +5462,7 @@ OCIO_ADD_TEST(CTFTransform, save_lut1d_f16_raw)
     lutT->setValue(1, values[3], values[4], values[5]);
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(lutT);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstLut1DOpDataRcPtr lut = OCIO::DynamicPtrCast<const OCIO::Lut1DOpData>(op);
@@ -5499,7 +5504,7 @@ OCIO_ADD_TEST(CTFTransform, save_lut1d_f32)
     lutT->setValue(7, values[7], values[7], values[7]);
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(lutT);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstLut1DOpDataRcPtr lut = OCIO::DynamicPtrCast<const OCIO::Lut1DOpData>(op);
@@ -5614,7 +5619,7 @@ OCIO_ADD_TEST(CTFTransform, save_range)
     rangeT->setMaxOutValue(1.5);
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(rangeT);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 1);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstRangeOpDataRcPtr range = OCIO::DynamicPtrCast<const OCIO::RangeOpData>(op);
@@ -5644,7 +5649,7 @@ OCIO_ADD_TEST(CTFTransform, save_group)
     groupT->appendTransform(matT);
 
     OCIO::LocalCachedFileRcPtr cachedFile = WriteRead(groupT);
-    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & fileOps = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(fileOps.size(), 2);
     OCIO::ConstOpDataRcPtr op = fileOps[0];
     OCIO::ConstRangeOpDataRcPtr range = OCIO::DynamicPtrCast<const OCIO::RangeOpData>(op);
@@ -6108,7 +6113,7 @@ OCIO_ADD_TEST(CTFTransform, cdl_clf)
     OCIO::CachedFileRcPtr file = tester.read(ctfStream, emptyString, OCIO::INTERP_DEFAULT);
     auto cachedFile = OCIO::DynamicPtrCast<OCIO::LocalCachedFile>(file);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto cdlData = std::dynamic_pointer_cast<const OCIO::CDLOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(cdlData);
@@ -8674,7 +8679,7 @@ OCIO_ADD_TEST(FileFormatCTF, bake_1d_shaper)
         OCIO::CachedFileRcPtr file = tester.read(outputCTF, emptyString, OCIO::INTERP_DEFAULT);
         auto cachedFile = OCIO::DynamicPtrCast<OCIO::LocalCachedFile>(file);
 
-        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 2);
 
         auto range = OCIO_DYNAMIC_POINTER_CAST<const OCIO::RangeOpData>(opList[0]);
@@ -8716,7 +8721,7 @@ OCIO_ADD_TEST(FileFormatCTF, bake_1d_shaper)
         OCIO::CachedFileRcPtr file = tester.read(outputCTF, emptyString, OCIO::INTERP_DEFAULT);
         auto cachedFile = OCIO::DynamicPtrCast<OCIO::LocalCachedFile>(file);
 
-        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+        const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
         auto lut = OCIO_DYNAMIC_POINTER_CAST<const OCIO::Lut1DOpData>(opList[0]);
@@ -8869,7 +8874,7 @@ OCIO_ADD_TEST(FileFormatCTF, bake_1d_3d)
     OCIO::CachedFileRcPtr file = tester.read(output, emptyString, OCIO::INTERP_DEFAULT);
     auto cachedFile = OCIO::DynamicPtrCast<OCIO::LocalCachedFile>(file);
 
-    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOps();
+    const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
     OCIO_REQUIRE_EQUAL(opList.size(), 2);
     auto shaperLut = std::dynamic_pointer_cast<const OCIO::Lut1DOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(shaperLut);

@@ -42,8 +42,6 @@ public:
         return m_metadata;
     }
 
-    const char * getCacheID() override;
-
     ConstTransformRcPtr getTransform(int index) const override;
 
     TransformRcPtr & getTransform(int index) override;

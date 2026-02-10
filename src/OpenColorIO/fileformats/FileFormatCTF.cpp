@@ -28,6 +28,8 @@
 #include "TransformBuilder.h"
 #include "transforms/FileTransform.h"
 #include "utils/StringUtils.h"
+#include "HashUtils.h"
+
 
 
 // TODO: Add explanation of the SMPTE variant as well?
@@ -242,7 +244,7 @@ public:
             throwMessage(error);
         }
 
-        if (pT->getOps().empty())
+        if (pT->getOpDataVec().empty())
         {
             static const std::string error(
                 "CTF/CLF parsing error: No color operator in file.");
@@ -1358,7 +1360,7 @@ void LocalFileFormat::buildFileOps(OpRcPtrVec & ops,
     cachedFile->m_transform->toMetadata(processorData);
 
     // Resolve reference path using context and load referenced files.
-    const ConstOpDataVec & opDataVec = cachedFile->m_transform->getOps();
+    const ConstOpDataVec & opDataVec = cachedFile->m_transform->getOpDataVec();
 
     // Try to use the FileTransform interpolation for any Lut1D or Lut3D that does not specify
     // an interpolation in the CTF itself.  If the interpolation can not be used, ignore it.
@@ -1637,6 +1639,16 @@ void LocalFileFormat::write(const ConstConfigRcPtr & config,
 
     const FormatMetadataImpl & metadata = group.getFormatMetadata();
     CTFReaderTransformPtr transform = std::make_shared<CTFReaderTransform>(ops, metadata);
+
+    // It it doesn't have an id, create one based on the op list.
+    if (transform->getID().empty())
+    {
+        std::string opId = ops.getCacheID();
+
+        std::ostringstream ss;
+        ss << "urn:uuid:" << CacheIDHashUUID(opId.c_str(), opId.size());
+        transform->setID(ss.str().c_str());
+    }
 
     // Write XML Header.
     ostream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;

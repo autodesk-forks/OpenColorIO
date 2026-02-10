@@ -239,8 +239,8 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
         OCIO_CHECK_EQUAL(t.getOutputDescriptor(), "");
         OCIO_CHECK_EQUAL(ct.getOutputDescriptor(), "");
 
-        OCIO_CHECK_ASSERT(t.getOps().empty());
-        OCIO_CHECK_ASSERT(ct.getOps().empty());
+        OCIO_CHECK_ASSERT(t.getOpDataVec().empty());
+        OCIO_CHECK_ASSERT(ct.getOpDataVec().empty());
 
         OCIO_CHECK_ASSERT(t.getDescriptions().empty());
         OCIO_CHECK_ASSERT(ct.getDescriptions().empty());
@@ -252,7 +252,7 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
     t.setOutputDescriptor("output");
 
     auto matrixOp = std::make_shared<OCIO::MatrixOpData>();
-    t.getOps().push_back(matrixOp);
+    t.getOpDataVec().push_back(matrixOp);
 
     t.getDescriptions().push_back("One");
     t.getDescriptions().push_back("Two");
@@ -271,8 +271,8 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
         OCIO_CHECK_EQUAL(t.getOutputDescriptor(), "output");
         OCIO_CHECK_EQUAL(ct.getOutputDescriptor(), "output");
 
-        OCIO_CHECK_EQUAL(t.getOps().size(), 1);
-        OCIO_CHECK_EQUAL(ct.getOps().size(), 1);
+        OCIO_CHECK_EQUAL(t.getOpDataVec().size(), 1);
+        OCIO_CHECK_EQUAL(ct.getOpDataVec().size(), 1);
 
         OCIO_CHECK_EQUAL(t.getDescriptions().size(), 2);
         OCIO_CHECK_EQUAL(ct.getDescriptions().size(), 2);
