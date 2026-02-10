@@ -208,7 +208,13 @@ void CTFReaderTransformElt::start(const char ** atts)
             // Handle as CLF.
             m_isCLF = true;
         }
-        // TODO: collect and store non-default xmlns attributes.
+        else if(StringUtils::StartsWith(std::string(atts[i]),"xmlns:"))
+        {
+            // TODO: Once the CTFReaderTransform class gets a FormatMetada
+            // member, push this as an attribute. Until then just ignore with a
+            // reminder warning.
+            logParameterWarning(atts[i]);
+        }
         else
         {
             logParameterWarning(atts[i]);
@@ -299,9 +305,11 @@ void CTFReaderIdElt::end()
 {
     if(!ValidateSMPTEId(m_id))
     {
+        // We allow non-compliant Id values with a warning.
         std::ostringstream ss;
+        ss << getXmlFile().c_str() << "(" << getXmlLineNumber() << "): ";
         ss << "'" << m_id << "' is not a SMPTE ST 2136-1 compliant Id value.";
-        throwMessage(ss.str());
+        LogWarning(ss.str().c_str());   
     }
 
     auto* pTransformnElt = dynamic_cast<CTFReaderTransformElt*>(getParent().get());

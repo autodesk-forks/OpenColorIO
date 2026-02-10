@@ -111,22 +111,100 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_all_metadata)
     OCIO_CHECK_NO_THROW(group = processor->createGroupTransform());
     OCIO_REQUIRE_ASSERT(group);
 
-    const auto & md = group->getFormatMetadata();
-    OCIO_REQUIRE_EQUAL(md.getNumAttributes(), 2); // name, id present. xmlns:clfbp is missing, xmlns becomes version
+    const auto & md = dynamic_cast<OCIO::FormatMetadataImpl&>(group->getFormatMetadata());
+    OCIO_REQUIRE_EQUAL(md.getNumAttributes(), 1);
+    
+    // Attributes (xmlns:clfbp is ignored, xmlns becomes version)
+    OCIO_CHECK_EQUAL(std::string(md.getAttributeName(0)),  "name");
+    OCIO_CHECK_EQUAL(std::string(md.getAttributeValue(0)), "SMPTE Example Live Broadcast LUT33 Profile");
 
-    OCIO_REQUIRE_EQUAL(md.getNumChildrenElements(), 9); 
-    // Id
-    // Description (no language attr)
-    // Description (no language attr)
-    // Description (no language attr)
-    // Input Descriptor (no language attr)
-    // Output Descriptor (no language attr)
-    // Output Descriptor (no language attr)
-    // Output Descriptor (no language attr)
-    // Info (9 sub-elements, keeping the name spaces intact)
+    // TODO: Also needs to have xmlns:clfbp in the attr list.
 
-    // TODO: test exact values
+    // Child elements (language attributes are currently ignored)
+    auto & items = md.getChildrenElements();
+    OCIO_REQUIRE_EQUAL(items.size(), 9); 
+    OCIO_CHECK_EQUAL(std::string(items[0].getElementName()),  "Id");
+    OCIO_CHECK_EQUAL(std::string(items[0].getElementValue()), "urn:uuid:a8f91bfa-b79f-5d4d-b750-a411c476bb47");
 
+    OCIO_CHECK_EQUAL(std::string(items[1].getElementName()),  "Description");
+    OCIO_CHECK_EQUAL(std::string(items[1].getElementValue()), "Demo Advanced LUT with dummy values");
+
+    OCIO_CHECK_EQUAL(std::string(items[2].getElementName()),  "Description");
+    OCIO_CHECK_EQUAL(std::string(items[2].getElementValue()), "Démonstration d'une LUT avancée avec des valeurs factices");
+
+    OCIO_CHECK_EQUAL(std::string(items[3].getElementName()),  "Description");
+    OCIO_CHECK_EQUAL(std::string(items[3].getElementValue()), "Demo Erweiterte LUT mit Dummy-Werten");
+
+    OCIO_CHECK_EQUAL(std::string(items[4].getElementName()),  "InputDescriptor");
+    OCIO_CHECK_EQUAL(std::string(items[4].getElementValue()), "ITU-R BT.709");
+
+    OCIO_CHECK_EQUAL(std::string(items[5].getElementName()),  "OutputDescriptor");
+    OCIO_CHECK_EQUAL(std::string(items[5].getElementValue()), "Same as Input");
+   
+    OCIO_CHECK_EQUAL(std::string(items[6].getElementName()),  "OutputDescriptor");
+    OCIO_CHECK_EQUAL(std::string(items[6].getElementValue()), "Identique à l'entrée");
+
+    OCIO_CHECK_EQUAL(std::string(items[7].getElementName()),  "OutputDescriptor");
+    OCIO_CHECK_EQUAL(std::string(items[7].getElementValue()), "Gleiches wie Eingabe");
+    
+    OCIO_CHECK_EQUAL(std::string(items[8].getElementName()),  "Info");
+    OCIO_CHECK_EQUAL(std::string(items[8].getElementValue()), "");
+
+    // Info block (name spaces are retained)
+    auto & info = items[8].getChildrenElements();
+    OCIO_REQUIRE_EQUAL(info.size(), 9);
+    OCIO_CHECK_EQUAL(std::string(info[0].getElementName()),  "Profile");
+    OCIO_CHECK_EQUAL(std::string(info[0].getElementValue()), "http://www.smpte-ra.org/ns/2136-10/2026#Live_Broadcast_LUT33");
+
+    OCIO_CHECK_EQUAL(std::string(info[1].getElementName()),  "AppRelease");
+    OCIO_CHECK_EQUAL(std::string(info[1].getElementValue()), "SMPTE_2136-10_Example");
+
+    OCIO_CHECK_EQUAL(std::string(info[2].getElementName()),  "Copyright");
+    OCIO_CHECK_EQUAL(std::string(info[2].getElementValue()), "OCIO contributors");
+
+    OCIO_CHECK_EQUAL(std::string(info[3].getElementName()),  "Revision");
+    OCIO_CHECK_EQUAL(std::string(info[3].getElementValue()), "1.0");
+
+    OCIO_CHECK_EQUAL(std::string(info[4].getElementName()),  "clfbp:InputCharacteristics");
+    OCIO_CHECK_EQUAL(std::string(info[4].getElementValue()), "");
+    
+    OCIO_CHECK_EQUAL(std::string(info[5].getElementName()),  "clfbp:OutputCharacteristics");
+    OCIO_CHECK_EQUAL(std::string(info[5].getElementValue()), "");
+    
+    OCIO_CHECK_EQUAL(std::string(info[6].getElementName()),  "clfbp:OutputVideoSignalClipping");
+    OCIO_CHECK_EQUAL(std::string(info[6].getElementValue()), "sdiClip");
+    
+    OCIO_CHECK_EQUAL(std::string(info[7].getElementName()),  "Keywords");
+    OCIO_CHECK_EQUAL(std::string(info[7].getElementValue()), "Test, Display-light");
+    
+    OCIO_CHECK_EQUAL(std::string(info[8].getElementName()),  "clfbp:ContactEmail");
+    OCIO_CHECK_EQUAL(std::string(info[8].getElementValue()), "fake-email@ocio.org");
+
+    // Info / InputCharacteristics
+    auto & input = info[4].getChildrenElements();
+    OCIO_REQUIRE_EQUAL(input.size(), 3);
+    OCIO_CHECK_EQUAL(std::string(input[0].getElementName()),  "clfbp:ColorPrimaries");
+    OCIO_CHECK_EQUAL(std::string(input[0].getElementValue()), "ColorPrimaries_ITU709");
+
+    OCIO_CHECK_EQUAL(std::string(input[1].getElementName()),  "clfbp:TransferCharacteristic");
+    OCIO_CHECK_EQUAL(std::string(input[1].getElementValue()), "TransferCharacteristic_ITU709");
+    
+    OCIO_CHECK_EQUAL(std::string(input[2].getElementName()),  "clfbp:CodingEquations");
+    OCIO_CHECK_EQUAL(std::string(input[2].getElementValue()), "CodingEquations_ITU709");
+
+    // Info / OutputCharacteristics
+    auto & output = info[5].getChildrenElements();
+    OCIO_REQUIRE_EQUAL(output.size(), 3);
+    OCIO_CHECK_EQUAL(std::string(output[0].getElementName()),  "clfbp:ColorPrimaries");
+    OCIO_CHECK_EQUAL(std::string(output[0].getElementValue()), "ColorPrimaries_ITU2020");
+
+    OCIO_CHECK_EQUAL(std::string(output[1].getElementName()),  "clfbp:TransferCharacteristic");
+    OCIO_CHECK_EQUAL(std::string(output[1].getElementValue()), "TransferCharacteristic_SMPTEST2084");
+    
+    OCIO_CHECK_EQUAL(std::string(output[2].getElementName()),  "clfbp:CodingEquations");
+    OCIO_CHECK_EQUAL(std::string(output[2].getElementValue()), "CodingEquations_ITU2100_ICtCp");
+
+    // Check writing retains the namespaces and attributes
 }
 
 OCIO_ADD_TEST(FileFormatCTF, smpte_namespaces)
@@ -140,24 +218,23 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_namespaces)
 
 }
 
-OCIO_ADD_TEST(FileFormatCTF, smpte_signature)
-{
-    const std::string ctfFile("clf/smpte_only/signature.clf");
-    OCIO::LocalCachedFileRcPtr cachedFile;
-    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
-
-    // This passes with many "Unrecognized element" warnings
-    // TODO: Try to ignore the name-spaced elements?
-    // TODO: Extend?
-}
-
 OCIO_ADD_TEST(FileFormatCTF, smpte_id_bad_value)
 {
     const std::string ctfFile("clf/smpte_only/illegal/id_bad_value.clf");
+
+    // Add a log guard to catch warnings.
+    OCIO::LogGuard guard;
+    OCIO::SetLoggingLevel(OCIO::LOGGING_LEVEL_WARNING);
+
     OCIO::LocalCachedFileRcPtr cachedFile;
-    OCIO_CHECK_THROW_WHAT(cachedFile = LoadCLFFile(ctfFile), 
-                          OCIO::Exception,
-                          "'3bae2da8' is not a SMPTE ST 2136-1 compliant Id value.");
+    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO_REQUIRE_ASSERT((bool)cachedFile);
+
+    // Check the expected warning.
+    static constexpr char Warning[1024] = 
+        "id_bad_value.clf(3): '3bae2da8' is not a SMPTE ST 2136-1 compliant Id value.";
+    OCIO_CHECK_NE(std::string::npos, 
+                  StringUtils::Find( StringUtils::RightTrim(guard.output()), Warning ));
 }
 
 // *****************************************************************
@@ -1496,8 +1573,18 @@ OCIO_ADD_TEST(FileFormatCTF, difficult_syntax)
     OCIO::LocalCachedFileRcPtr cachedFile;
     const std::string ctfFile("clf/difficult_syntax.clf");
 
+    // Add a log guard to catch warnings.
+    OCIO::LogGuard guard;
+    OCIO::SetLoggingLevel(OCIO::LOGGING_LEVEL_WARNING);
+
     OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
+
+    // Check the expected warning.
+    static constexpr char Warning[1024] = 
+        "difficult_syntax.clf(41): Unrecognized attribute 'unknown' of 'LUT1D'.";
+    OCIO_CHECK_NE(std::string::npos, 
+                  StringUtils::Find( StringUtils::RightTrim(guard.output()), Warning ));
 
     const OCIO::CTFVersion clfVersion = cachedFile->m_transform->getCLFVersion();
     const OCIO::CTFVersion ver("http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::VERSION_SMPTE_XMLNS);

@@ -39,6 +39,7 @@ namespace OCIO_NAMESPACE
 // This results in less pretty output and also causes problems for some unit tests.  
 static constexpr unsigned DOUBLE_PRECISION = 15;
 
+static constexpr const char* SMPTE_XMLNS_URL = "http://www.smpte-ra.org/ns/2136-1/2024";
 
 CTFVersion::CTFVersion(const std::string & versionString, StringFormat acceptedFormat) 
 {
@@ -51,7 +52,7 @@ CTFVersion::CTFVersion(const std::string & versionString, StringFormat acceptedF
         if (acceptedFormat & VERSION_SMPTE_XMLNS) 
         {
             res = (0 == Platform::Strcasecmp(versionString.c_str(), 
-                "http://www.smpte-ra.org/ns/2136-1/2024"));
+                SMPTE_XMLNS_URL));
         }
 
         if (!res && acceptedFormat & VERSION_SMPTE_CLF) 
@@ -105,7 +106,7 @@ CTFVersion::CTFVersion(const std::string & versionString, StringFormat acceptedF
         if (acceptedFormat & VERSION_SMPTE_CLF)
             os << "'ST2136-1:2024' or ";
         if (acceptedFormat & VERSION_SMPTE_XMLNS)
-            os << "'http://www.smpte-ra.org/ns/2136-1/2024' or ";
+            os << "'" << SMPTE_XMLNS_URL << "' or ";
         os << "MAJOR[.MINOR[.REVISION]] ";
         throw Exception(os.str().c_str());
     }
@@ -2595,7 +2596,7 @@ void TransformWriter::write() const
             attributes.push_back(XmlFormatter::Attribute(
                 ATTR_COMP_CLF_VERSION, "3"));
             attributes.push_back(XmlFormatter::Attribute(
-                ATTR_XMLNS, "http://www.smpte-ra.org/ns/2136-1/2024"));
+                ATTR_XMLNS, SMPTE_XMLNS_URL));
             break;
 
         case SubFormat::FORMAT_CTF:

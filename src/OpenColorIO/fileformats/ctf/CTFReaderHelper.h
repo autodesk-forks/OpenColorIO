@@ -83,11 +83,10 @@ class CTFReaderIdElt : public XmlReaderPlainElt
 public:
     CTFReaderIdElt() = delete;
     CTFReaderIdElt(const std::string & name,
-                            ContainerEltRcPtr & pParent,
-                            unsigned int xmlLocation,
-                            const std::string & xmlFile)
+                   ContainerEltRcPtr & pParent,
+                   unsigned int xmlLocation,
+                   const std::string & xmlFile)
         : XmlReaderPlainElt(name, pParent, xmlLocation, xmlFile)
-        , m_changed(false)
     {
     }
 
@@ -97,23 +96,20 @@ public:
 
     void start(const char ** /* atts */) override
     {
-        m_id.resize(0);
-        m_changed = false;
+        m_id = {};
     }
 
     void end() override;
 
     void setRawData(const char * str, size_t len, unsigned int /* xmlLine */) override
     {
-        // Keep adding to the string.
+        // This function can receive the text in small pieces, so keep adding to
+        // the string.
         m_id += std::string(str, len);
-        m_changed = true;
     }
 
 private:
     std::string m_id;
-    bool m_changed;
-
 };
 
 typedef OCIO_SHARED_PTR<CTFReaderTransformElt> CTFReaderTransformEltRcPtr;
