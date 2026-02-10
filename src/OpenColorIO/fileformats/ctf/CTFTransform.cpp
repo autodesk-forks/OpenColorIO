@@ -443,6 +443,7 @@ const char * GetFirstElementValue(const FormatMetadataImpl::Elements & elements,
     return "";
 }
 
+[[maybe_unused]]
 const char * GetLastElementValue(const FormatMetadataImpl::Elements & elements, const std::string & name)
 {
     for (auto it = elements.rbegin(); it != elements.rend(); ++it)
