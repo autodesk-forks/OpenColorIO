@@ -208,10 +208,7 @@ void CTFReaderTransformElt::start(const char ** atts)
             // Handle as CLF.
             m_isCLF = true;
         }
-//         else if (0 == Platform::Strcasecmp("xmlns", atts[i]))
-//         {
-//             // Ignore.
-//         }
+        // TODO: collect and store non-default xmlns attributes.
         else
         {
             logParameterWarning(atts[i]);

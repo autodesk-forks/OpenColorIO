@@ -109,11 +109,6 @@ namespace OCIO_NAMESPACE
 namespace
 {
 
-// Control variables 
-// This is used to strip the name spaces from the element names when parsing.
-// This allows our parser to handle elements with name space prefixes.
-constexpr const bool STRIP_NAMESPACES = true;
-
 class LocalCachedFile : public CachedFile
 {
 public:
@@ -516,7 +511,7 @@ private:
 
         // Strip the name spaces
         const char *name = name_full;
-        if (STRIP_NAMESPACES) 
+        if (pImpl->m_keepNamespaces <= 0) 
         {
             name = strrchr(name_full, ':');
             name = name ? (name+1) : name_full;        
@@ -832,6 +827,8 @@ private:
                 else if (SupportedElement(name, pElt, TAG_INFO, 
                                           TAG_PROCESS_LIST, recognizedName))
                 {
+                    pImpl->m_keepNamespaces++;
+
                     pImpl->m_elms.push_back(
                         std::make_shared<CTFReaderInfoElt>(
                             name,
@@ -1044,7 +1041,7 @@ private:
 
         // Strip the name spaces
         const char *name = name_full;
-        if (STRIP_NAMESPACES) 
+        if (pImpl->m_keepNamespaces <= 0) 
         {
             name = strrchr(name_full, ':');
             name = name ? (name+1) : name_full;
@@ -1102,6 +1099,12 @@ private:
                 ss << "'.";
                 pImpl->throwMessage(ss.str());
             }
+        }
+
+        // Exiting the info element; decrease keep namespace counter.
+        if(std::dynamic_pointer_cast<CTFReaderInfoElt>(pElt))
+        {
+            pImpl->m_keepNamespaces--;
         }
 
         pElt->end();
@@ -1210,6 +1213,7 @@ private:
     bool m_isCLF;
     XmlReaderElementStack m_elms; // Parsing stack
     CTFReaderTransformPtr m_transform;
+    int m_keepNamespaces = 0; // if >0, name spaces will be preserved
 
 };
 
@@ -1236,7 +1240,7 @@ bool isLoadableCTF(std::istream & istream)
             {
                 foundPattern = true;
             }
-            else if(STRIP_NAMESPACES && strstr(line, pattern2)) 
+            else if (strstr(line, pattern2)) 
             {
                 foundPattern = true;
             }

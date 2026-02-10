@@ -234,28 +234,28 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
         OCIO_CHECK_EQUAL(ct.getName(), "");
         OCIO_CHECK_EQUAL(t.getInverseOfId(), "");
         OCIO_CHECK_EQUAL(ct.getInverseOfId(), "");
-        OCIO_CHECK_EQUAL(t.getInputDescriptor(), "");
-        OCIO_CHECK_EQUAL(ct.getInputDescriptor(), "");
-        OCIO_CHECK_EQUAL(t.getOutputDescriptor(), "");
-        OCIO_CHECK_EQUAL(ct.getOutputDescriptor(), "");
 
         OCIO_CHECK_ASSERT(t.getOpDataVec().empty());
         OCIO_CHECK_ASSERT(ct.getOpDataVec().empty());
 
         OCIO_CHECK_ASSERT(t.getDescriptions().empty());
         OCIO_CHECK_ASSERT(ct.getDescriptions().empty());
+        OCIO_CHECK_ASSERT(t.getInputDescriptors().empty());
+        OCIO_CHECK_ASSERT(ct.getInputDescriptors().empty());
+        OCIO_CHECK_ASSERT(t.getOutputDescriptors().empty());
+        OCIO_CHECK_ASSERT(ct.getOutputDescriptors().empty());
     }
     t.setName("Name");
     t.setID("123");
     t.setInverseOfId("654");
-    t.setInputDescriptor("input");
-    t.setOutputDescriptor("output");
 
     auto matrixOp = std::make_shared<OCIO::MatrixOpData>();
     t.getOpDataVec().push_back(matrixOp);
 
     t.getDescriptions().push_back("One");
     t.getDescriptions().push_back("Two");
+    t.getInputDescriptors().push_back("input");
+    t.getOutputDescriptors().push_back("output");
 
     {
         const OCIO::CTFReaderTransform & ct = t;
@@ -266,19 +266,28 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
         OCIO_CHECK_EQUAL(ct.getName(), "Name");
         OCIO_CHECK_EQUAL(t.getInverseOfId(), "654");
         OCIO_CHECK_EQUAL(ct.getInverseOfId(), "654");
-        OCIO_CHECK_EQUAL(t.getInputDescriptor(), "input");
-        OCIO_CHECK_EQUAL(ct.getInputDescriptor(), "input");
-        OCIO_CHECK_EQUAL(t.getOutputDescriptor(), "output");
-        OCIO_CHECK_EQUAL(ct.getOutputDescriptor(), "output");
 
         OCIO_CHECK_EQUAL(t.getOpDataVec().size(), 1);
         OCIO_CHECK_EQUAL(ct.getOpDataVec().size(), 1);
 
-        OCIO_CHECK_EQUAL(t.getDescriptions().size(), 2);
-        OCIO_CHECK_EQUAL(ct.getDescriptions().size(), 2);
+        OCIO_REQUIRE_EQUAL(t.getDescriptions().size(), 2);
+        OCIO_REQUIRE_EQUAL(ct.getDescriptions().size(), 2);
         OCIO_CHECK_EQUAL(t.getDescriptions()[0], "One");
         OCIO_CHECK_EQUAL(ct.getDescriptions()[0], "One");
         OCIO_CHECK_EQUAL(t.getDescriptions()[1], "Two");
         OCIO_CHECK_EQUAL(ct.getDescriptions()[1], "Two");
+
+        OCIO_REQUIRE_EQUAL(t.getInputDescriptors().size(), 1);
+        OCIO_REQUIRE_EQUAL(ct.getInputDescriptors().size(), 1);
+        OCIO_CHECK_EQUAL(t.getInputDescriptors()[0], "input");
+        OCIO_CHECK_EQUAL(ct.getInputDescriptors()[0], "input");
+
+        OCIO_REQUIRE_EQUAL(t.getOutputDescriptors().size(), 1);
+        OCIO_REQUIRE_EQUAL(ct.getOutputDescriptors().size(), 1);
+        OCIO_CHECK_EQUAL(t.getOutputDescriptors()[0], "output");
+        OCIO_CHECK_EQUAL(ct.getOutputDescriptors()[0], "output");
+
+
+
     }
 }

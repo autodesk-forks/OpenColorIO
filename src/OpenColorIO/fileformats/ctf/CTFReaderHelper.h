@@ -179,6 +179,7 @@ public:
 
     void start(const char ** /* atts */) override
     {
+        // Todo: collect language attr.
     }
 
     void end() override
@@ -187,13 +188,15 @@ public:
 
     void setRawData(const char * str, size_t len, unsigned int /*xmlLine*/) override
     {
+        // TODO: do we want to support multi-line descriptors?
         CTFReaderTransformElt* pTransform
             = dynamic_cast<CTFReaderTransformElt*>(getParent().get());
 
-        std::string s = pTransform->getTransform()->getInputDescriptor();
-        s += std::string(str, len);
+        auto & descs = pTransform->getTransform()->getInputDescriptors();
+        descs.push_back(std::string(str, len));
 
-        pTransform->getTransform()->setInputDescriptor(s);
+        // TODO: re-work the metaData handling in CTFReaderTransformPtr and add
+        // language attr
     }
 };
 
@@ -213,8 +216,9 @@ public:
     {
     }
 
-    void start(const char ** /* atts */) override
+    void start(const char ** /*atts*/ ) override
     {
+        // TODO: collect language attr.
     }
 
     void end() override
@@ -223,13 +227,16 @@ public:
 
     void setRawData(const char* str, size_t len, unsigned int /* xmlLine */) override
     {
+        // TODO: do we want to support multi-line descriptors?
+
         CTFReaderTransformElt* pTransform
             = dynamic_cast<CTFReaderTransformElt*>(getParent().get());
 
-        std::string s = pTransform->getTransform()->getOutputDescriptor();
-        s += std::string(str, len);
+        auto & descs = pTransform->getTransform()->getOutputDescriptors();
+        descs.push_back(std::string(str, len));
 
-        pTransform->getTransform()->setOutputDescriptor(s);
+        // TODO: re-work the metaData handling in CTFReaderTransformPtr and add
+        // language attr
     }
 };
 

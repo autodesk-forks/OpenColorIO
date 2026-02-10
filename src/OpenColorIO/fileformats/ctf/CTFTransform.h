@@ -222,24 +222,24 @@ public:
         return m_descriptions;
     }
 
-    const std::string & getInputDescriptor() const
+    const StringUtils::StringVec & getInputDescriptors() const
     {
-        return m_inDescriptor;
+        return m_inDescriptors;
     }
 
-    void setInputDescriptor(const std::string & in)
+    StringUtils::StringVec & getInputDescriptors() 
     {
-        m_inDescriptor = in;
+        return m_inDescriptors;
     }
 
-    const std::string & getOutputDescriptor() const
+    const StringUtils::StringVec & getOutputDescriptors() const
     {
-        return m_outDescriptor;
+        return m_outDescriptors;
     }
 
-    void setOutputDescriptor(const std::string & out)
+    StringUtils::StringVec & getOutputDescriptors() 
     {
-        m_outDescriptor = out;
+        return m_outDescriptors;
     }
 
     void setCTFVersion(const CTFVersion & ver);
@@ -267,12 +267,12 @@ private:
     std::string m_id_element; // id element
     std::string m_name;
     std::string m_inverseOfId;
-    std::string m_inDescriptor;
-    std::string m_outDescriptor;
     FormatMetadataImpl m_infoMetadata;
 
     ConstOpDataVec m_ops;
     StringUtils::StringVec m_descriptions;
+    StringUtils::StringVec m_inDescriptors;
+    StringUtils::StringVec m_outDescriptors;
 
     // CTF version used even for CLF files.
     // CLF versions <= 2.0 are interpreted as CTF version 1.7.

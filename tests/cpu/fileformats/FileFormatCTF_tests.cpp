@@ -104,12 +104,29 @@ OCIO_ADD_TEST(FileFormatCTF, non_smpte_xmlns)
 OCIO_ADD_TEST(FileFormatCTF, smpte_all_metadata)
 {
     const std::string ctfFile("clf/smpte_only/broadcast_profile_lut33.clf");
-    OCIO::LocalCachedFileRcPtr cachedFile;
-    OCIO_CHECK_NO_THROW(cachedFile = LoadCLFFile(ctfFile));
+    OCIO::ConstProcessorRcPtr processor;
+    OCIO_CHECK_NO_THROW(processor = OCIO::GetFileTransformProcessor(ctfFile));
+    OCIO_REQUIRE_ASSERT(processor);
+    OCIO::GroupTransformRcPtr group;
+    OCIO_CHECK_NO_THROW(group = processor->createGroupTransform());
+    OCIO_REQUIRE_ASSERT(group);
 
-    // This passes with a single "Unrecognized element" warning for xmlns:clfbp
-    // TODO: Should we try to ignore it silently?
-    // TODO: Extend?
+    const auto & md = group->getFormatMetadata();
+    OCIO_REQUIRE_EQUAL(md.getNumAttributes(), 2); // name, id present. xmlns:clfbp is missing, xmlns becomes version
+
+    OCIO_REQUIRE_EQUAL(md.getNumChildrenElements(), 9); 
+    // Id
+    // Description (no language attr)
+    // Description (no language attr)
+    // Description (no language attr)
+    // Input Descriptor (no language attr)
+    // Output Descriptor (no language attr)
+    // Output Descriptor (no language attr)
+    // Output Descriptor (no language attr)
+    // Info (9 sub-elements, keeping the name spaces intact)
+
+    // TODO: test exact values
+
 }
 
 OCIO_ADD_TEST(FileFormatCTF, smpte_namespaces)
@@ -329,8 +346,11 @@ OCIO_ADD_TEST(FileFormatCTF, matrix4x4)
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
 
-    OCIO_CHECK_ASSERT(cachedFile->m_transform->getInputDescriptor() == "XYZ");
-    OCIO_CHECK_ASSERT(cachedFile->m_transform->getOutputDescriptor() == "RGB");
+    OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getInputDescriptors().size() == 1);
+    OCIO_CHECK_ASSERT(cachedFile->m_transform->getInputDescriptors()[0] == "XYZ");
+
+    OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getOutputDescriptors().size() == 1);
+    OCIO_CHECK_ASSERT(cachedFile->m_transform->getOutputDescriptors()[0] == "RGB");
 
     OCIO_CHECK_EQUAL(pMatrix->getFileInputBitDepth(), OCIO::BIT_DEPTH_F32);
     OCIO_CHECK_EQUAL(pMatrix->getFileOutputBitDepth(), OCIO::BIT_DEPTH_F32);
@@ -448,8 +468,11 @@ OCIO_ADD_TEST(FileFormatCTF, matrix_1_3_3x3)
     auto pMatrix = std::dynamic_pointer_cast<const OCIO::MatrixOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pMatrix);
 
-    OCIO_CHECK_ASSERT(cachedFile->m_transform->getInputDescriptor() == "XYZ");
-    OCIO_CHECK_ASSERT(cachedFile->m_transform->getOutputDescriptor() == "RGB");
+    OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getInputDescriptors().size() == 1);
+    OCIO_CHECK_ASSERT(cachedFile->m_transform->getInputDescriptors()[0] == "XYZ");
+
+    OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getOutputDescriptors().size() == 1);
+    OCIO_CHECK_ASSERT(cachedFile->m_transform->getOutputDescriptors()[0] == "RGB");
 
     OCIO_CHECK_EQUAL(pMatrix->getFileInputBitDepth(), OCIO::BIT_DEPTH_UINT10);
     OCIO_CHECK_EQUAL(pMatrix->getFileOutputBitDepth(), OCIO::BIT_DEPTH_UINT10);
@@ -762,8 +785,13 @@ OCIO_ADD_TEST(FileFormatCTF, lut_1d)
         OCIO_REQUIRE_EQUAL(cachedFile->m_transform->getDescriptions().size(), 1);
         OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[0],
                          "Apply a 1/2.2 gamma.");
-        OCIO_CHECK_EQUAL(cachedFile->m_transform->getInputDescriptor(), "RGB");
-        OCIO_CHECK_EQUAL(cachedFile->m_transform->getOutputDescriptor(), "RGB");
+
+        OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getInputDescriptors().size() == 1);
+        OCIO_CHECK_EQUAL(cachedFile->m_transform->getInputDescriptors()[0], "RGB");
+
+        OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getOutputDescriptors().size() == 1);
+        OCIO_CHECK_EQUAL(cachedFile->m_transform->getOutputDescriptors()[0], "RGB");
+
         const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
         OCIO_REQUIRE_EQUAL(opList.size(), 1);
 
@@ -1380,9 +1408,13 @@ OCIO_ADD_TEST(FileFormatCTF, info_example)
                      "Example of using the Info element");
     OCIO_CHECK_EQUAL(cachedFile->m_transform->getDescriptions()[1],
                      "A second description");
-    OCIO_CHECK_EQUAL(cachedFile->m_transform->getInputDescriptor(),
+
+    OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getInputDescriptors().size() == 1)
+    OCIO_CHECK_EQUAL(cachedFile->m_transform->getInputDescriptors()[0],
                      "input desc");
-    OCIO_CHECK_EQUAL(cachedFile->m_transform->getOutputDescriptor(),
+
+    OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getOutputDescriptors().size() == 1)
+    OCIO_CHECK_EQUAL(cachedFile->m_transform->getOutputDescriptors()[0],
                      "output desc");
 
     // Ensure ops were not affected by metadata parsing.
@@ -2831,10 +2863,15 @@ OCIO_ADD_TEST(FileFormatCTF, cdl_clamp_fwd)
     OCIO_REQUIRE_ASSERT((bool)cachedFile);
 
     const OCIO::ConstOpDataVec & opList = cachedFile->m_transform->getOpDataVec();
-    OCIO_CHECK_EQUAL(cachedFile->m_transform->getInputDescriptor(),
+
+    OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getInputDescriptors().size() == 1);
+    OCIO_CHECK_EQUAL(cachedFile->m_transform->getInputDescriptors()[0],
                      "inputDesc");
-    OCIO_CHECK_EQUAL(cachedFile->m_transform->getOutputDescriptor(),
+
+    OCIO_REQUIRE_ASSERT(cachedFile->m_transform->getOutputDescriptors().size() == 1);
+    OCIO_CHECK_EQUAL(cachedFile->m_transform->getOutputDescriptors()[0],
                      "outputDesc");
+
     OCIO_REQUIRE_EQUAL(opList.size(), 1);
     auto pCDL = std::dynamic_pointer_cast<const OCIO::CDLOpData>(opList[0]);
     OCIO_REQUIRE_ASSERT(pCDL);
@@ -8773,11 +8810,12 @@ OCIO_ADD_TEST(FileFormatCTF, bake_3d)
     data.addChildElement(OCIO::METADATA_DESCRIPTION,
                          "OpenColorIO Test Line 2");
     data.addChildElement("Anything", "Not Saved");
-    data.addChildElement(OCIO::METADATA_INPUT_DESCRIPTOR, "Input descriptor");
-    data.addChildElement(OCIO::METADATA_INPUT_DESCRIPTOR, "Only first is saved");
-    data.addChildElement(OCIO::METADATA_OUTPUT_DESCRIPTOR, "Output descriptor");
+    data.addChildElement(OCIO::METADATA_INPUT_DESCRIPTOR, "Input descriptor 1");
+    data.addChildElement(OCIO::METADATA_INPUT_DESCRIPTOR, "Input descriptor 2");
+    data.addChildElement(OCIO::METADATA_OUTPUT_DESCRIPTOR, "Output descriptor 1");
+    data.addChildElement(OCIO::METADATA_OUTPUT_DESCRIPTOR, "Output descriptor 2");
     data.addChildElement(OCIO::METADATA_INFO, "");
-    auto & info = data.getChildElement(6);
+    auto & info = data.getChildElement(7);
     info.addAttribute("attrib1", "val1");
     info.addAttribute("attrib2", "val2");
     info.addChildElement("anything", "is saved");
@@ -8795,8 +8833,10 @@ R"(<?xml version="1.0" encoding="UTF-8"?>
 <ProcessList compCLFversion="3" xmlns="http://www.smpte-ra.org/ns/2136-1/2024" id="TestID">
     <Description>OpenColorIO Test Line 1</Description>
     <Description>OpenColorIO Test Line 2</Description>
-    <InputDescriptor>Input descriptor</InputDescriptor>
-    <OutputDescriptor>Output descriptor</OutputDescriptor>
+    <InputDescriptor>Input descriptor 1</InputDescriptor>
+    <InputDescriptor>Input descriptor 2</InputDescriptor>
+    <OutputDescriptor>Output descriptor 1</OutputDescriptor>
+    <OutputDescriptor>Output descriptor 2</OutputDescriptor>
     <Info attrib1="val1" attrib2="val2">
         <anything>is saved</anything>
         <anything>is also saved</anything>

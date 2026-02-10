@@ -483,8 +483,8 @@ void CTFReaderTransform::fromMetadata(const FormatMetadataImpl & metadata)
     // Elements
     m_id_element = GetFirstElementValue(metadata.getChildrenElements(), METADATA_ID_ELEMENT);
     // Preserve first InputDescriptor, last OutputDescriptor, and all Descriptions.
-    m_inDescriptor = GetFirstElementValue(metadata.getChildrenElements(), METADATA_INPUT_DESCRIPTOR);
-    m_outDescriptor = GetLastElementValue(metadata.getChildrenElements(), METADATA_OUTPUT_DESCRIPTOR);
+    GetElementsValues(metadata.getChildrenElements(), METADATA_INPUT_DESCRIPTOR, m_inDescriptors);
+    GetElementsValues(metadata.getChildrenElements(), METADATA_OUTPUT_DESCRIPTOR, m_outDescriptors);
     GetElementsValues(metadata.getChildrenElements(), METADATA_DESCRIPTION, m_descriptions);
 
     // Combine all Info elements.
@@ -527,12 +527,20 @@ void CTFReaderTransform::toMetadata(FormatMetadataImpl & metadata) const
 
     // Child Elements
     AddNonEmptyElement(metadata, METADATA_ID_ELEMENT, getIDElement());
-    AddNonEmptyElement(metadata, METADATA_INPUT_DESCRIPTOR, getInputDescriptor());
-    AddNonEmptyElement(metadata, METADATA_OUTPUT_DESCRIPTOR, getOutputDescriptor());
+    
     for (auto & desc : m_descriptions)
     {
         metadata.addChildElement(METADATA_DESCRIPTION, desc.c_str());
     }
+    for (auto & desc : m_inDescriptors)
+    {
+        metadata.addChildElement(METADATA_INPUT_DESCRIPTOR, desc.c_str());
+    }
+    for (auto & desc : m_outDescriptors)
+    {
+        metadata.addChildElement(METADATA_OUTPUT_DESCRIPTOR, desc.c_str());
+    }
+
     const std::string infoValue(m_infoMetadata.getElementValue());
     if (m_infoMetadata.getNumAttributes() || m_infoMetadata.getNumChildrenElements() ||
         !infoValue.empty())
@@ -546,9 +554,9 @@ void CTFReaderTransform::toMetadata(FormatMetadataImpl & metadata) const
 
 namespace
 {
-void WriteDescriptions(XmlFormatter & fmt, const char * tag, const StringUtils::StringVec & descriptions)
+void WriteTagStringVec(XmlFormatter & fmt, const char * tag, const StringUtils::StringVec & strVec)
 {
-    for (auto & it : descriptions)
+    for (auto & it : strVec)
     {
         fmt.writeContentTag(tag, it);
     }
@@ -775,7 +783,7 @@ void OpWriter::writeFormatMetadata() const
     StringUtils::StringVec desc;
     GetElementsValues(op->getFormatMetadata().getChildrenElements(),
                       TAG_DESCRIPTION, desc);
-    WriteDescriptions(m_formatter, TAG_DESCRIPTION, desc);
+    WriteTagStringVec(m_formatter, TAG_DESCRIPTION, desc);
 }
 
 const char * BitDepthToCLFString(BitDepth bitDepth)
@@ -917,7 +925,7 @@ void CDLWriter::writeContent() const
         StringUtils::StringVec desc;
         GetElementsValues(op->getFormatMetadata().getChildrenElements(),
                           METADATA_SOP_DESCRIPTION, desc);
-        WriteDescriptions(m_formatter, TAG_DESCRIPTION, desc);
+        WriteTagStringVec(m_formatter, TAG_DESCRIPTION, desc);
 
         oss.str("");
         params = m_cdl->getSlopeParams();
@@ -944,7 +952,7 @@ void CDLWriter::writeContent() const
         StringUtils::StringVec desc;
         GetElementsValues(op->getFormatMetadata().getChildrenElements(),
                           METADATA_SAT_DESCRIPTION, desc);
-        WriteDescriptions(m_formatter, TAG_DESCRIPTION, desc);
+        WriteTagStringVec(m_formatter, TAG_DESCRIPTION, desc);
 
         oss.str("");
         oss << m_cdl->getSaturation();
@@ -959,15 +967,15 @@ void CDLWriter::writeFormatMetadata() const
     StringUtils::StringVec desc;
     GetElementsValues(op->getFormatMetadata().getChildrenElements(),
                       METADATA_DESCRIPTION, desc);
-    WriteDescriptions(m_formatter, TAG_DESCRIPTION, desc);
+    WriteTagStringVec(m_formatter, TAG_DESCRIPTION, desc);
     desc.clear();
     GetElementsValues(op->getFormatMetadata().getChildrenElements(),
                       METADATA_INPUT_DESCRIPTION, desc);
-    WriteDescriptions(m_formatter, METADATA_INPUT_DESCRIPTION, desc);
+    WriteTagStringVec(m_formatter, METADATA_INPUT_DESCRIPTION, desc);
     desc.clear();
     GetElementsValues(op->getFormatMetadata().getChildrenElements(),
                       METADATA_VIEWING_DESCRIPTION, desc);
-    WriteDescriptions(m_formatter, METADATA_VIEWING_DESCRIPTION, desc);
+    WriteTagStringVec(m_formatter, METADATA_VIEWING_DESCRIPTION, desc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2639,19 +2647,9 @@ void TransformWriter::write() const
             m_formatter.writeContentTag(TAG_ID, idEl);
         }
 
-        WriteDescriptions(m_formatter, TAG_DESCRIPTION, m_transform->getDescriptions());
-
-        const std::string & inputDesc = m_transform->getInputDescriptor();
-        if (!inputDesc.empty())
-        {
-            m_formatter.writeContentTag(METADATA_INPUT_DESCRIPTOR, inputDesc);
-        }
-
-        const std::string & outputDesc = m_transform->getOutputDescriptor();
-        if (!outputDesc.empty())
-        {
-            m_formatter.writeContentTag(METADATA_OUTPUT_DESCRIPTOR, outputDesc);
-        }
+        WriteTagStringVec(m_formatter, TAG_DESCRIPTION, m_transform->getDescriptions());
+        WriteTagStringVec(m_formatter, METADATA_INPUT_DESCRIPTOR, m_transform->getInputDescriptors());
+        WriteTagStringVec(m_formatter, METADATA_OUTPUT_DESCRIPTOR, m_transform->getOutputDescriptors());
 
         const FormatMetadataImpl & info = m_transform->getInfoMetadata();
         {
