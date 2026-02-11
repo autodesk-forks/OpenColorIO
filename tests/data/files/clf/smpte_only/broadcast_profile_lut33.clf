@@ -2,8 +2,7 @@
 <ProcessList name="SMPTE Example Live Broadcast LUT33 Profile" 
         xmlns="http://www.smpte-ra.org/ns/2136-1/2024" 
         xmlns:clfbp="http://www.smpte-ra.org/ns/2136-10/2026" 
-        compCLFversion="ST2136-1:2024" 
-        id="urn:uuid:a8f91bfa-b79f-5d4d-b750-a411c476bb46">
+        compCLFversion="ST2136-1:2024">
 
     <Id>urn:uuid:a8f91bfa-b79f-5d4d-b750-a411c476bb47</Id>
 

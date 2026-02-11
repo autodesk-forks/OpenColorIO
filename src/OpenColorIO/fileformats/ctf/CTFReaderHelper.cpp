@@ -235,7 +235,7 @@ void CTFReaderTransformElt::start(const char ** atts)
     {
         if (m_isCLF)
         {
-            throwMessage("None of the 'version', 'compCLFversion', or 'xmlns' attributes were found;"
+            throwMessage("No valid 'version', 'compCLFversion', or 'xmlns' attributes were found; "
                 "at least one of them is required.");
         }
         setVersion(CTF_PROCESS_LIST_VERSION_1_2);

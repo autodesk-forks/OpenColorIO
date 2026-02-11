@@ -85,7 +85,7 @@ OCIO_ADD_TEST(CTFVersion, read_version)
     }
 
     {
-        // Short SMPTE should be accepted only when the the format is allowed.
+        // Short SMPTE should be accepted only when the format is allowed.
         OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion(
             "ST2136-1:2024"), 
             OCIO::Exception,
@@ -93,7 +93,7 @@ OCIO_ADD_TEST(CTFVersion, read_version)
     }
 
     {
-        // Long SMPTE should be accepted only when the the format is allowed.
+        // Long SMPTE should be accepted only when the format is allowed.
         OCIO_CHECK_THROW_WHAT(versionRead = OCIO::CTFVersion(
             "http://www.smpte-ra.org/ns/2136-1/2024"), 
             OCIO::Exception,
@@ -117,7 +117,7 @@ OCIO_ADD_TEST(CTFVersion, read_version)
     }
 
     {
-        // Long SMPTE should be accepted only when the the format is allowed and
+        // Long SMPTE should be accepted only when the format is allowed and
         // should be regarded as v3.0.0.
         OCIO_CHECK_NO_THROW(versionRead = OCIO::CTFVersion(
             "http://www.smpte-ra.org/ns/2136-1/2024", OCIO::CTFVersion::VERSION_SMPTE_XMLNS));
@@ -235,6 +235,8 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
         OCIO_CHECK_EQUAL(t.getInverseOfId(), "");
         OCIO_CHECK_EQUAL(ct.getInverseOfId(), "");
 
+        OCIO_CHECK_EQUAL(ct.getIDElement(), "");
+
         OCIO_CHECK_ASSERT(t.getOpDataVec().empty());
         OCIO_CHECK_ASSERT(ct.getOpDataVec().empty());
 
@@ -249,13 +251,17 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
     t.setID("123");
     t.setInverseOfId("654");
 
+    t.setIDElement("urn:uuid:123e4567-e89b-12d3-a456-426655440000");
+
     auto matrixOp = std::make_shared<OCIO::MatrixOpData>();
     t.getOpDataVec().push_back(matrixOp);
 
     t.getDescriptions().push_back("One");
     t.getDescriptions().push_back("Two");
-    t.getInputDescriptors().push_back("input");
-    t.getOutputDescriptors().push_back("output");
+    t.getInputDescriptors().push_back("input 1");
+    t.getInputDescriptors().push_back("input 2");
+    t.getOutputDescriptors().push_back("output 1");
+    t.getOutputDescriptors().push_back("output 2");
 
     {
         const OCIO::CTFReaderTransform & ct = t;
@@ -267,8 +273,13 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
         OCIO_CHECK_EQUAL(t.getInverseOfId(), "654");
         OCIO_CHECK_EQUAL(ct.getInverseOfId(), "654");
 
+        OCIO_CHECK_EQUAL(t.getIDElement(), "urn:uuid:123e4567-e89b-12d3-a456-426655440000");
+        OCIO_CHECK_EQUAL(ct.getIDElement(), "urn:uuid:123e4567-e89b-12d3-a456-426655440000");
+
         OCIO_CHECK_EQUAL(t.getOpDataVec().size(), 1);
         OCIO_CHECK_EQUAL(ct.getOpDataVec().size(), 1);
+
+        // TODO: add language attribute set/get tests when implemented.
 
         OCIO_REQUIRE_EQUAL(t.getDescriptions().size(), 2);
         OCIO_REQUIRE_EQUAL(ct.getDescriptions().size(), 2);
@@ -277,17 +288,14 @@ OCIO_ADD_TEST(CTFReaderTransform, accessors)
         OCIO_CHECK_EQUAL(t.getDescriptions()[1], "Two");
         OCIO_CHECK_EQUAL(ct.getDescriptions()[1], "Two");
 
-        OCIO_REQUIRE_EQUAL(t.getInputDescriptors().size(), 1);
-        OCIO_REQUIRE_EQUAL(ct.getInputDescriptors().size(), 1);
-        OCIO_CHECK_EQUAL(t.getInputDescriptors()[0], "input");
-        OCIO_CHECK_EQUAL(ct.getInputDescriptors()[0], "input");
+        OCIO_REQUIRE_EQUAL(t.getInputDescriptors().size(), 2);
+        OCIO_REQUIRE_EQUAL(ct.getInputDescriptors().size(), 2);
+        OCIO_CHECK_EQUAL(t.getInputDescriptors()[0], "input 1");
+        OCIO_CHECK_EQUAL(ct.getInputDescriptors()[1], "input 2");
 
-        OCIO_REQUIRE_EQUAL(t.getOutputDescriptors().size(), 1);
-        OCIO_REQUIRE_EQUAL(ct.getOutputDescriptors().size(), 1);
-        OCIO_CHECK_EQUAL(t.getOutputDescriptors()[0], "output");
-        OCIO_CHECK_EQUAL(ct.getOutputDescriptors()[0], "output");
-
-
-
+        OCIO_REQUIRE_EQUAL(t.getOutputDescriptors().size(), 2);
+        OCIO_REQUIRE_EQUAL(ct.getOutputDescriptors().size(), 2);
+        OCIO_CHECK_EQUAL(t.getOutputDescriptors()[0], "output 1");
+        OCIO_CHECK_EQUAL(ct.getOutputDescriptors()[1], "output 2");
     }
 }

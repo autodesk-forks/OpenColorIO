@@ -237,6 +237,17 @@ OCIO_ADD_TEST(FileFormatCTF, smpte_id_bad_value)
                   StringUtils::Find( StringUtils::RightTrim(guard.output()), Warning ));
 }
 
+OCIO_ADD_TEST(FileFormatCTF, smpte_conflicting_version)
+{
+    const std::string ctfFile("clf/smpte_only/illegal/process_list_higher_ns_version.clf");
+
+    OCIO::LocalCachedFileRcPtr cachedFile;
+    OCIO_CHECK_THROW_WHAT(cachedFile = LoadCLFFile(ctfFile),
+                          OCIO::Exception,
+                          "No valid 'version', 'compCLFversion', or 'xmlns' attributes "
+                          "were found; at least one of them is required.");
+}
+
 // *****************************************************************
 
 
