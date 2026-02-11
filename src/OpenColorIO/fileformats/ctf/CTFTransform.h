@@ -90,12 +90,12 @@ public:
     }
 
 private:
-    // CTF and CLF uses the numeric version system.
+    // CTF and Academy/ASC CLF uses the numeric version system.
     unsigned int m_major = 0;
     unsigned int m_minor = 0;
     unsigned int m_revision = 0;
 
-    // SMPTE standard uses non-numeric version system.
+    // SMPTE CLF uses a non-numeric xmlns version system.
     std::string m_version_string; 
 };
 

@@ -242,7 +242,7 @@ void CTFReaderTransformElt::start(const char ** atts)
     }
     else
     {
-        setVersion(requestedVersion);  // TODO: do we care about this when SMPTE?
+        setVersion(requestedVersion);
         setCLFVersion(requestedCLFVersion);
     }
 }

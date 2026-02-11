@@ -31,8 +31,6 @@
 #include "HashUtils.h"
 
 
-
-// TODO: Add explanation of the SMPTE variant as well?
 /*
 
 This file format reader supports the Academy/ASC Common LUT Format (CLF) and

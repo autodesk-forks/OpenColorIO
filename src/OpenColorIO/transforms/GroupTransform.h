@@ -64,7 +64,6 @@ private:
     FormatMetadataImpl m_metadata;
     TransformDirection m_dir;
     TransformRcPtrVec m_vec;
-    std::string m_cacheID;
 };
 
 }

@@ -10,7 +10,6 @@
 #include "OpBuilders.h"
 #include "transforms/FileTransform.h"
 #include "transforms/GroupTransform.h"
-#include "HashUtils.h"
 
 
 namespace OCIO_NAMESPACE
@@ -104,13 +103,11 @@ TransformRcPtr & GroupTransformImpl::getTransform(int index)
 
 void GroupTransformImpl::appendTransform(TransformRcPtr transform) noexcept
 {
-    m_cacheID = {};
     m_vec.push_back(transform);
 }
 
 void GroupTransformImpl::prependTransform(TransformRcPtr transform) noexcept
 {
-    m_cacheID = {};
     m_vec.insert(m_vec.begin(), transform);
 }
 

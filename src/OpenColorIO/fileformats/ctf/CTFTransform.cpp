@@ -8,7 +8,6 @@
 #include "fileformats/ctf/CTFReaderUtils.h"
 #include "fileformats/ctf/CTFTransform.h"
 #include "fileformats/xmlutils/XMLReaderUtils.h"
-//#include "HashUtils.h"
 #include "ops/cdl/CDLOpData.h"
 #include "ops/exponent/ExponentOp.h"
 #include "ops/exposurecontrast/ExposureContrastOpData.h"
