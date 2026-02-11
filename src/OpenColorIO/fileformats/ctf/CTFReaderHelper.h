@@ -175,25 +175,27 @@ public:
 
     void start(const char ** /* atts */) override
     {
+        m_desc = {};
         // Todo: collect language attr.
     }
 
     void end() override
     {
+        CTFReaderTransformElt* pTransform = 
+            dynamic_cast<CTFReaderTransformElt*>(getParent().get());
+
+        auto & descs = pTransform->getTransform()->getInputDescriptors();
+        descs.push_back(m_desc);
     }
 
     void setRawData(const char * str, size_t len, unsigned int /*xmlLine*/) override
     {
-        // TODO: do we want to support multi-line descriptors?
-        CTFReaderTransformElt* pTransform
-            = dynamic_cast<CTFReaderTransformElt*>(getParent().get());
-
-        auto & descs = pTransform->getTransform()->getInputDescriptors();
-        descs.push_back(std::string(str, len));
-
-        // TODO: re-work the metaData handling in CTFReaderTransformPtr and add
-        // language attr
+        // This function can receive the text in small pieces, so keep adding to
+        // the string.
+        m_desc += std::string(str, len);
     }
+private:
+    std::string m_desc;
 };
 
 class CTFReaderOutputDescriptorElt : public XmlReaderPlainElt
@@ -214,26 +216,27 @@ public:
 
     void start(const char ** /*atts*/ ) override
     {
+        m_desc = {};
         // TODO: collect language attr.
     }
 
     void end() override
     {
+        CTFReaderTransformElt* pTransform = 
+            dynamic_cast<CTFReaderTransformElt*>(getParent().get());
+
+        auto & descs = pTransform->getTransform()->getOutputDescriptors();
+        descs.push_back(m_desc);
     }
 
     void setRawData(const char* str, size_t len, unsigned int /* xmlLine */) override
     {
-        // TODO: do we want to support multi-line descriptors?
-
-        CTFReaderTransformElt* pTransform
-            = dynamic_cast<CTFReaderTransformElt*>(getParent().get());
-
-        auto & descs = pTransform->getTransform()->getOutputDescriptors();
-        descs.push_back(std::string(str, len));
-
-        // TODO: re-work the metaData handling in CTFReaderTransformPtr and add
-        // language attr
+        // This function can receive the text in small pieces, so keep adding to
+        // the string.
+        m_desc += std::string(str, len);
     }
+private:
+    std::string m_desc;
 };
 
 class CTFReaderArrayElt : public XmlReaderPlainElt
