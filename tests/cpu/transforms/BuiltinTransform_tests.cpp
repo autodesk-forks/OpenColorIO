@@ -412,6 +412,9 @@ AllValues UnitTestValues
     { "ACES-LMT - ACES 1.3 Reference Gamut Compression",
         { 1.0e-6f,
         { 0.5f, 0.4f, -0.3f }, { 0.54812347889f, 0.42805567384f, -0.00588858686f } } },
+    { "ACES-LMT - ACES 2.0 DCC Look 1",
+        { 1.0e-6f,
+        { 0.5f, 0.4f, 0.3f }, { 0.875603199f, 0.673843086f, 0.47828418f } } },
 
     { "ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - SDR-CINEMA_1.0",
         { 1.0e-6f,
