@@ -5786,7 +5786,7 @@ void Config::Impl::checkVersionConsistency(ConstTransformRcPtr & transform) cons
 
             if (m_majorVersion == 2 && m_minorVersion < 5 )
             {
-                if( ffstyle == FIXED_FUNCTION_RGB_TO_HSY_LIN  ||
+                if( ffstyle == FIXED_FUNCTION_RGB_TO_HSY_LIN  || 
                     ffstyle == FIXED_FUNCTION_RGB_TO_HSY_LOG ||
                     ffstyle == FIXED_FUNCTION_RGB_TO_HSY_VID )
                 {
