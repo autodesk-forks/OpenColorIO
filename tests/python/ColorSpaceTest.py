@@ -1140,9 +1140,9 @@ colorspaces:
         csname = OCIO.Config.LocateBuiltinColorSpace(editableCfg, "scene_linear", builtinConfig)
         self.assertEqual(csname, "ACES2065-1")
 
-        # A data space returns an empty string.
+        # A data space returns the name of the built-in config's "raw" data space.
         csname = OCIO.Config.LocateBuiltinColorSpace(editableCfg, "raw", builtinConfig)
-        self.assertEqual(csname, "")
+        self.assertEqual(csname, "Raw")
 
         # Check what happens if the source color space doesn't exist.
         with self.assertRaises(OCIO.Exception) as cm:

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <charconv>
 #include <sstream>
 #include <regex>
 
@@ -71,7 +72,14 @@ bool IsReservedConfigName(const std::string & sanitizedConfigName)
         return false;
     }
 
-    const int majorVersion = std::stoi(match[1].str());
+    const std::string majorVersionStr = match[1].str();
+    int majorVersion = 0;
+    const auto result = std::from_chars(
+        majorVersionStr.data(), majorVersionStr.data() + majorVersionStr.size(), majorVersion);
+    if (result.ec != std::errc())
+    {
+        return false;
+    }
     return majorVersion >= 4;
 }
 

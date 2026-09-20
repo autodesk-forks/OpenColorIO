@@ -1975,10 +1975,10 @@ colorspaces:
         OCIO_CHECK_EQUAL(std::string(csname), std::string(""));
     }
 
-    // A data space returns an empty string rather than the data space of the built-in config.
+    // A data space returns the name of the built-in config's "raw" data space.
     {
         const char * csname = OCIO::Config::LocateBuiltinColorSpace(editableCfg, "raw data", builtinConfig);
-        OCIO_CHECK_EQUAL(std::string(csname), std::string(""));
+        OCIO_CHECK_EQUAL(std::string(csname), std::string("Raw"));
     }
 
     // Test that a missing or empty source color space name throws.
@@ -2044,6 +2044,35 @@ colorspaces:
     {
         const char * csname = OCIO::Config::LocateBuiltinColorSpace(editableCfg, "sRGB - Display CS", builtinConfig);
         OCIO_CHECK_EQUAL(std::string(csname), std::string("sRGB - Display"));
+    }
+
+    // Rename the color space that allowed the display-referred interchange space to be found
+    // by name above.  With no interchange role set and no name-based match possible, the
+    // heuristics cannot identify a display-referred interchange space (they only support
+    // scene-referred spaces), so an exception is thrown rather than proceeding with
+    // uncorrected test values.
+    //
+    // For scene-referred color spaces, there are heuristics that search the config for an sRGB
+    // or known linear color space, but those are not present for the display-referred case.
+    // If the interchange role is missing, only a simply check for a CIE XYZ color space is done.
+    {
+        OCIO::ColorSpaceRcPtr renamedCS = editableCfg->getColorSpace("CIE-XYZ-D65")->createEditableCopy();
+        renamedCS->setName("Not the interchange space");
+        editableCfg->removeColorSpace("CIE-XYZ-D65");
+        editableCfg->addColorSpace(renamedCS);
+
+        OCIO_CHECK_THROW_WHAT(
+            OCIO::Config::LocateBuiltinColorSpace(editableCfg, "sRGB - Display CS", builtinConfig),
+            OCIO::Exception,
+            "Heuristics were not able to find an interchange space in the source config, "
+            "so it is not possible to search for the color space: sRGB - Display CS."
+        );
+
+        // Restore the color space for the remaining tests.
+        OCIO::ColorSpaceRcPtr restoredCS = editableCfg->getColorSpace("Not the interchange space")->createEditableCopy();
+        restoredCS->setName("CIE-XYZ-D65");
+        editableCfg->removeColorSpace("Not the interchange space");
+        editableCfg->addColorSpace(restoredCS);
     }
 
     // Make the color spaces that the heuristics are able to use inactive, so that an

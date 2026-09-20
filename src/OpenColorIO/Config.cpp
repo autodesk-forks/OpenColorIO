@@ -3060,10 +3060,10 @@ const char * Config::LocateBuiltinColorSpace(const ConstConfigRcPtr & srcConfig,
     if (srcColorSpace->isData())
     {
         // Data spaces have no colorimetry to compare, so return early rather than requiring
-        // an interchange space to be identified.  (Note that the built-in config data space
-        // is intentionally not returned, since a data space is not equivalent to any other
-        // color space.)
-        return "";
+        // an interchange space to be identified.  Built-in configs always have a "raw" data
+        // color space, so just use that rather than searching for one.
+        ConstColorSpaceRcPtr rawColorSpace = builtinConfig->getColorSpace("raw");
+        return rawColorSpace ? rawColorSpace->getName() : "";
     }
 
     // Calculate (or reuse) the cached fingerprints of both configs.  This requires access to

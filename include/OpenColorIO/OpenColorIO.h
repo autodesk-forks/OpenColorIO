@@ -753,46 +753,37 @@ public:
                                                   const char * builtinColorSpaceName);
 
     /**
-     * \brief Find the name of the color space in the given built-in config that is the same
-     *        as a color space in the source config.  This is the inverse of
-     *        \ref Config::IdentifyBuiltinColorSpace.  For example, if the source config
-     *        contains a color space named "cct_ap1", passing that name would return
-     *        "ACEScct" when using the default CG config.  Note that this method relies
+     * \brief Find the name of the color space in the given built-in config that is the same as
+     *        the color space in the source config.  This is useful as a way of finding a color
+     *        interop ID for a color space that doesn't have one, since the recent built-in
+     *        configs have the ID populated for all color spaces.  Note that this method relies
      *        on heuristics which may evolve over time and which may not work on all configs.
-     *
+     *        
      *        Both active and inactive color spaces are searched in the built-in config (note
      *        that this differs from IdentifyBuiltinColorSpace, which only searches the active
-     *        color spaces of the source config).  Color spaces that are a data space, that
-     *        define both a to_reference and a from_reference transform, or that have the
-     *        "is-unique" category are not candidates for a match.
+     *        color spaces of the source config).
      *
-     *        A color space is identified by sending a set of test colors through it and
-     *        comparing the results, so the source config and the built-in config must each
-     *        have an interchange role set or the heuristics must be able to identify a known
-     *        color space in them (this is the same requirement as
-     *        \ref Config::IdentifyInterchangeSpace).  Note that the heuristics look at active
-     *        and inactive color spaces but only support scene-referred color spaces, so if the
-     *        requested color space is display-referred, the source config must have the
-     *        cie_xyz_d65_interchange role set.
-     *
+     *        A built-in color space is identified by sending a set of test colors through it and
+     *        comparing the results.  The interchange roles are used to make this comparison
+     *        independent of the reference spaces in the configs. If the source config does not
+     *        have the interchange roles, heuristics will be used but these may be less accurate
+     *        or may not identify the reference space, particularly for display-referred spaces.
+     *        
      *        Note that the set of test results (the "fingerprints") for the built-in config
-     *        is expensive to calculate, since it requires building a Processor for each of
-     *        its color spaces.  It is calculated on the first call and then cached on the
-     *        config object until the config is modified.  For that reason, an application
+     *        are expensive to calculate, since it requires building a Processor for each of
+     *        its color spaces.  They are calculated on the first call and then cached on the
+     *        builtinConfig until the config is modified.  For that reason, an application
      *        that calls this method more than once should hold on to the built-in config
-     *        object rather than calling \ref Config::CreateFromBuiltinConfig each time
-     *        (that method returns a new Config object on each call).
+     *        object rather than calling \ref Config::CreateFromBuiltinConfig each time.
      *
      * \param srcConfig The config containing the color space to search for.
      * \param srcColorSpaceName Color space name in the source config.  Roles and aliases may
      *                          be used, and inactive color spaces are available.
      * \param builtinConfig The built-in config to search.  See \ref Config::CreateFromBuiltinConfig.
-     *                      (Any config may be used, if it has the interchange roles set.)
-     * \return Matching color space name from the built-in config.  Empty if not found (which
-     *         is also the case if the source color space is a data space).
+     * \return Matching color space name from the built-in config.  Empty if not found.
      *
      * \throw Exception if the source color space does not exist or if an interchange space
-     *        cannot be found in either config.
+     *        cannot be found in srcConfig.
      */
     static const char * LocateBuiltinColorSpace(const ConstConfigRcPtr & srcConfig,
                                                 const char * srcColorSpaceName,
