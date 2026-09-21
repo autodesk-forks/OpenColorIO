@@ -63,7 +63,7 @@ ocio_handle_dependency(  expat REQUIRED ALLOW_INSTALL
 # https://github.com/jbeder/yaml-cpp
 ocio_handle_dependency(  yaml-cpp REQUIRED ALLOW_INSTALL
                          MIN_VERSION 0.8.0
-                         RECOMMENDED_VERSION 0.8.0
+                         RECOMMENDED_VERSION 0.9.0
                          RECOMMENDED_VERSION_REASON "Latest version tested with OCIO")
 
 # pystring
