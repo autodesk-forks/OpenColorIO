@@ -745,7 +745,11 @@ jobs:
           build_rc=$?
           echo "cmake --build exit code: $build_rc"
           ls -la "./${{ matrix.build-type }}"
-          export PATH=../../../_install/bin:$PATH
+          echo "--- ext/dist/lib ---"
+          ls -la "${{ env.ocio_build_path }}/ext/dist/lib"
+          echo "--- ext/dist/bin ---"
+          ls -la "${{ env.ocio_build_path }}/ext/dist/bin" 2>&1
+          export PATH=../../../_install/bin:${{ env.ocio_build_path }}/ext/dist/bin:$PATH
           ./${{ matrix.build-type }}/consumer
           consumer_rc=$?
           echo "consumer exit code: $consumer_rc"
