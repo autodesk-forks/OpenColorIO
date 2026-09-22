@@ -37,7 +37,14 @@ if(NOT ZLIB_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACKAGE
 
     if(WIN32)
         set(_ZLIB_LIB_NAME "zlib")
-        set(_ZLIB_STATIC_LIB_NAME "zlibstatic")
+        # zlib 1.3.2 rewrote its CMakeLists.txt and renamed the Windows static
+        # library output from "zlibstatic" to "zs" (OUTPUT_NAME z${zlib_static_suffix}).
+        # Keep the old name for versions prior to that so older pins still work.
+        if(ZLIB_VERSION VERSION_LESS "1.3.2")
+            set(_ZLIB_STATIC_LIB_NAME "zlibstatic")
+        else()
+            set(_ZLIB_STATIC_LIB_NAME "zs")
+        endif()
     else()
         set(_ZLIB_LIB_NAME "z")
         set(_ZLIB_STATIC_LIB_NAME "z")
@@ -82,6 +89,11 @@ if(NOT ZLIB_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACKAGE
             -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
             -DCMAKE_INSTALL_PREFIX=${_EXT_DIST_ROOT}
             -DCMAKE_OBJECT_PATH_MAX=${CMAKE_OBJECT_PATH_MAX}
+            # ZLIB versions <=1.3.1 always install to ${CMAKE_INSTALL_PREFIX}/lib and ignore
+            # CMAKE_INSTALL_LIBDIR. Starting with 1.3.2, ZLIB uses GNUInstallDirs, which without
+            # this pre-seeded value would default to a platform-specific dir (e.g. lib64),
+            # breaking the hardcoded "${_ZLIB_INSTALL_LIBDIR}" path used below.
+            -DCMAKE_INSTALL_LIBDIR=${_ZLIB_INSTALL_LIBDIR}
         )
 
         if(CMAKE_TOOLCHAIN_FILE)
