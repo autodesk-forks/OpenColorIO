@@ -35,6 +35,14 @@ if(NOT ZLIB_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACKAGE
     set(_EXT_DIST_ROOT "${PROJECT_BINARY_DIR}/ext/dist")
     set(_EXT_BUILD_ROOT "${PROJECT_BINARY_DIR}/ext/build")
 
+    # Set find_package standard args
+    set(ZLIB_FOUND TRUE)
+    if(OCIO_ZLIB_RECOMMENDED_VERSION)
+        set(ZLIB_VERSION ${OCIO_ZLIB_RECOMMENDED_VERSION})
+    else()
+        set(ZLIB_VERSION ${ZLIB_FIND_VERSION})
+    endif()
+
     if(WIN32)
         set(_ZLIB_LIB_NAME "zlib")
         # zlib 1.3.2 rewrote its CMakeLists.txt and renamed the Windows static
@@ -48,14 +56,6 @@ if(NOT ZLIB_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACKAGE
     else()
         set(_ZLIB_LIB_NAME "z")
         set(_ZLIB_STATIC_LIB_NAME "z")
-    endif()
-
-    # Set find_package standard args
-    set(ZLIB_FOUND TRUE)
-    if(OCIO_ZLIB_RECOMMENDED_VERSION)
-        set(ZLIB_VERSION ${OCIO_ZLIB_RECOMMENDED_VERSION})
-    else()
-        set(ZLIB_VERSION ${ZLIB_FIND_VERSION})
     endif()
 
     set(ZLIB_INCLUDE_DIRS "${_EXT_DIST_ROOT}/${CMAKE_INSTALL_INCLUDEDIR}")
