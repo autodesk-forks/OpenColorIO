@@ -149,6 +149,20 @@ if(NOT ZLIB_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACKAGE
         COMMAND ${CMAKE_COMMAND} -E remove -f ${_EXT_DIST_ROOT}/${_ZLIB_INSTALL_LIBDIR}/${_ZLIB_LIB_NAME}.lib ${_EXT_DIST_ROOT}/bin/${_ZLIB_LIB_NAME}.dll
     )
 
+    if(WIN32 AND NOT _ZLIB_STATIC_LIB_NAME STREQUAL "zlibstatic")
+        # CMake's own FindZLIB.cmake (used by downstream consumers of OpenColorIOConfig.cmake)
+        # only ever looks for the static library under the name "zlibstatic", so alias the
+        # renamed 1.3.2+ output ("zs") to that name too.
+        ExternalProject_Add_Step(
+            ZLIB_install zlib_alias_static_lib
+            COMMENT "Alias ${_ZLIB_STATIC_LIB_NAME}.lib as zlibstatic.lib for downstream find_package(ZLIB)"
+            DEPENDEES zlib_remove_dll
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${_EXT_DIST_ROOT}/${_ZLIB_INSTALL_LIBDIR}/${_ZLIB_STATIC_LIB_NAME}${_ZLIB_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+                ${_EXT_DIST_ROOT}/${_ZLIB_INSTALL_LIBDIR}/zlibstatic${_ZLIB_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+        )
+    endif()
+
     add_dependencies(ZLIB::ZLIB ZLIB_install)
     
     # FindZLIB from CMake needs ZLIB_LIBRARY and ZLIB_INCLUDE_DIR.
