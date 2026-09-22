@@ -44,13 +44,14 @@ if(NOT ZLIB_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACKAGE
     endif()
 
     if(WIN32)
-        set(_ZLIB_LIB_NAME "zlib")
-        # zlib 1.3.2 rewrote its CMakeLists.txt and renamed the Windows static
-        # library output from "zlibstatic" to "zs" (OUTPUT_NAME z${zlib_static_suffix}).
-        # Keep the old name for versions prior to that so older pins still work.
+        # zlib 1.3.2 rewrote its CMakeLists.txt and renamed the Windows shared and
+        # static library outputs from "zlib"/"zlibstatic" to "z"/"zs".
+        # Keep the old names for versions prior to that so older pins still work.
         if(ZLIB_VERSION VERSION_LESS "1.3.2")
+            set(_ZLIB_LIB_NAME "zlib")
             set(_ZLIB_STATIC_LIB_NAME "zlibstatic")
         else()
+            set(_ZLIB_LIB_NAME "z")
             set(_ZLIB_STATIC_LIB_NAME "zs")
         endif()
     else()
@@ -143,9 +144,9 @@ if(NOT ZLIB_FOUND AND OCIO_INSTALL_EXT_PACKAGES AND NOT OCIO_INSTALL_EXT_PACKAGE
 
     ExternalProject_Add_Step(
         ZLIB_install zlib_remove_dll
-        COMMENT "Remove zlib.lib and zlib.dll, leaves only zlibstatic.lib"
+        COMMENT "Remove ${_ZLIB_LIB_NAME}.lib and ${_ZLIB_LIB_NAME}.dll, leaves only ${_ZLIB_STATIC_LIB_NAME}.lib"
         DEPENDEES install
-        COMMAND ${CMAKE_COMMAND} -E remove -f ${_EXT_DIST_ROOT}/${_ZLIB_INSTALL_LIBDIR}/zlib.lib ${_EXT_DIST_ROOT}/bin/zlib.dll
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${_EXT_DIST_ROOT}/${_ZLIB_INSTALL_LIBDIR}/${_ZLIB_LIB_NAME}.lib ${_EXT_DIST_ROOT}/bin/${_ZLIB_LIB_NAME}.dll
     )
 
     add_dependencies(ZLIB::ZLIB ZLIB_install)
